@@ -229,6 +229,7 @@ export class HttpRequest {
         if (contentType) {
             this._headers["Content-Type"] = contentType;
         }
+        this._headers["X-Requested-With"] = "XMLHttpRequest";
         this._send(data, this._headers);
     }
 
