@@ -61,6 +61,8 @@ class JsonmlDomHandler implements JsonMLHandler {
                     default:
                         if (typeof attrs[a] === "function") {
                             e.addEventListener(a, attrs[a]);
+                        } else if (typeof attrs[a] === "boolean") {
+                            attrs[a] && e.setAttribute(a, "");
                         } else {
                             e.setAttribute(a, attrs[a]);
                         }

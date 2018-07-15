@@ -58,6 +58,8 @@ class JsonmlIDomHandler implements JsonMLHandler {
                     default:
                         if (typeof attrs[a] === "function") {
                             props.push("on" + a, attrs[a]);
+                        } else if (typeof attrs[a] === "boolean") {
+                            attrs[a] && props.push(a, "");
                         } else {
                             props.push(a, attrs[a]);
                         }

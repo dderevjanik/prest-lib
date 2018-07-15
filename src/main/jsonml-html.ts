@@ -78,7 +78,11 @@ class JsonmlHtmlHandler implements JsonMLHandler {
                         props.push(["style", style]);
                         break;
                     default:
-                        if (typeof attrs[a] !== "function") {
+                        if (typeof attrs[a] === "function") {
+                            // ignore
+                        } else if (typeof attrs[a] === "boolean") {
+                            attrs[a] && props.push([a, ""]);
+                        } else {
                             props.push([a, attrs[a]]);
                         }
                 }
