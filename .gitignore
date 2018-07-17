@@ -13,14 +13,14 @@ node_modules/
 .idea
 .vscode
 
-src/**/*.js
-src/**/*.d.ts
-src/**/*.js.map
-src/**/*.jsx
+# src/**/*.js
+# src/**/*.d.ts
+# src/**/*.js.map
+# src/**/*.jsx
 
-test/**/*.js
-test/**/*.d.ts
-test/**/*.js.map
-test/**/*.jsx
+# test/**/*.js
+# test/**/*.d.ts
+# test/**/*.js.map
+# test/**/*.jsx
 
 !src/test-main.js
