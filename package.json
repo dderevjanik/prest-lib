@@ -51,7 +51,7 @@
     "url": "https://github.com/peter-rybar/prest-lib.git"
   },
   "pre-commit": [
-    "build",
+    "test",
     "dist"
   ],
   "pre-push": [],
