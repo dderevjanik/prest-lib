@@ -40,6 +40,7 @@
     "dist": "rollup -c",
     "predist": "npm run tslint && npm run clean",
     "dist:watch": "npm run dist -- -w",
+    "pretest": "npm run build",
     "test": "./node_modules/karma-cli/bin/karma start ./karma.conf.js --single-run",
     "test:watch": "./node_modules/karma-cli/bin/karma start ./karma.conf.js",
     "clean": "rm -rf build; rm -rf dist; cd tools; npm run clean",
