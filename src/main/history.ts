@@ -2,11 +2,11 @@
 export class History<T> {
 
     back(distance?: number): void {
-        (window.history as any).back(distance);
+        window.history.back(distance);
     }
 
     forward(distance?: number): void {
-        (window.history as any).forward(distance);
+        window.history.forward(distance);
     }
 
     go(delta?: number): void {
