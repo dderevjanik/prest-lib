@@ -112,3 +112,16 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
 
     handler.close(tag, children, ctx);
 }
+
+export function join(jsonmls: JsonMLs, sep: string | JsonML): JsonMLs {
+    const r = jsonmls
+        .reduce<JsonMLs>(
+            (prev, cur) => {
+                prev.push(cur, sep);
+                return prev;
+            },
+            [] as JsonMLs
+        );
+    r.splice(-1);
+    return r;
+}
