@@ -152,6 +152,12 @@ export class HttpRequest {
         return this;
     }
 
+    patch(url: string, query?: Object): this {
+        this.method("PATCH");
+        this.url(url, query);
+        return this;
+    }
+
     del(url: string, query?: Object): this {
         this.method("DELETE");
         this.url(url, query);
@@ -278,7 +284,7 @@ export class HttpRequest {
 
         if ("ontimeout" in xhr) {
             if (this._onError) {
-                xhr.ontimeout = (e: Event) => {
+                xhr.ontimeout = (e: ProgressEvent) => {
                     this._onError(e);
                 };
             }
@@ -286,7 +292,7 @@ export class HttpRequest {
 
         if ("onabort" in xhr) {
             if (this._onError) {
-                xhr.onabort = () => {
+                xhr.onabort = (e: ProgressEvent) => {
                     this._onError(undefined);
                 };
             }
@@ -364,6 +370,10 @@ export const http = {
 
     put(url: string, query?: Object): HttpRequest {
         return new HttpRequest().method("PUT").url(url, query);
+    },
+
+    patch(url: string, query?: Object): HttpRequest {
+        return new HttpRequest().method("PATCH").url(url, query);
     },
 
     del(url: string, query?: Object): HttpRequest {
