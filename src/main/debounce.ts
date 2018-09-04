@@ -19,7 +19,7 @@ export function debounceFnc(delay: number = 300) {
 }
 
 
-// TEST -----------------------------------------------------------------------
+// TEST
 
 // const d = debounce(function (this: any, x: string, y: number) {
 //     console.log("debounce", x, y);
