@@ -341,7 +341,7 @@ export class HttpRequest {
             }
         } else {
             if (this._onError) {
-                xhr.onerror = (e: ErrorEvent) => {
+                xhr.onerror = (e: ProgressEvent) => {
                     this._onError(e);
                 };
             }
