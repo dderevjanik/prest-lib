@@ -1,6 +1,7 @@
 export function debounce<F extends (...args: any[]) => void>(func: F, delay: number = 300) {
+    type Params = F extends (...args: infer P) => void ? P : never;
     let timeout: number;
-    return function (this: any, ...args: F extends (...args: infer X) => void ? X : never) {
+    return function (this: any, ...args: Params) {
         clearTimeout(timeout);
         const context = this;
         timeout = setTimeout(function () {
