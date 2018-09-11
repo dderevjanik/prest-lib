@@ -1,8 +1,8 @@
 
-function is_array(obj: any) {
+export function isArray(obj: any) {
     return Array.isArray ?
         Array.isArray(obj) :
-        (obj == null || obj === undefined || "boolean|number|string|function|xml".indexOf(typeof obj) !== -1 ) ?
+        (obj == null || obj === undefined || "boolean|number|string|function|xml".indexOf(typeof obj) !== -1) ?
             false :
             (typeof obj.length === "number" && !(obj.propertyIsEnumerable("length")));
 }
@@ -12,8 +12,8 @@ export function decodeUrlQuery(queryStr: string): { [key: string]: string } {
     const query: { [key: string]: string } = {};
     if (queryStr) {
         const a = queryStr.substr(1).split("&");
-        for (let i = 0, l = a.length; i < l; i++) {
-            const b = a[i].split("=");
+        for (const item of a) {
+            const b = item.split("=");
             query[decodeURIComponent(b[0])] = decodeURIComponent(b[1] || "");
         }
     }
@@ -27,11 +27,11 @@ export function encodeUrlQuery(query: any): string {
         if (query.hasOwnProperty(key)) {
             const value = query[key];
             if (typeof value === "object") {
-                if (is_array(value)) {
-                    for (let j = 0, l = value.length; j < l; j++) {
+                if (isArray(value)) {
+                    for (const item of value) {
                         key_value_pairs.push(
-                            [key, typeof value[j] === "object" ?
-                                JSON.stringify(value[j]) : value[j]]);
+                            [key, typeof item === "object" ?
+                                JSON.stringify(item) : item]);
                     }
                 } else {
                     key_value_pairs.push([key, JSON.stringify(value)]);
@@ -42,9 +42,8 @@ export function encodeUrlQuery(query: any): string {
         }
     }
 
-    const enc = encodeURIComponent;
-    for (let j = 0, pair: any; pair = key_value_pairs[j++]; ) {
-        key_value_pairs[j - 1] = `${enc(pair[0])}=${enc(pair[1])}`;
+    for (let j = 0, pair: any; pair = key_value_pairs[j++];) {
+        key_value_pairs[j - 1] = `${encodeURIComponent(pair[0])}=${encodeURIComponent(pair[1])}`;
     }
 
     return key_value_pairs.join("&");
@@ -99,7 +98,7 @@ export interface HttpProgress {
     total: number;
 }
 
-export type Method =
+export type HttpMethod =
     | "GET"
     | "POST"
     | "PUT"
@@ -110,7 +109,7 @@ export type Method =
     | "OPTIONS"
     | "TRACE";
 
-export type ResponseType =
+export type HttpResponseType =
     | "arraybuffer"
     | "blob"
     | "document"
@@ -121,10 +120,10 @@ export class HttpRequest {
 
     private _url: string;
     private _query: Object;
-    private _method: Method = "GET";
+    private _method: HttpMethod = "GET";
     private _headers: { [key: string]: string } = {};
     private _timeout: number;
-    private _responseType: ResponseType;
+    private _responseType: HttpResponseType;
 
     private _onProgress: (progress: HttpProgress) => void;
     private _onResponse: (response: HttpResponse) => void;
@@ -170,7 +169,7 @@ export class HttpRequest {
         return this;
     }
 
-    method(method: Method): this {
+    method(method: HttpMethod): this {
         this._method = method;
         return this;
     }
@@ -194,7 +193,7 @@ export class HttpRequest {
         return this;
     }
 
-    responseType(type: ResponseType): this {
+    responseType(type: HttpResponseType): this {
         this._responseType = type;
         return this;
     }
@@ -320,6 +319,7 @@ export class HttpRequest {
                             }
                         }
                         break;
+                    default:
                 }
             };
 
