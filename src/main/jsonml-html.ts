@@ -14,7 +14,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
 
     private static _pairTags = [
         "script",
-        "html", "head", "body", "title",
+        "html", "head", "body", "title", "div",
         "h1", "h2", "h3", "h4", "h5", "h6",
         "p", "a", "pre", "blockquote", "i", "b", "em", "strong", "tt", "cite",
         "ol", "ul", "li", "dl", "dt", "dd", "table", "tr", "td"];
