@@ -5,17 +5,21 @@ import { html2jsonml } from "./html2jsonml";
 
 const args = process.argv.slice(2);
 
+function jsonml2string(jsonml: any): string {
+    return JSON.stringify(jsonml, null, 4).replace(/\[\s+"/mg, `["`);
+}
+
 switch (args.length) {
     case 1: {
         const html = fs.readFileSync(args[0], "utf8");
         const jsonml = html2jsonml(html);
-        console.log(JSON.stringify(jsonml, null, 4));
+        console.log(jsonml2string(jsonml));
         break;
     }
     case 2: {
         const html = fs.readFileSync(args[0], "utf8");
         const jsonml = html2jsonml(html);
-        fs.writeFileSync(args[1], JSON.stringify(jsonml, null, 4));
+        fs.writeFileSync(args[1], jsonml2string(jsonml));
         break;
     }
     default:
@@ -28,6 +32,6 @@ switch (args.length) {
         process.stdin.on("end", () => {
             const html = data.join("");
             const jsonml = html2jsonml(html);
-            console.log(JSON.stringify(jsonml, null, 4));
+            console.log(jsonml2string(jsonml));
         });
 }

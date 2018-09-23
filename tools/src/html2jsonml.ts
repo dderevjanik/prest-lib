@@ -15,7 +15,11 @@ export function html2jsonml(html: string): any {
     parser.ontext = text => {
         // console.log("text:\t", JSON.stringify(text));
         // console.log(jsonml, jsonmlNode, jsonmlPath);
-        jsonmlNode.push(text);
+        const textTrimmed = text.trim().replace(/\s+/mg, " ");
+        // console.log("text:\t", JSON.stringify(textTrimmed));
+        if (textTrimmed) {
+            jsonmlNode.push(textTrimmed);
+        }
     };
     parser.onopentag = node => {
         // console.log("open:\t", JSON.stringify(node));
