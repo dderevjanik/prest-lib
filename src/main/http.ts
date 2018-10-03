@@ -298,30 +298,47 @@ export class HttpRequest {
         }
 
         if (this._async) {
-            xhr.onreadystatechange = (e: Event) => {
-                switch (xhr.readyState) {
-                    // case 3: // loading
-                    //    if (this._onProgress) {
-                    //        this._onProgress(new HttpResponse(httpRequest));
-                    //    }
-                    //    break;
-                    case 4: // done
-                        const httpStatusOk = xhr.status >= 200 && xhr.status < 300;
-                        // schemes other than http/https (file, ftp)
-                        const fileFtpStatusOk = xhr.status === 0 && !this._url.match(/^https?:\/\//);
-                        if (httpStatusOk || fileFtpStatusOk) {
-                            if (this._onResponse) {
-                                this._onResponse(new HttpResponse(xhr));
-                            }
-                        } else {
-                            if (this._onError) {
-                                this._onError(e);
-                            }
+            if ("onload" in xhr) {
+                xhr.onload = (e: ProgressEvent) => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        if (this._onResponse) {
+                            this._onResponse(new HttpResponse(xhr));
                         }
-                        break;
-                    default:
-                }
-            };
+                    } else {
+                        if (this._onError) {
+                            this._onError(e);
+                        }
+                    }
+                };
+            } else {
+                // legacy
+                (xhr as any).onreadystatechange = (e: Event) => {
+                    switch ((xhr as any).readyState) {
+                        // case 3: // loading
+                        //    if (this._onProgress) {
+                        //        this._onProgress(new HttpResponse(httpRequest));
+                        //    }
+                        //    break;
+                        case 4: // done
+                            // const httpStatusOk = xhr.status >= 200 && xhr.status < 300;
+                            // schemes other than http/https (file, ftp)
+                            // const fileFtpStatusOk = xhr.status === 0 && !this._url.match(/^https?:\/\//);
+                            // const fileFtpStatusOk = xhr.status === 0 && !xhr.responseURL.match(/^https?:\/\//);
+                            // if (httpStatusOk || fileFtpStatusOk) {
+                            if ((xhr as any).status >= 200 && (xhr as any).status < 300) {
+                                if (this._onResponse) {
+                                    this._onResponse(new HttpResponse(xhr));
+                                }
+                            } else {
+                                if (this._onError) {
+                                    this._onError(e);
+                                }
+                            }
+                            break;
+                        default:
+                    }
+                };
+            }
 
             if (data !== undefined) {
                 if (
