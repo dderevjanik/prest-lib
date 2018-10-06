@@ -20,6 +20,12 @@
         "inlineSourceMap": false,
         "removeComments": true,
         "experimentalDecorators": true,
+        "strict": true,
+        "strictFunctionTypes": true,
+        "allowUnreachableCode": false,
+        "noFallthroughCasesInSwitch": true,
+        // "preserveConstEnums": true,
+        // "pretty": true,
         "outDir": "build"
     },
     "include": [

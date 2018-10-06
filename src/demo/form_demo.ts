@@ -19,12 +19,13 @@ const numberValidator = (entry: form.Entry, locale: string) => {
     }
 };
 
-const fileValidator = (entry: form.FileEntry, locale: string) => {
+const fileValidator = (entry: form.Entry, locale: string) => {
+    const fileEntry = entry as form.FileEntry;
     switch (locale) {
         case "sk":
-            return entry.getFile() ? "" : "Prázdna hodnota";
+            return fileEntry.getFile() ? "" : "Prázdna hodnota";
         default:
-            return entry.getFile() ? "" : "Empty value";
+            return fileEntry.getFile() ? "" : "Empty value";
     }
 };
 
