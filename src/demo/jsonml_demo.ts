@@ -1,163 +1,74 @@
-import { remove, select, Widget, selectAll } from "../main/dom";
-import { jsonml2html } from "../main/jsonml-html";
-import { jsonml2dom } from "../main/jsonml-dom";
 import { jsonmls2idomPatch } from "../main/jsonml-idom";
+import { JsonMLs, JsonML } from "../main/jsonml";
 
+const state = {
+    title: "Counter",
+    count: 0
+};
 
-class Item {
-    constructor(public text: string,
-                public count: number) {
+let renderScheduled: number = null;
+function dispatch(event: string, data?: any): void {
+    console.log("\ndispatch", event, data);
+    const stateNew = reduce(state, dispatch, event, data);
+    console.log("state", stateNew);
+    if (stateNew && !renderScheduled) {
+        renderScheduled = setTimeout(() => {
+            render(stateNew);
+            renderScheduled = null;
+        }, 0);
     }
 }
 
-class MyWidget implements Widget {
-
-    readonly name: string;
-
-    private _items: Item[] = [];
-    private _onSelect: (item: Item) => void;
-
-    private _element: HTMLElement;
-
-    constructor(name?: string) {
-        this.name = name;
+function reduce(state: any,
+                dispatch: (event: string, data: any) => void,
+                event: string,
+                data: any): any {
+    console.log("reduce", event, data);
+    switch (event) {
+        case "inc":
+            state.count += data;
+            break;
+        case "dec":
+            state.count -= data;
+            setTimeout(() => dispatch("dec-async", 1), 0);
+            break;
+        case "dec-async":
+            state.count -= data;
+            return null;
+        default:
+            console.warn("unhandled event", event, data);
+            return null;
     }
-
-    setItems(items: Item[]): this {
-        this._items = items;
-        this._update();
-        return this;
-    }
-
-    getItems(): Item[] {
-        return this._items;
-    }
-
-    addItem(item: Item): this {
-        this._items.push(item);
-        this._update();
-        return this;
-    }
-
-    removeItem(item: Item): this {
-        this._items = this._items.filter(i => i !== item);
-        this._update();
-        return this;
-    }
-
-    onSelect(callback: (item: Item) => void): this {
-        this._onSelect = callback;
-        return this;
-    }
-
-    mount(e: HTMLElement): this {
-        this._element = e;
-        this._update();
-        return this;
-    }
-
-    umount(): this {
-        remove(this._element);
-        return this;
-    }
-
-    private _update(): void {
-        if (this._element) {
-            jsonmls2idomPatch(this._element, [
-                ["form",
-                    {
-                        submit: (e: Event) => {
-                            e.preventDefault();
-                            // const form = (e.target as HTMLFormElement);
-                            // const input = (select("input", form) as HTMLInputElement);
-                            const input = (select("input", this._element) as HTMLInputElement);
-                            console.log("submit", input.value);
-                            if (input.value) {
-                                this.addItem(new Item(input.value, this._items.length));
-                                input.value = "";
-                            }
-                        }
-                    },
-                    ["input",
-                        {
-                            type: "text", name: "text",
-                            input: (e: Event) => {
-                                console.log("input", (e.target as HTMLInputElement).value);
-                            },
-                            change: (e: Event) => {
-                                console.log("change", (e.target as HTMLInputElement).value);
-                            }
-                        }
-                    ],
-                    ["input", { type: "submit", value: "add" }]
-                ],
-                ["ol",
-                    ...this._items.map(item => {
-                        return (
-                            ["li",
-                                {
-                                    click: (e: Event) => {
-                                        e.stopPropagation();
-                                        if (this._onSelect) {
-                                            this._onSelect(item);
-                                        }
-                                    }
-                                },
-                                ["span.label", item.text], " ",
-                                ["small.count", `[${item.count}]`]
-                            ]
-                        );
-                    })
-                ]
-            ]);
-        }
-    }
-
+    return state;
 }
 
-new MyWidget()
-    .setItems([
-        new Item("text 1", 0),
-        new Item("text 2", 1),
-        new Item("text 3", 2)])
-    .onSelect(item => {
-        console.log("selected:", item);
-        const selected = select("#selected") as HTMLSpanElement;
-        selected.innerHTML = JSON.stringify(item);
-    })
-    .mount(select("#container"));
+function app(state: any, dispatch: (event: string, data?: any) => void): JsonMLs {
+    function dec() { dispatch("dec", 1); }
+    function inc() { dispatch("inc", 2); }
+    function xxx() { dispatch("xxx"); }
+    return [
+        ["h2", state.title],
+        ["p",
+            ["em", "Count"], ": ", state.count.toString(),
+            " ",
+            button("-", dec),
+            button("+", inc),
+            " ",
+            button("xxx", xxx),
+        ],
+    ];
+}
 
+function button(label: string, cb: (e: Event) => void): JsonML {
+    return ["button", { click: cb }, label];
+}
 
-// renderers test
+const appElement = document.getElementById("app");
 
-const jml = [
-    "a#b.c1.c2",
-    {
-        _ref: "ref-root",
-        _key: "key",
-        _skip: false,
-        href: "localhost",
-        click: function (e: Event) {
-            e.preventDefault();
-            console.log(e);
-        },
-        data: { x: "x", y: "y", o: { a: "a" } },
-        classes: ["c3"],
-        styles: { color: "green", borderTop: "1px solid red" }
-    },
-    ["#x.y~ref-div", "div", (e: HTMLElement) => console.log("fnc div", e)],
-    ["strong", "link"],
-    " text",
-    ["~ref-empty", "empty"],
-    (e: HTMLElement) => console.log("fnc anchor", e)
-];
+function render(state: any): void {
+    const jsonml = app(state, dispatch);
+    console.log("render", jsonml);
+    jsonmls2idomPatch(appElement, jsonml);
+}
 
-jsonml2html(jml, html => console.log(html));
-
-jsonml2html(jml, html => console.log(html), true);
-
-const e = jsonml2dom(jml);
-console.log(e);
-document.body.appendChild(e);
-
-console.log("refs", selectAll("[ref]", e));
+render(state);
