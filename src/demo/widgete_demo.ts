@@ -1,14 +1,14 @@
 import { WidgetE } from "../main/widgete";
 import { JsonMLs, JsonML } from "../main/jsonml";
 
-interface AppState {
+interface State {
     title: string;
     count: number;
 }
 
-class AppWidget extends WidgetE<AppState> {
+class AppWidget extends WidgetE<State> {
 
-    constructor(state: AppState) {
+    constructor(state: State) {
         super("AppWidget", state);
     }
 
@@ -55,5 +55,23 @@ app.events
         s.count -= num;
         widget.setState(s);
     });
+    // .cbs(
+    //     {
+    //         inc: (num, widget) => {
+    //             widget.events.emit("dec", 1);
+    //         },
+    //         dec: (num, widget) => {
+    //             const s = widget.getState();
+    //             s.count -= num;
+    //             widget.setState(s);
+    //         }
+    //     },
+    //     {
+    //         inc: (num, widget) => {
+    //             widget.getState().count += num;
+    //             widget.update();
+    //         }
+    //     }
+    // );
 
 (self as any).app = app;
