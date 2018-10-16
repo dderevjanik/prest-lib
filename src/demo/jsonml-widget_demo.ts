@@ -17,7 +17,7 @@ class MyWidget implements Widget {
     private _items: Item[] = [];
     private _onSelect: (item: Item) => void;
 
-    private _element: HTMLElement;
+    private _e: HTMLElement;
 
     constructor(name?: string) {
         this.name = name;
@@ -25,7 +25,7 @@ class MyWidget implements Widget {
 
     setItems(items: Item[]): this {
         this._items = items;
-        this._update();
+        this._render();
         return this;
     }
 
@@ -35,13 +35,13 @@ class MyWidget implements Widget {
 
     addItem(item: Item): this {
         this._items.push(item);
-        this._update();
+        this._render();
         return this;
     }
 
     removeItem(item: Item): this {
         this._items = this._items.filter(i => i !== item);
-        this._update();
+        this._render();
         return this;
     }
 
@@ -51,26 +51,26 @@ class MyWidget implements Widget {
     }
 
     mount(e: HTMLElement): this {
-        this._element = e;
-        this._update();
+        this._e = e;
+        this._render();
         return this;
     }
 
     umount(): this {
-        remove(this._element);
+        remove(this._e);
         return this;
     }
 
-    private _update(): void {
-        if (this._element) {
-            jsonmls2idomPatch(this._element, [
+    private _render(): void {
+        if (this._e) {
+            jsonmls2idomPatch(this._e, [
                 ["form",
                     {
                         submit: (e: Event) => {
                             e.preventDefault();
                             // const form = (e.target as HTMLFormElement);
                             // const input = (select("input", form) as HTMLInputElement);
-                            const input = (select("input", this._element) as HTMLInputElement);
+                            const input = (select("input", this._e) as HTMLInputElement);
                             console.log("submit", input.value);
                             if (input.value) {
                                 this.addItem(new Item(input.value, this._items.length));
