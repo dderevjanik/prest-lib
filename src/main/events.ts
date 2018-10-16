@@ -12,6 +12,20 @@ export class Events<C> {
         this._ctx = ctx;
     }
 
+    emit(e: string, data?: any): this {
+        if (e in this._cbs) {
+            for (let i = 0, l = this._cbs[e].length; i < l; i++) {
+                this._cbs[e][i](data, this._ctx, e);
+            }
+        }
+        if (this._cb) {
+            for (let i = 0, l = this._cb.length; i < l; i++) {
+                this._cb[i](data, this._ctx, e);
+            }
+        }
+        return this;
+    }
+
     on(e: string, cb: (data: any, ctx: C, e: string) => void): this {
         if (!e) {
             if (!this._cb) {
@@ -67,17 +81,10 @@ export class Events<C> {
         return this;
     }
 
-    emit(e: string, data?: any): this {
-        if (e in this._cbs) {
-            for (let i = 0, l = this._cbs[e].length; i < l; i++) {
-                this._cbs[e][i](data, this._ctx, e);
-            }
-        }
-        if (this._cb) {
-            for (let i = 0, l = this._cb.length; i < l; i++) {
-                this._cb[i](data, this._ctx, e);
-            }
-        }
+    cbs(...cbs: { [e: string]: (data: any, ctx: C, e: string) => void }[]): this {
+        cbs.forEach(a =>
+            Object.keys(a).forEach(k =>
+                this.on(k, a[k])));
         return this;
     }
 
@@ -107,3 +114,16 @@ export class Events<C> {
 // es.emit("e1", "all e1");
 // es.emit("e2", "all e2");
 // es.emit("e3", "all e3");
+
+// es.cbs(
+//     {
+//         ex1 : (data, ctx, e) => console.log("ex1-1:", data, ctx, e),
+//         ex2 : (data, ctx, e) => console.log("ex2-1:", data, ctx, e)
+//     },
+//     {
+//         ex1 : (data, ctx, e) => console.log("ex1-1:", data, ctx, e),
+//         ex2 : (data, ctx, e) => console.log("ex2-2:", data, ctx, e)
+//     }
+// );
+// es.emit("ex1", "ex1-data");
+// es.emit("ex2", "ex2-data");
