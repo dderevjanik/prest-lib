@@ -1,60 +1,61 @@
 import { jsonmls2idomPatch } from "../main/jsonml-idom";
 import { JsonMLs, JsonML } from "../main/jsonml";
 
-const state = {
-    title: "Counter",
-    count: 0
-};
+type Component<State> = (state: State, dispatch: Dispatch) => JsonMLs;
 
-let renderScheduled: number = null;
-function dispatch(event: string, data?: any): void {
-    console.log("\ndispatch", event, data);
-    const stateNew = reduce(state, dispatch, event, data);
-    console.log("state", stateNew);
-    if (stateNew && !renderScheduled) {
-        renderScheduled = setTimeout(() => {
-            render(stateNew);
-            renderScheduled = null;
+type Dispatch = (event: string, data?: any) => void;
+
+type Action<State> = (state: State, data: any, dispatch: Dispatch, event: string) => State;
+
+function render<State>(element: HTMLElement,
+                       state: State,
+                       component: Component<State>,
+                       dispatch: Dispatch): void {
+    (render as any).scheduled || ((render as any).scheduled = null);
+    if (!state) return;
+    if (!(render as any).scheduled) {
+        (render as any).scheduled = setTimeout(() => {
+            const jsonml = component(state, dispatch);
+            // console.log("render", jsonml);
+            jsonmls2idomPatch(element, jsonml);
+            (render as any).scheduled = null;
         }, 0);
     }
 }
 
-function reduce(state: any,
-                dispatch: (event: string, data: any) => void,
-                event: string,
-                data: any): any {
-    console.log("reduce", event, data);
-    switch (event) {
-        case "inc":
-            state.count += data;
-            break;
-        case "dec":
-            state.count -= data;
-            setTimeout(() => dispatch("dec-async", 1), 0);
-            break;
-        case "dec-async":
-            state.count -= data;
-            return null;
-        default:
-            console.warn("unhandled event", event, data);
-            return null;
+function dispatcher<State>(element: HTMLElement,
+                           state: State,
+                           component: Component<State>,
+                           reducer: Action<State>
+                ): Dispatch {
+    function dispatch(event: string, data?: any): void {
+        // console.log("\ndispatch", event, data);
+        const stateNew = reducer(state, data, dispatch, event);
+        // console.log("state", stateNew);
+        render(element, stateNew, component, dispatch);
     }
-    return state;
+    return dispatch;
 }
 
-function app(state: any, dispatch: (event: string, data?: any) => void): JsonMLs {
-    function dec() { dispatch("dec", 1); }
-    function inc() { dispatch("inc", 2); }
-    function xxx() { dispatch("xxx"); }
+// ----------------------------------------------------------------------------
+
+const appState = {
+    title: "Counter",
+    count: 0
+};
+
+type AppState = typeof appState;
+
+function app(state: AppState, dispatch: Dispatch): JsonMLs {
     return [
         ["h2", state.title],
         ["p",
             ["em", "Count"], ": ", state.count.toString(),
             " ",
-            button("-", dec),
-            button("+", inc),
+            button("-", () =>  dispatch("dec", 1)),
+            button("+", () => dispatch("inc", 2)),
             " ",
-            button("xxx", xxx),
+            button("xxx", () => dispatch("xxx")),
         ],
     ];
 }
@@ -63,12 +64,30 @@ function button(label: string, cb: (e: Event) => void): JsonML {
     return ["button", { click: cb }, label];
 }
 
-const appElement = document.getElementById("app");
-
-function render(state: any): void {
-    const jsonml = app(state, dispatch);
-    console.log("render", jsonml);
-    jsonmls2idomPatch(appElement, jsonml);
+function reducer(state: AppState, data: any, dispatch: Dispatch, event: string): any {
+    // console.log("reduce", event, data);
+    switch (event) {
+        case "inc":
+            state.count += data;
+            break;
+        case "dec":
+            state.count -= data;
+            setTimeout(() => dispatch("dec_async", 1), 1e3);
+            break;
+        case "dec_async":
+            state.count -= data;
+            break;
+        default:
+            console.warn("unhandled event", event, data);
+            return null;
+    }
+    return state;
 }
 
-render(state);
+const appElement = document.getElementById("app");
+
+const dispatch = dispatcher<AppState>(appElement, appState, app, reducer);
+
+render(appElement, appState, app, dispatch);
+
+dispatch("event", {});
