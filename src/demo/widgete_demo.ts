@@ -35,7 +35,7 @@ function button(label: string, cb: (e: Event) => void): JsonML {
     return ["button", { click: cb }, label];
 }
 
-const app: AppWidget = new AppWidget({ title: "Counter", count: 77 })
+const app = new AppWidget({ title: "Counter", count: 77 })
     .mount(document.getElementById("app"));
 
 // flux dispatcher

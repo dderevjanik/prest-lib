@@ -40,7 +40,7 @@ function button(label: string, onClick: (e: Event) => void): JsonML {
     return ["button", { click: onClick }, label];
 }
 
-const app: AppWidget = new AppWidget()
+const app = new AppWidget()
     .setState({
         title: "Counter",
         count: 77

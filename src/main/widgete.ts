@@ -8,7 +8,7 @@ export abstract class WidgetE<S> extends Widget {
 
     readonly events: Events<this>;
 
-    constructor(type: string = "", state?: S, events?: Events<any>) {
+    constructor(type: string = "", state?: S, events?: Events) {
         super(type);
         this._state = state;
         this.events = events ? events : new Events<this>(this);
