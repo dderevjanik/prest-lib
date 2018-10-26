@@ -3,9 +3,8 @@ export function debounce<F extends (...args: any[]) => void>(func: F, delay: num
     let timeout: number;
     return function (this: any, ...args: Params) {
         clearTimeout(timeout);
-        const context = this;
-        timeout = setTimeout(function () {
-            func.apply(context, args);
+        timeout = setTimeout(() => {
+            func.apply(this, args);
         }, delay);
     };
 }
@@ -22,9 +21,11 @@ export function debounceFnc(delay: number = 300) {
 
 // TEST
 
-// const d = debounce(function (this: any, x: string, y: number) {
-//     console.log("debounce", x, y);
-// }, 300);
+// const d = debounce(
+//     function (this: any, x: string, y: number) {
+//         console.log("debounce", x, y);
+//     },
+//     300);
 // d("peter", 3);
 
 // const o = {
@@ -35,10 +36,10 @@ export function debounceFnc(delay: number = 300) {
 //     d: ({} as any)
 // };
 // o.d = debounce(o.m, 300);
-// o.d("peter", 3);
+// o.d("test");
 
 // class O {
-//     x:string = "O.x";
+//     x: string = "O.x";
 
 //     @debounceFnc(300)
 //     m(y: string) {
@@ -49,8 +50,8 @@ export function debounceFnc(delay: number = 300) {
 // // obj.m = debounce(obj.m, 300); // decorator equivalent
 // obj.m("m(p)");
 
-// setTimeout(() => { obj.m("m(p)") }, 200);
-// setTimeout(() => { obj.m("m(p)") }, 1200);
-// setTimeout(() => { obj.m("m(p)") }, 1400);
-// setTimeout(() => { obj.m("m(p)") }, 2200);
-// setTimeout(() => { obj.m("m(p)") }, 2400);
+// setTimeout(() => obj.m("m(p) 200"), 200);
+// setTimeout(() => obj.m("m(p) 1200"), 1200);
+// setTimeout(() => obj.m("m(p) 1400"), 1400);
+// setTimeout(() => obj.m("m(p) 2200"), 2200);
+// setTimeout(() => obj.m("m(p) 2400"), 2400);
