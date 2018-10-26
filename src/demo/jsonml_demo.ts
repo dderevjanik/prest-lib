@@ -72,7 +72,7 @@ function reducer(state: AppState, data: any, dispatch: Dispatch, event: string):
             break;
         case "dec":
             state.count -= data;
-            setTimeout(() => dispatch("dec_async", 1), 1e3);
+            setTimeout(dispatch, 1e3, "dec_async", 1);
             break;
         case "dec_async":
             state.count -= data;

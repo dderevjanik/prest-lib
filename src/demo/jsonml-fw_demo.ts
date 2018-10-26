@@ -37,7 +37,7 @@ class Dispatcher<State> {
         this._dispatch = (event: string, data: any) => this.dispatch(event, data);
 
     }
-    dispatch(event: string, data: any): void {
+    dispatch(event: string, data?: any): void {
         // console.log(event);
         const reducer = this._reducer[event];
         if (reducer) {
@@ -124,7 +124,7 @@ const appReducer: Reducer<AppState> = {
     },
     dec: (state: AppState, data: any, dispatch: Dispatch, event: string): AppState => {
         state.count -= data;
-        setTimeout(() => dispatch("dec_async", 1), 1e3);
+        setTimeout(dispatch, 1e3, "dec_async", 1);
         return state;
     },
     dec_async: (state: AppState, data: any, dispatch: Dispatch, event: string): AppState => {
