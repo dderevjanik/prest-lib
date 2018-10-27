@@ -5,8 +5,8 @@ export interface Attrs {
     _ref?: string;
     _key?: string;
     _skip?: boolean;
-    data?: {[key: string]: any};
-    styles?: {[key: string]: string};
+    data?: { [key: string]: any };
+    styles?: { [key: string]: string };
     classes?: string[];
     [key: string]: any;
 }

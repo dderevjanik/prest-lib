@@ -82,7 +82,7 @@ class JsonmlDomHandler implements JsonMLHandler {
             this.element = e;
             this._current = e;
         }
-        if (widget && "mount" in widget && widget.mount.constructor === Function) {
+        if (widget && widget.mount && widget.mount.constructor === Function) {
             widget.mount(e);
         }
         return attrs._skip ? true : false;

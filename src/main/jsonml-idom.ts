@@ -79,7 +79,7 @@ class JsonmlIDomHandler implements JsonMLHandler {
         if (ctx && ref) {
             ctx.refs[ref] = idom.currentElement();
         }
-        if (widget && "mount" in widget && widget.mount.constructor === Function) {
+        if (widget && widget.mount && widget.mount.constructor === Function) {
             widget.mount(idom.currentElement());
             idom.skip();
         }
