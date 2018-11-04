@@ -4,7 +4,7 @@ import { Events } from "./events";
 
 export type Component<S> = (state: S, events: Events<WidgetC<S>>) => JsonMLs;
 
-export class WidgetC<S> extends Widget {
+export class WidgetC<S = any> extends Widget {
 
     private _state: S;
     private _component: Component<S>;
