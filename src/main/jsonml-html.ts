@@ -17,7 +17,8 @@ class JsonmlHtmlHandler implements JsonMLHandler {
         "html", "head", "body", "title", "div",
         "h1", "h2", "h3", "h4", "h5", "h6",
         "p", "a", "pre", "blockquote", "i", "b", "em", "strong", "tt", "cite",
-        "ol", "ul", "li", "dl", "dt", "dd", "table", "tr", "td"];
+        "ol", "ul", "li", "dl", "dt", "dd", "table", "tr", "td",
+        "textarea", "select", "option"];
 
     private _onHtml: (html: string) => void;
     private _pretty: boolean;
