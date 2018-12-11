@@ -297,6 +297,12 @@ export class HttpRequest {
             }
         }
 
+        if (this._onError) {
+            xhr.onerror = (e: ProgressEvent) => {
+                this._onError(e);
+            };
+        }
+
         if (this._async) {
             if ("onload" in xhr) {
                 xhr.onload = (e: ProgressEvent) => {
@@ -357,11 +363,6 @@ export class HttpRequest {
                 xhr.send();
             }
         } else {
-            if (this._onError) {
-                xhr.onerror = (e: ProgressEvent) => {
-                    this._onError(e);
-                };
-            }
             if (data) {
                 const payload = (typeof data === "string") ? data : JSON.stringify(data);
                 xhr.send(payload);
