@@ -11,7 +11,7 @@ export interface Attrs {
     [key: string]: any;
 }
 
-export type JsonMLFnc = (e?: HTMLElement) => void;
+export type JsonMLFnc = (e?: Element) => boolean;
 
 export interface JsonMLObj {
     toJsonML?(): JsonML;

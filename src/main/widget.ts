@@ -40,7 +40,7 @@ export abstract class Widget implements JsonMLObj, DomWidget {
 
     abstract render(): JsonMLs;
 
-    mount(e: HTMLElement = document.body): this {
+    mount(e: Element = document.body): this {
         if ("widget" in e) {
             const w = (e as any).widget as Widget;
             w && w.umount();
@@ -150,11 +150,9 @@ export abstract class Widget implements JsonMLObj, DomWidget {
 }
 
 
-declare var IncrementalDOM: any;
+import * as idom from "incremental-dom";
 
-const idom = IncrementalDOM;
-
-idom.notifications.nodesDeleted = (nodes: Node[]) => {
+(idom as any).notifications.nodesDeleted = (nodes: Node[]) => {
     nodes.forEach(node => {
         if (node.nodeType === 1 && "widget" in node) {
             const w = (node as any).widget as Widget;
