@@ -13,11 +13,24 @@ function page(state: PageState, events: Events): JsonMLs {
         ["p",
             ["em", "Count"], ": ", state.count.toString(),
             " ",
-            button("-", () =>  events.emit("dec", 1)),
+            button("-", () => events.emit("dec", 1)),
             button("+", () => events.emit("inc", 2)),
             " ",
             button("xxx", () => events.emit("xxx")),
         ],
+        ["div",
+            WidgetC.jsonMlFnc<PageState>(subpage, state, events)
+        ]
+    ];
+}
+
+// function subpage(state: PageState, action: Action): JsonMLs {
+function subpage(state: PageState, events: Events): JsonMLs {
+    return [
+        ["h3", state.title],
+        ["p",
+            ["em", "Count"], ": ", state.count.toString(),
+        ]
     ];
 }
 
@@ -25,12 +38,17 @@ function button(label: string, cb: (e: Event) => void): JsonML {
     return ["button", { click: cb }, label];
 }
 
-const app = new WidgetC<PageState>({ title: "Counter", count: 77 }, page);
+const state: PageState = {
+    title: "Counter",
+    count: 77
+};
+
+const app = new WidgetC<PageState>(page, state);
 
 // flux dispatcher
 app.events
-    .on("", (data, widget, event) => {
-        console.log("event:", data, event, widget);
+    .any((data, widget, event) => {
+        console.log("event:", event, data, widget);
     })
     .on("inc", (num, widget) => {
         widget.events.emit("dec", 1);
@@ -44,7 +62,7 @@ app.events
         s.count -= num;
         widget.state = s;
     });
-    // .cbs(
+    // .many(
     //     {
     //         inc: (num, widget) => {
     //             widget.events.emit("dec", 1);
