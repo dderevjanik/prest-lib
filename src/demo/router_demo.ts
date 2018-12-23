@@ -26,7 +26,7 @@ Router.start();
 
 Router.navigate("users/987");
 
-function print(...args: any[]) {
+function print(...args: [any?, ...any[]]) {
     console.log.apply(console, args);
     const out = document.getElementById("output");
     out.innerHTML += "<br>" + args.join(" ");

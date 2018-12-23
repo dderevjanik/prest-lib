@@ -1,7 +1,6 @@
-/// <reference path="../../node_modules/moment/moment.d.ts" />
-
-// import * as moment from "moment";
-declare const moment: any;
+import * as moment from "moment";
+import * as numeral from "numeral";
+import "numeral/locales/sk";
 
 console.log(new Date().toString());
 console.log(new Date().toISOString());
