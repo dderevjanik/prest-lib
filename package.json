@@ -38,9 +38,7 @@
     "tslint": "tslint --project tsconfig.json",
     "dev": "webpack --mode development --watch",
     "build": "webpack --mode production",
-    "pretest": "npm run build",
-    "test": "./node_modules/karma-cli/bin/karma start ./karma.conf.js --single-run",
-    "test:watch": "./node_modules/karma-cli/bin/karma start ./karma.conf.js",
+    "test": "npm run tslint; npm run build",
     "start": "npm run dev"
   },
   "repository": {
@@ -48,28 +46,15 @@
     "url": "https://github.com/peter-rybar/prest-lib.git"
   },
   "pre-commit": [
-    "build"
+    "test"
   ],
   "pre-push": [],
   "dependencies": {},
   "devDependencies": {
-    "@types/assertion-error": "^1.1.0",
-    "@types/chai": "^3.4.34",
     "@types/incremental-dom": "^0.5.0",
-    "@types/mocha": "^2.2.48",
     "@types/numeral": "0.0.22",
-    "@types/stats": "^0.16.30",
-    "chai": "^3.5.0",
     "glob": "^7.1.3",
     "incremental-dom": "^0.6.0",
-    "karma": "^1.3.0",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^1.0.1",
-    "karma-cli": "^1.0.1",
-    "karma-mocha": "^1.3.0",
-    "karma-phantomjs-launcher": "^1.0.2",
-    "karma-requirejs": "^1.1.0",
-    "mocha": "^3.1.2",
     "moment": "^2.22.0",
     "numeral": "^2.0.6",
     "pre-commit": "^1.2.2",

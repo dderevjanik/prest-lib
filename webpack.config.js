@@ -11,11 +11,21 @@ console.log("entries:", entries);
 
 module.exports = {
     mode: "development",
-    devtool: "inline-source-map",
+    // devtool: false,
+    // devtool: "eval",
+    // devtool: "source-map",
+    // devtool: "inline-source-map",
+    // devtool: "eval-source-map",
+    devtool: "cheap-source-map",
+    // devtool: "inline-cheap-source-map",
+    // devtool: "cheap-module-source-map",
+    // devtool: "cheap-eval-source-map",
+    // devtool: "hidden-source-map",
+    // devtool: "nosources-source-map",
+    entry: entries,
     // entry: {
     //     index: "./src/main/index.ts"
     // },
-    entry: entries,
     output: {
         // filename: '[name].[chunkhash].js',
         filename: '[name].js',
