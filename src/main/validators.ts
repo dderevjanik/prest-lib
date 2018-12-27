@@ -298,10 +298,10 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
 
 }
 
-export type FormValidatorRes = {
-    str: { [key: string]: string },
-    obj: { [key: string]: any },
-    err: { [key: string]: string },
+export type FormValidatorRes<T> = {
+    str: { [key in keyof T]: string },
+    obj: { [key in keyof T]: any },
+    err: { [key in keyof T]: string },
     valid: boolean
 };
 
@@ -314,34 +314,38 @@ export class FormValidator<T = any> {
         return this;
     }
 
-    validate(data: { [key: string]: string }): FormValidatorRes {
+    validate(data: { [key in keyof T]: string },
+             defaults?: { [key in keyof T]: string }): FormValidatorRes<T> {
+        const d = { ...defaults as object, ...data as object };
         const res = Object.keys(this.validators)
             .reduce(
                 (a, k) => {
-                    const r = (this.validators as any)[k].validate(data[k]);
+                    const v = (d as any)[k];
+                    const r = (this.validators as any)[k].validate(v);
                     console.log(r);
                     (a.str as any)[k] = r.str;
                     (a.obj as any)[k] = r.obj;
                     (a.err as any)[k] = r.err;
                     return a;
                 },
-                { str: {}, obj: {}, err: {} } as FormValidatorRes);
-        res.valid = !Object.keys(res.err).length;
+                { str: {}, obj: {}, err: {} } as FormValidatorRes<T>);
+        res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
         return res;
     }
 
-    format(data: { [key: string]: any }): FormValidatorRes {
+    format(data: { [key in keyof T]: any }): FormValidatorRes<T> {
         const res = Object.keys(this.validators)
             .reduce(
                 (a, k) => {
-                    const r = (this.validators as any)[k].format(data[k]);
+                    const v = (data as any)[k];
+                    const r = (this.validators as any)[k].format(v);
                     (a.str as any)[k] = r.str;
-                    (a.obj as any)[k] = data[k];
+                    (a.obj as any)[k] = v;
                     (a.err as any)[k] = r.err;
                     return a;
                 },
-                { str: {}, obj: {}, err: {} } as FormValidatorRes);
-        res.valid = !Object.keys(res.err).length;
+                { str: {}, obj: {}, err: {} } as FormValidatorRes<T>);
+        res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
         return res;
     }
 
