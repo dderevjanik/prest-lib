@@ -6,6 +6,7 @@ export abstract class Validator<T, O, M> {
 
     readonly opts: O;
     readonly msgs: M;
+
     readonly str: string;
     readonly err: string;
     readonly obj: T;
@@ -298,16 +299,14 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
 
 }
 
-export type FormValidatorRes<T> = {
-    str: { [key in keyof T]: string },
-    obj: { [key in keyof T]: any },
-    err: { [key in keyof T]: string },
-    valid: boolean
-};
-
 export class FormValidator<T = any> {
 
     readonly validators: { [key in keyof T]: Validator<any, any, any> } = {} as any;
+
+    readonly str: { [key in keyof T]: string };
+    readonly obj: { [key in keyof T]: any };
+    readonly err: { [key in keyof T]: string };
+    readonly valid: boolean;
 
     addValidator(field: keyof T, validator: Validator<any, any, any>): this {
         this.validators[field] = validator;
@@ -315,7 +314,7 @@ export class FormValidator<T = any> {
     }
 
     validate(data: { [key in keyof T]: string },
-             defaults?: { [key in keyof T]: string }): FormValidatorRes<T> {
+             defaults?: { [key in keyof T]: string }): this {
         const d = { ...defaults as object, ...data as object };
         const res = Object.keys(this.validators)
             .reduce(
@@ -328,12 +327,16 @@ export class FormValidator<T = any> {
                     r.err && ((a.err as any)[k] = r.err);
                     return a;
                 },
-                { str: {}, obj: {}, err: {} } as FormValidatorRes<T>);
+                { str: {}, obj: {}, err: {}, valid: false });
         res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
-        return res;
+        (this.str as any) = res.str;
+        (this.obj as any) = res.obj;
+        (this.err as any) = res.err;
+        (this.valid as any) = res.valid;
+        return this;
     }
 
-    format(data: { [key in keyof T]: any }): FormValidatorRes<T> {
+    format(data: { [key in keyof T]: any }): this {
         const res = Object.keys(this.validators)
             .reduce(
                 (a, k) => {
@@ -344,9 +347,13 @@ export class FormValidator<T = any> {
                     r.err && ((a.err as any)[k] = r.err);
                     return a;
                 },
-                { str: {}, obj: {}, err: {} } as FormValidatorRes<T>);
+                { str: {}, obj: {}, err: {}, valid: false });
         res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
-        return res;
+        (this.str as any) = res.str;
+        (this.obj as any) = res.obj;
+        (this.err as any) = res.err;
+        (this.valid as any) = res.valid;
+        return this;
     }
 
 }
@@ -431,12 +438,14 @@ export class FormValidator<T = any> {
 
 // console.log();
 
-// const d = { code: "123a", num: "33" };
+// const data = { code: "123a", num: "111" };
 
-// const fv = new FormValidator<typeof d>()
+// const fv = new FormValidator<typeof data>()
 //     .addValidator("code", sv)
-//     .addValidator("num", nv);
-// const fvr = fv.validate(d);
-// console.log(fvr);
-// const fvf = fv.format(fvr.obj);
-// console.log(fvf);
+//     .addValidator("num", nv)
+//     .validate(data);
+
+// console.log(fv);
+
+// fv.format(fv.obj);
+// console.log(fv);
