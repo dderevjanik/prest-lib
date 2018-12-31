@@ -6,9 +6,9 @@ export abstract class Validator<T, O, M> {
 
     readonly opts: O;
     readonly msgs: M;
+    readonly str: string;
     readonly err: string;
     readonly obj: T;
-    readonly str: string;
 
     constructor(opts?: O, msgs?: M) {
         this.opts = opts;
@@ -325,7 +325,7 @@ export class FormValidator<T = any> {
                     console.log(r);
                     (a.str as any)[k] = r.str;
                     (a.obj as any)[k] = r.obj;
-                    (a.err as any)[k] = r.err;
+                    r.err && ((a.err as any)[k] = r.err);
                     return a;
                 },
                 { str: {}, obj: {}, err: {} } as FormValidatorRes<T>);
@@ -341,7 +341,7 @@ export class FormValidator<T = any> {
                     const r = (this.validators as any)[k].format(v);
                     (a.str as any)[k] = r.str;
                     (a.obj as any)[k] = v;
-                    (a.err as any)[k] = r.err;
+                    r.err && ((a.err as any)[k] = r.err);
                     return a;
                 },
                 { str: {}, obj: {}, err: {} } as FormValidatorRes<T>);
