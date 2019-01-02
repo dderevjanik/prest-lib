@@ -2,6 +2,13 @@ import * as numeral from "numeral";
 import * as moment from "moment";
 import { Moment } from "moment";
 
+const required_msg = "required";
+const not_in_range_msg = "not_in_range";
+const invalid_format_msg = "invalid_format";
+const invalid_option_msg = "invalid_option";
+const locale_default = "en";
+const format_default = "L";
+
 export abstract class Validator<T, O, M> {
 
     readonly opts: O;
@@ -67,7 +74,7 @@ export class SelectValidator extends Validator<string, SelectValidatorOpts, Sele
         const msgs = this.msgs;
         if ("required" in opts) {
             if (opts.required && !str) {
-                return { err: msgs && msgs.required ? msgs.required : "required" };
+                return { err: msgs && msgs.required ? msgs.required : required_msg };
             }
         }
         return { obj: str };
@@ -78,7 +85,7 @@ export class SelectValidator extends Validator<string, SelectValidatorOpts, Sele
         const msgs = this.msgs;
         if ("options" in opts) {
             if (opts.options.indexOf(obj) === -1) {
-                return msgs && msgs.invalid_option ? msgs.invalid_option : "invalid_option";
+                return msgs && msgs.invalid_option ? msgs.invalid_option : invalid_option_msg;
             }
         }
         return undefined;
@@ -114,12 +121,14 @@ export class StringValidator extends Validator<string, StringValidatorOpts, Stri
         const msgs = this.msgs;
         if ("required" in opts) {
             if (opts.required && !str) {
-                return { err: msgs && msgs.required ? msgs.required : "required" };
+                return { err: msgs && msgs.required ? msgs.required : required_msg };
             }
         }
         if ("regexp" in opts) {
             if (!str.match(opts.regexp)) {
-                return { err: msgs && msgs.invalid_format ? msgs.invalid_format : "invalid_format" };
+                return { err: msgs && msgs.invalid_format
+                    ? msgs.invalid_format
+                    : invalid_format_msg };
             }
         }
         return { obj: str };
@@ -130,17 +139,17 @@ export class StringValidator extends Validator<string, StringValidatorOpts, Stri
         const msgs = this.msgs;
         if ("max" in opts) {
             if (obj.length > opts.max) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : "not_in_range";
+                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
             }
         }
         if ("min" in opts) {
             if (obj.length < opts.min) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : "not_in_range";
+                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
             }
         }
         if ("min" in opts && "max" in opts) {
             if (obj.length > opts.max && obj.length < opts.min) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : "not_in_range";
+                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
             }
         }
         return undefined;
@@ -177,19 +186,18 @@ export class NumberValidator extends Validator<Numeral, NumberValidatorOpts, Num
     protected strToObj(str: string): { obj?: Numeral, err?: string } {
         const opts = this.opts;
         const msgs = this.msgs;
-        const defaultLocale = "en";
         if ("required" in opts) {
             if (opts.required && !str) {
-                return { err: msgs && msgs.required ? msgs.required : "required" };
+                return { err: msgs && msgs.required ? msgs.required : required_msg };
             }
         }
-        numeral.locale(opts.locale ? opts.locale : defaultLocale);
+        numeral.locale(opts.locale ? opts.locale : locale_default);
         const n = numeral(str);
         if (n.value() === null) {
             return {
                 err: msgs && msgs.invalid_format
                     ? `${msgs.invalid_format} ${this.objToStr(1234.45 as any).str}`
-                    : "invalid_format"
+                    : invalid_format_msg
                 };
         }
         return { obj: n };
@@ -203,17 +211,17 @@ export class NumberValidator extends Validator<Numeral, NumberValidatorOpts, Num
         const msgs = this.msgs;
         if ("max" in opts) {
             if (obj.value() > opts.max) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : "not_in_range";
+                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
             }
         }
         if ("min" in opts) {
             if (obj.value() < opts.min) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : "not_in_range";
+                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
             }
         }
         if ("min" in opts && "max" in opts) {
             if (obj.value() > opts.max && obj.value() < opts.min) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : "not_in_range";
+                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
             }
         }
         return undefined;
@@ -255,15 +263,15 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
         if ("required" in opts) {
             if (opts.required && !str) {
                 return {
-                    err: msgs && msgs.required ? msgs.required : "required" };
+                    err: msgs && msgs.required ? msgs.required : required_msg };
             }
         }
-        const d = moment(str, opts && opts.format, opts && opts.locale);
+        const d = moment(str, opts && (opts.format || format_default), opts && (opts.locale || locale_default));
         if (!d.isValid() || (opts && opts.parsedValue && opts.parsedValue !== str)) {
             return {
                 err: msgs && msgs.invalid_format
                     ? `${msgs.invalid_format} ${this.objToStr(new Date() as any).str}`
-                    : "invalid_format"
+                    : invalid_format_msg
             };
         }
         return { obj: d };
@@ -277,12 +285,12 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
         const msgs = this.msgs;
         if ("max" in opts) {
             if (obj.isAfter(opts.max)) {
-                return msgs.not_in_range ? msgs.not_in_range : "not_in_range";
+                return msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
             }
         }
         if ("min" in opts) {
             if (obj.isBefore(opts.min)) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : "not_in_range";
+                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
             }
         }
         return undefined;
@@ -293,7 +301,7 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
             obj = moment(obj);
         }
         return { str: obj
-            ? obj.locale(this.opts.locale || "en").format(this.opts.format || "L")
+            ? obj.locale(this.opts.locale || locale_default).format(this.opts.format || format_default)
             : undefined };
     }
 
