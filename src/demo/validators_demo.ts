@@ -6,6 +6,8 @@ import {
 } from "../main/validators";
 import * as moment from "moment";
 
+import "numeral/locales";
+
 const sv = new StringValidator(
     {
         required: true,
@@ -14,9 +16,9 @@ const sv = new StringValidator(
         regexp: /[0123]+/
     },
     {
-        required: "required msg",
-        invalid_format: "invalid_format msg",
-        not_in_range: "not_in_range msg"
+        required: "required ${min} ${max} ${regexp}",
+        invalid_format: "invalid_format ${regexp}",
+        not_in_range: "not_in_range ${min} ${max}"
     });
 
 ["x1234", "x1234y", "xy"].forEach(v => {
@@ -36,15 +38,16 @@ const nv = new NumberValidator(
         required: true,
         min: 3,
         max: 500,
-        // locale: "sk"
+        locale: "sk",
+        format: "0,0.0[00]"
     },
     {
-        required: "required msg",
-        invalid_format: "invalid_format msg",
-        not_in_range: "not_in_range msg"
+        required: "required ${min} ${max} ${locale} ${format}",
+        invalid_format: "invalid_format ${num} ${locale} ${format}",
+        not_in_range: "not_in_range ${min} ${max} ${locale}"
     });
 
-["123", "1234y", "xy"].forEach(v => {
+["123,45", "1234y", "xy"].forEach(v => {
     console.log(v);
     const r = nv.validate(v);
     console.log(r);
@@ -66,9 +69,9 @@ const dv = new DateValidator(
         // parsedValue: ""
     },
     {
-        required: "required msg",
-        invalid_format: "invalid_format msg",
-        not_in_range: "not_in_range msg"
+        required: "required ${min} ${max} ${locale} ${format}",
+        invalid_format: "invalid_format ${date} ${locale}",
+        not_in_range: "not_in_range ${min} ${max} ${locale} ${format}"
     });
 
 ["01.03.2018 5:35", "5:35", "01.13.2018", "03/01/2018"].forEach(v => {
@@ -83,12 +86,15 @@ const dv = new DateValidator(
 
 console.log();
 
-const d = { code: "123a", num: "33" };
+const data = { str: "123a", num: "12,34", date: "02.01.2019 12:12" };
 
-const fv = new FormValidator<typeof d>()
-    .addValidator("code", sv)
-    .addValidator("num", nv);
-const fvr = fv.validate(d);
-console.log(fvr);
-const fvf = fv.format(fvr.obj);
-console.log(fvf);
+const fv = new FormValidator<typeof data>()
+    .addValidator("str", sv)
+    .addValidator("num", nv)
+    .addValidator("date", dv)
+    .validate(data);
+
+console.log(fv);
+
+fv.format(fv.obj);
+console.log(fv);

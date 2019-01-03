@@ -2,12 +2,13 @@ import * as numeral from "numeral";
 import * as moment from "moment";
 import { Moment } from "moment";
 
-const required_msg = "required";
-const not_in_range_msg = "not_in_range";
-const invalid_format_msg = "invalid_format";
-const invalid_option_msg = "invalid_option";
-const locale_default = "en";
-const format_default = "L";
+const requiredMsg = "required";
+const notInRangeMsg = "not_in_range";
+const invalidFormatMsg = "invalid_format";
+const invalidOptionMsg = "invalid_option";
+const localeDefault = "en";
+const dateFormatFefault = "L";
+const numFormatDefault = "0,0.[00]";
 
 export abstract class Validator<T, O, M> {
 
@@ -74,7 +75,14 @@ export class SelectValidator extends Validator<string, SelectValidatorOpts, Sele
         const msgs = this.msgs;
         if ("required" in opts) {
             if (opts.required && !str) {
-                return { err: msgs && msgs.required ? msgs.required : required_msg };
+                return {
+                    err: msgs && msgs.required
+                        ? tpl(msgs.required,
+                            {
+                                options: opts.options && opts.options.join(", ")
+                            })
+                        : requiredMsg
+                };
             }
         }
         return { obj: str };
@@ -85,7 +93,13 @@ export class SelectValidator extends Validator<string, SelectValidatorOpts, Sele
         const msgs = this.msgs;
         if ("options" in opts) {
             if (opts.options.indexOf(obj) === -1) {
-                return msgs && msgs.invalid_option ? msgs.invalid_option : invalid_option_msg;
+                return msgs && msgs.invalid_option
+                    ? tpl(msgs.invalid_option,
+                        {
+                            option: obj,
+                            options: opts.options && opts.options.join(", ")
+                        })
+                    : invalidOptionMsg;
             }
         }
         return undefined;
@@ -121,14 +135,28 @@ export class StringValidator extends Validator<string, StringValidatorOpts, Stri
         const msgs = this.msgs;
         if ("required" in opts) {
             if (opts.required && !str) {
-                return { err: msgs && msgs.required ? msgs.required : required_msg };
+                return {
+                    err: msgs && msgs.required
+                        ? tpl(msgs.required,
+                            {
+                                min: opts.min && ("" + opts.min),
+                                max: opts.max && ("" + opts.max),
+                                regexp: opts.regexp && ("" + opts.regexp)
+                            })
+                        : requiredMsg
+                };
             }
         }
         if ("regexp" in opts) {
             if (!str.match(opts.regexp)) {
-                return { err: msgs && msgs.invalid_format
-                    ? msgs.invalid_format
-                    : invalid_format_msg };
+                return {
+                    err: msgs && msgs.invalid_format
+                        ? tpl(msgs.invalid_format,
+                            {
+                                regexp: opts.regexp && ("" + opts.regexp)
+                            })
+                        : invalidFormatMsg
+                    };
             }
         }
         return { obj: str };
@@ -137,20 +165,30 @@ export class StringValidator extends Validator<string, StringValidatorOpts, Stri
     protected objCheck(obj: string): string {
         const opts = this.opts;
         const msgs = this.msgs;
+        let err: boolean;
         if ("max" in opts) {
             if (obj.length > opts.max) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
+                err = true;
             }
         }
         if ("min" in opts) {
             if (obj.length < opts.min) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
+                err = true;
             }
         }
         if ("min" in opts && "max" in opts) {
             if (obj.length > opts.max && obj.length < opts.min) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
+                err = true;
             }
+        }
+        if (err) {
+            return msgs && msgs.not_in_range
+                ? tpl(msgs.not_in_range,
+                    {
+                        min: opts.min && ("" + opts.min),
+                        max: opts.max && ("" + opts.max)
+                    })
+                : notInRangeMsg;
         }
         return undefined;
     }
@@ -163,12 +201,12 @@ export class StringValidator extends Validator<string, StringValidatorOpts, Stri
 
 export const emailRegex = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
-
 export interface NumberValidatorOpts {
     required?: boolean;
     min?: number;
     max?: number;
     locale?: string;
+    format?: string;
 }
 
 export interface NumberValidatorMsgs {
@@ -188,16 +226,31 @@ export class NumberValidator extends Validator<Numeral, NumberValidatorOpts, Num
         const msgs = this.msgs;
         if ("required" in opts) {
             if (opts.required && !str) {
-                return { err: msgs && msgs.required ? msgs.required : required_msg };
+                return {
+                    err: msgs && msgs.required
+                        ? tpl(msgs.required,
+                            {
+                                min: opts.min && ("" + opts.min),
+                                max: opts.max && ("" + opts.max),
+                                locale: opts.locale || localeDefault,
+                                format: opts.format || numFormatDefault
+                            })
+                        : requiredMsg
+                };
             }
         }
-        numeral.locale(opts.locale ? opts.locale : locale_default);
+        numeral.locale(opts.locale || localeDefault);
         const n = numeral(str);
         if (n.value() === null) {
             return {
                 err: msgs && msgs.invalid_format
-                    ? `${msgs.invalid_format} ${this.objToStr(1234.45 as any).str}`
-                    : invalid_format_msg
+                    ? tpl(msgs.invalid_format,
+                        {
+                            num: this.objToStr(1234.45 as any).str,
+                            locale: opts.locale || localeDefault,
+                            format: opts.format || numFormatDefault
+                        })
+                    : invalidFormatMsg
                 };
         }
         return { obj: n };
@@ -209,20 +262,27 @@ export class NumberValidator extends Validator<Numeral, NumberValidatorOpts, Num
         }
         const opts = this.opts;
         const msgs = this.msgs;
+        let err: boolean;
         if ("max" in opts) {
             if (obj.value() > opts.max) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
+                err = true;
             }
         }
         if ("min" in opts) {
             if (obj.value() < opts.min) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
+                err = true;
             }
         }
-        if ("min" in opts && "max" in opts) {
-            if (obj.value() > opts.max && obj.value() < opts.min) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
-            }
+        if (err) {
+            return msgs && msgs.not_in_range
+                ? tpl(msgs.not_in_range,
+                    {
+                        min: opts.min && ("" + opts.min),
+                        max: opts.max && ("" + opts.max),
+                        locale: opts.locale || localeDefault,
+                        format: opts.format || numFormatDefault
+                    })
+                : notInRangeMsg;
         }
         return undefined;
     }
@@ -231,7 +291,8 @@ export class NumberValidator extends Validator<Numeral, NumberValidatorOpts, Num
         if (obj.constructor === Number) {
             obj = numeral(obj);
         }
-        return { str: obj ? obj.format() : undefined };
+        numeral.locale(this.opts.locale || localeDefault);
+        return { str: obj ? obj.format(this.opts.format || numFormatDefault) : undefined };
     }
 
 }
@@ -263,16 +324,31 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
         if ("required" in opts) {
             if (opts.required && !str) {
                 return {
-                    err: msgs && msgs.required ? msgs.required : required_msg };
+                    err: msgs && msgs.required
+                        ? tpl(msgs.required,
+                            {
+                                min: opts.min && ("" + opts.min),
+                                max: opts.max && ("" + opts.max),
+                                locale: opts.locale || localeDefault,
+                                format: opts.format && opts.format
+                            })
+                        : requiredMsg
+                };
             }
         }
-        const d = moment(str, opts && (opts.format || format_default), opts && (opts.locale || locale_default));
+        moment.locale(opts.locale || localeDefault);
+        const d = moment(str, opts && (opts.format || dateFormatFefault), opts && (opts.locale || localeDefault));
         if (!d.isValid() || (opts && opts.parsedValue && opts.parsedValue !== str)) {
             return {
                 err: msgs && msgs.invalid_format
-                    ? `${msgs.invalid_format} ${this.objToStr(new Date() as any).str}`
-                    : invalid_format_msg
-            };
+                    ? tpl(msgs.invalid_format,
+                        {
+                            date: this.objToStr(new Date() as any).str,
+                            locale: opts.locale || localeDefault,
+                            format: opts.format && opts.format
+                        })
+                    : invalidFormatMsg
+                };
         }
         return { obj: d };
     }
@@ -283,15 +359,27 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
         }
         const opts = this.opts;
         const msgs = this.msgs;
+        let err: boolean;
         if ("max" in opts) {
             if (obj.isAfter(opts.max)) {
-                return msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
+                err = true;
             }
         }
         if ("min" in opts) {
             if (obj.isBefore(opts.min)) {
-                return msgs && msgs.not_in_range ? msgs.not_in_range : not_in_range_msg;
+                err = true;
             }
+        }
+        if (err) {
+            return msgs && msgs.not_in_range
+                ? tpl(msgs.not_in_range,
+                    {
+                        min: opts.min && ("" + opts.min),
+                        max: opts.max && ("" + opts.max),
+                        locale: opts.locale && opts.locale,
+                        format: opts.format && opts.format
+                    })
+                : notInRangeMsg;
         }
         return undefined;
     }
@@ -301,7 +389,9 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
             obj = moment(obj);
         }
         return { str: obj
-            ? obj.locale(this.opts.locale || locale_default).format(this.opts.format || format_default)
+            ? obj
+                .locale(this.opts.locale || localeDefault)
+                .format(this.opts.format || dateFormatFefault)
             : undefined };
     }
 
@@ -366,8 +456,15 @@ export class FormValidator<T = any> {
 
 }
 
+function tpl(tmpl: string, data: { [k: string]: string }): string {
+    return Object.keys(data)
+        .map(k => [k, data[k]])
+        .reduce((t, d) => t.replace(new RegExp(`\\$\\{${d[0]}\\}`, "g"), d[1]), tmpl);
+}
 
 // TEST
+
+// import "numeral/locales";
 
 // const sv = new StringValidator(
 //     {
@@ -377,9 +474,9 @@ export class FormValidator<T = any> {
 //         regexp: /[0123]+/
 //     },
 //     {
-//         required: "required msg",
-//         invalid_format: "invalid_format msg",
-//         not_in_range: "not_in_range msg"
+//         required: "required ${min} ${max} ${regexp}",
+//         invalid_format: "invalid_format ${regexp}",
+//         not_in_range: "not_in_range ${min} ${max}"
 //     });
 
 // ["x1234", "x1234y", "xy"].forEach(v => {
@@ -399,15 +496,16 @@ export class FormValidator<T = any> {
 //         required: true,
 //         min: 3,
 //         max: 500,
-//         // locale: "sk"
+//         locale: "sk",
+//         format: "0,0.0[00]"
 //     },
 //     {
-//         required: "required msg",
-//         invalid_format: "invalid_format msg",
-//         not_in_range: "not_in_range msg"
+//         required: "required ${min} ${max} ${locale} ${format}",
+//         invalid_format: "invalid_format ${num} ${locale} ${format}",
+//         not_in_range: "not_in_range ${min} ${max} ${locale}"
 //     });
 
-// ["123", "1234y", "xy"].forEach(v => {
+// ["123,45", "1234y", "xy"].forEach(v => {
 //     console.log(v);
 //     const r = nv.validate(v);
 //     console.log(r);
@@ -429,9 +527,9 @@ export class FormValidator<T = any> {
 //         // parsedValue: ""
 //     },
 //     {
-//         required: "required msg",
-//         invalid_format: "invalid_format msg",
-//         not_in_range: "not_in_range msg"
+//         required: "required ${min} ${max} ${locale} ${format}",
+//         invalid_format: "invalid_format ${date} ${locale}",
+//         not_in_range: "not_in_range ${min} ${max} ${locale} ${format}"
 //     });
 
 // ["01.03.2018 5:35", "5:35", "01.13.2018", "03/01/2018"].forEach(v => {
@@ -446,11 +544,12 @@ export class FormValidator<T = any> {
 
 // console.log();
 
-// const data = { code: "123a", num: "111" };
+// const data = { str: "123a", num: "12,34", date: "02.01.2019 12:12" };
 
 // const fv = new FormValidator<typeof data>()
-//     .addValidator("code", sv)
+//     .addValidator("str", sv)
 //     .addValidator("num", nv)
+//     .addValidator("date", dv)
 //     .validate(data);
 
 // console.log(fv);
