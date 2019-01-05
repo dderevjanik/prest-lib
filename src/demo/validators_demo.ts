@@ -1,8 +1,8 @@
 import {
     StringValidator,
     NumberValidator,
-    DateValidator,
-    FormValidator
+    DateTimeValidator,
+    ObjectValidator
 } from "../main/validators";
 import * as moment from "moment";
 
@@ -21,7 +21,12 @@ const sv = new StringValidator(
         not_in_range: "not_in_range ${min} ${max}"
     });
 
-["x1234", "x1234y", "xy"].forEach(v => {
+[
+    "x1234",
+    "x1234y",
+    "xy"
+].forEach(v => {
+    console.log();
     console.log(v);
     const r = sv.validate(v);
     console.log(r);
@@ -37,9 +42,10 @@ const nv = new NumberValidator(
     {
         required: true,
         min: 3,
-        max: 500,
+        max: 5000,
         locale: "sk",
-        format: "0,0.0[00]"
+        format: "0,0.0[00]",
+        strict: true
     },
     {
         required: "required ${min} ${max} ${locale} ${format}",
@@ -47,7 +53,13 @@ const nv = new NumberValidator(
         not_in_range: "not_in_range ${min} ${max} ${locale}"
     });
 
-["123,45", "1234y", "xy"].forEach(v => {
+[
+    "1234,56",
+    "1 234,56",
+    "1 234,56y",
+    "xy"
+].forEach(v => {
+    console.log();
     console.log(v);
     const r = nv.validate(v);
     console.log(r);
@@ -59,14 +71,14 @@ const nv = new NumberValidator(
 
 console.log();
 
-const dv = new DateValidator(
+const dv = new DateTimeValidator(
     {
         required: true,
         locale: "sk",
-        format: "L LT",
+        format: "l LT",
         min: moment("03/01/2017", "L", "en"),
-        max: moment("03/01/2020", "L", "en")
-        // parsedValue: ""
+        max: moment("03/01/2020", "L", "en"),
+        strict: true
     },
     {
         required: "required ${min} ${max} ${locale} ${format}",
@@ -74,7 +86,16 @@ const dv = new DateValidator(
         not_in_range: "not_in_range ${min} ${max} ${locale} ${format}"
     });
 
-["01.03.2018 5:35", "5:35", "01.13.2018", "03/01/2018"].forEach(v => {
+[
+    "01.03.2018 5:35",
+    "1.3.2018 5:35",
+    "5:35",
+    "01.13.2018",
+    "1.13.2018",
+    "03/01/2018",
+    "3/1/2018"
+].forEach(v => {
+    console.log();
     console.log(v);
     const r = dv.validate(v);
     console.log(r);
@@ -88,13 +109,13 @@ console.log();
 
 const data = { str: "123a", num: "12,34", date: "02.01.2019 12:12" };
 
-const fv = new FormValidator<typeof data>()
+const ov = new ObjectValidator<typeof data>()
     .addValidator("str", sv)
     .addValidator("num", nv)
     .addValidator("date", dv)
     .validate(data);
 
-console.log(fv);
+console.log(ov);
 
-fv.format(fv.obj);
-console.log(fv);
+ov.format(ov.obj);
+console.log(ov);

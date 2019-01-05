@@ -28,27 +28,27 @@ export abstract class Validator<T, O, M> {
 
     protected abstract objCheck(obj: T): string;
 
-    protected abstract objToStr(obj: T): { str?: string, err?: string };
+    protected abstract objToStr(obj: T, format?: string): { str?: string, err?: string };
 
     validate(str: string): { str?: string, obj?: T, err?: string } {
         (this.str as any) = str;
         const ots = this.strToObj(str);
+        (this.obj as any) = ots.obj;
         if (ots.err) {
             (this.err as any) = ots.err;
-            return { str, err: ots.err };
+            return { str, obj: ots.obj, err: ots.err };
         }
         const err = this.objCheck(ots.obj);
         if (err) {
             (this.err as any) = err;
-            return { str, err };
+            return { str, obj: ots.obj, err };
         }
-        (this.obj as any) = ots.obj;
         return { str, obj: ots.obj };
     }
 
-    format(obj: T): { str?: string, err?: string } {
+    format(obj: T, format?: string): { str?: string, err?: string } {
         const err = this.objCheck(obj);
-        const ots = this.objToStr(obj);
+        const ots = this.objToStr(obj, format);
         return { str: ots.str, err: ots.err ? ots.err : err };
     }
 
@@ -105,7 +105,7 @@ export class SelectValidator extends Validator<string, SelectValidatorOpts, Sele
         return undefined;
     }
 
-    protected objToStr(obj: string): { str?: string, err?: string } {
+    protected objToStr(obj: string, format?: string): { str?: string, err?: string } {
         return { str: obj };
     }
 
@@ -193,7 +193,7 @@ export class StringValidator extends Validator<string, StringValidatorOpts, Stri
         return undefined;
     }
 
-    protected objToStr(obj: string): { str?: string, err?: string } {
+    protected objToStr(obj: string, format?: string): { str?: string, err?: string } {
         return { str: obj };
     }
 
@@ -207,6 +207,7 @@ export interface NumberValidatorOpts {
     max?: number;
     locale?: string;
     format?: string;
+    strict?: boolean;
 }
 
 export interface NumberValidatorMsgs {
@@ -241,12 +242,21 @@ export class NumberValidator extends Validator<Numeral, NumberValidatorOpts, Num
         }
         numeral.locale(opts.locale || localeDefault);
         const n = numeral(str);
+        let err: boolean;
         if (n.value() === null) {
+            err = true;
+        }
+        if (opts.strict && (str !== this.objToStr(n).str)) {
+            err = true;
+        }
+        if (err) {
+            const num = (n.value() !== null) ? n : numeral(1234.45);
             return {
+                obj: (n.value() !== null) ? n : undefined,
                 err: msgs && msgs.invalid_format
                     ? tpl(msgs.invalid_format,
                         {
-                            num: this.objToStr(1234.45 as any).str,
+                            num: this.objToStr(num).str,
                             locale: opts.locale || localeDefault,
                             format: opts.format || numFormatDefault
                         })
@@ -287,34 +297,38 @@ export class NumberValidator extends Validator<Numeral, NumberValidatorOpts, Num
         return undefined;
     }
 
-    protected objToStr(obj: Numeral): { str?: string, err?: string } {
+    protected objToStr(obj: Numeral, format?: string): { str?: string, err?: string } {
         if (obj.constructor === Number) {
             obj = numeral(obj);
         }
         numeral.locale(this.opts.locale || localeDefault);
-        return { str: obj ? obj.format(this.opts.format || numFormatDefault) : undefined };
+        return {
+            str: obj
+                ? obj.format(format ? format : this.opts.format || numFormatDefault)
+                : undefined
+        };
     }
 
 }
 
-export interface DateValidatorOpts {
+export interface DateTimeValidatorOpts {
     required?: boolean;
     min?: moment.Moment;
     max?: moment.Moment;
     locale?: string;
     format?: string;
-    parsedValue?: string;
+    strict?: boolean;
 }
 
-export interface DateValidatorMsgs {
+export interface DateTimeValidatorMsgs {
     required?: string;
     invalid_format?: string;
     not_in_range?: string;
 }
 
-export class DateValidator extends Validator<Moment, DateValidatorOpts, DateValidatorMsgs> {
+export class DateTimeValidator extends Validator<Moment, DateTimeValidatorOpts, DateTimeValidatorMsgs> {
 
-    constructor(opts?: DateValidatorOpts, msgs?: DateValidatorMsgs) {
+    constructor(opts?: DateTimeValidatorOpts, msgs?: DateTimeValidatorMsgs) {
         super(opts, msgs);
     }
 
@@ -336,14 +350,25 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
                 };
             }
         }
-        moment.locale(opts.locale || localeDefault);
-        const d = moment(str, opts && (opts.format || dateFormatFefault), opts && (opts.locale || localeDefault));
-        if (!d.isValid() || (opts && opts.parsedValue && opts.parsedValue !== str)) {
+        const d = moment(str,
+            opts && (opts.format || dateFormatFefault),
+            opts && (opts.locale || localeDefault),
+            opts.strict || false);
+        let err: boolean;
+        if (!d.isValid()) {
+            err = true;
+        }
+        if (opts.strict && (str !== this.objToStr(d).str)) {
+            err = true;
+        }
+        if (err) {
+            const date = d.isValid() ? d : moment(new Date());
             return {
+                obj: d.isValid() ? d : undefined,
                 err: msgs && msgs.invalid_format
                     ? tpl(msgs.invalid_format,
                         {
-                            date: this.objToStr(new Date() as any).str,
+                            date: this.objToStr(date).str,
                             locale: opts.locale || localeDefault,
                             format: opts.format && opts.format
                         })
@@ -384,20 +409,22 @@ export class DateValidator extends Validator<Moment, DateValidatorOpts, DateVali
         return undefined;
     }
 
-    protected objToStr(obj: Moment): { str?: string, err?: string } {
+    protected objToStr(obj: Moment, format?: string): { str?: string, err?: string } {
         if (obj.constructor === Date) {
             obj = moment(obj);
         }
-        return { str: obj
-            ? obj
-                .locale(this.opts.locale || localeDefault)
-                .format(this.opts.format || dateFormatFefault)
-            : undefined };
+        return {
+            str: obj
+                ? obj
+                    .locale(this.opts.locale || localeDefault)
+                    .format(format ? format : this.opts.format || dateFormatFefault)
+                : undefined
+        };
     }
 
 }
 
-export class FormValidator<T = any> {
+export class ObjectValidator<T = any> {
 
     readonly validators: { [key in keyof T]: Validator<any, any, any> } = {} as any;
 
@@ -479,7 +506,12 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 //         not_in_range: "not_in_range ${min} ${max}"
 //     });
 
-// ["x1234", "x1234y", "xy"].forEach(v => {
+// [
+//     "x1234",
+//     "x1234y",
+//     "xy"
+// ].forEach(v => {
+//     console.log();
 //     console.log(v);
 //     const r = sv.validate(v);
 //     console.log(r);
@@ -495,9 +527,10 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 //     {
 //         required: true,
 //         min: 3,
-//         max: 500,
+//         max: 5000,
 //         locale: "sk",
-//         format: "0,0.0[00]"
+//         format: "0,0.0[00]",
+//         strict: true
 //     },
 //     {
 //         required: "required ${min} ${max} ${locale} ${format}",
@@ -505,7 +538,13 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 //         not_in_range: "not_in_range ${min} ${max} ${locale}"
 //     });
 
-// ["123,45", "1234y", "xy"].forEach(v => {
+// [
+//     "1234,56",
+//     "1 234,56",
+//     "1 234,56y",
+//     "xy"
+// ].forEach(v => {
+//     console.log();
 //     console.log(v);
 //     const r = nv.validate(v);
 //     console.log(r);
@@ -517,14 +556,14 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 
 // console.log();
 
-// const dv = new DateValidator(
+// const dv = new DateTimeValidator(
 //     {
 //         required: true,
 //         locale: "sk",
-//         format: "L LT",
+//         format: "l LT",
 //         min: moment("03/01/2017", "L", "en"),
-//         max: moment("03/01/2020", "L", "en")
-//         // parsedValue: ""
+//         max: moment("03/01/2020", "L", "en"),
+//         strict: true
 //     },
 //     {
 //         required: "required ${min} ${max} ${locale} ${format}",
@@ -532,7 +571,16 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 //         not_in_range: "not_in_range ${min} ${max} ${locale} ${format}"
 //     });
 
-// ["01.03.2018 5:35", "5:35", "01.13.2018", "03/01/2018"].forEach(v => {
+// [
+//     "01.03.2018 5:35",
+//     "1.3.2018 5:35",
+//     "5:35",
+//     "01.13.2018",
+//     "1.13.2018",
+//     "03/01/2018",
+//     "3/1/2018"
+// ].forEach(v => {
+//     console.log();
 //     console.log(v);
 //     const r = dv.validate(v);
 //     console.log(r);
@@ -546,13 +594,13 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 
 // const data = { str: "123a", num: "12,34", date: "02.01.2019 12:12" };
 
-// const fv = new FormValidator<typeof data>()
+// const ov = new ObjectValidator<typeof data>()
 //     .addValidator("str", sv)
 //     .addValidator("num", nv)
 //     .addValidator("date", dv)
 //     .validate(data);
 
-// console.log(fv);
+// console.log(ov);
 
-// fv.format(fv.obj);
-// console.log(fv);
+// ov.format(ov.obj);
+// console.log(ov);
