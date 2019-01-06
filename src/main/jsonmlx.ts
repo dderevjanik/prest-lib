@@ -12,9 +12,12 @@ export interface JsonMLAttrs {
     classes?: Array<string | [string, boolean]>;
     [key: string]: string
         | string[]
+        | number
         | boolean
-        | { [key: string]: string }
-        | Array<string | [string, boolean]>;
+        | { [key: string]: string | number | Array<string> | Object }
+        | Array<string | [string, boolean]>
+        | ((e: Event) => void)
+        | JsonMLObj;
 }
 
 export type JsonMLFnc = (e?: Element) => boolean | void;
@@ -41,7 +44,7 @@ export interface JsonMLHandler {
 }
 
 export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void {
-    console.log("jsonml", jsonML);
+    // console.log("jsonml", jsonML);
     if (jsonML === undefined) {
         return;
     }
@@ -87,7 +90,7 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
     }
 
     function jsonmlTag(jsonML: JsonMLTag, handler: JsonMLHandler, ctx?: any): void {
-        console.log("jsonmlTag", jsonML);
+        // console.log("jsonmlTag", jsonML);
 
         const head = jsonML[0] as JsonMLHead;
         const attrsObj = jsonML[1] as any;
