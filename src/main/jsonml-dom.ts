@@ -1,12 +1,12 @@
 
 import {
+    jsonml,
     JsonML,
     JsonMLs,
-    JsonMLObj,
+    JsonMLAttrs,
     JsonMLFnc,
-    Attrs,
-    JsonMLHandler,
-    jsonml
+    JsonMLObj,
+    JsonMLHandler
 } from "./jsonml";
 
 
@@ -16,7 +16,7 @@ class JsonmlDomHandler implements JsonMLHandler {
 
     private _current: HTMLElement;
 
-    open(tag: string, attrs: Attrs, children: number, ctx?: any): boolean {
+    open(tag: string, attrs: JsonMLAttrs, children: number, ctx?: any): boolean {
         const e = document.createElement(tag);
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -35,8 +35,14 @@ class JsonmlDomHandler implements JsonMLHandler {
                         id = attrs[a];
                         break;
                     case "classes":
-                        classes = classes.concat(attrs[a]);
-                        break;
+                        classes = classes.concat(attrs[a]
+                            ? attrs[a]
+                                .map<string>(c => c.constructor === String
+                                    ? c as string
+                                    : (c[1] ? c[0] : undefined))
+                                .filter(c => c)
+                            : []);
+                    break;
                     case "class":
                         classes = classes.concat(attrs[a].split(" "));
                         break;

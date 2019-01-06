@@ -1,5 +1,7 @@
 
-export interface Attrs {
+export type JsonMLHead = string;
+
+export interface JsonMLAttrs {
     _id?: string;
     _classes?: string[];
     _ref?: string;
@@ -7,7 +9,7 @@ export interface Attrs {
     _skip?: boolean;
     data?: { [key: string]: any };
     styles?: { [key: string]: string };
-    classes?: string[];
+    classes?: Array<string | [string, boolean]>;
     [key: string]: any;
 }
 
@@ -17,17 +19,20 @@ export interface JsonMLObj {
     toJsonML?(): JsonML;
 }
 
-export interface JsonML extends Array<string | Attrs | JsonML | JsonMLFnc | JsonMLObj> {
+export interface JsonML extends Array<JsonMLHead | JsonMLAttrs | JsonMLFnc | JsonMLObj | JsonML> {
     // 0: string;
-    // 1?: Attrs | JsonML | JsonMLFnc | JsonMObj;
+    // 1?: Attrs | string | JsonML | JsonMLFnc | JsonMLObj;
+    // 2?: string | JsonML | JsonMLFnc | JsonMLObj;
+    // [i: number]: string | JsonMLFnc | JsonMLObj | JsonML;
+    // [i: number]: Attrs | string | JsonMLFnc | JsonMLObj | JsonML;
 }
 
-export interface JsonMLs extends Array<JsonML | string | JsonMLObj> {
+export interface JsonMLs extends Array<string | JsonMLFnc | JsonMLObj | JsonML> {
+    // [i: number]: string | JsonMLFnc | JsonMLObj | JsonML;
 }
-
 
 export interface JsonMLHandler {
-    open(tag: string, attrs: Attrs, children: number, ctx?: any): boolean;
+    open(tag: string, attrs: JsonMLAttrs, children: number, ctx?: any): boolean;
     close(tag: string, children: number, ctx?: any): void;
     text(text: string, ctx?: any): void;
     fnc(fnc: JsonMLFnc, ctx?: any): void;
@@ -43,7 +48,7 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
         throw `jsonml parse error: ${JSON.stringify(jsonML)}`;
     }
 
-    const head = jsonML[0] as string;
+    const head = jsonML[0] as JsonMLHead;
     const attrsObj = jsonML[1] as any;
     const hasAttrs = attrsObj && attrsObj.constructor === Object;
     const childIdx = hasAttrs ? 2 : 1;
@@ -63,9 +68,9 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
     const id = hashSplit[1];
     const classes = dotSplit.slice(1);
 
-    let attrs: Attrs;
+    let attrs: JsonMLAttrs;
     if (hasAttrs) {
-        attrs = attrsObj as Attrs;
+        attrs = attrsObj as JsonMLAttrs;
     } else {
         attrs = {};
     }
@@ -125,3 +130,42 @@ export function join(jsonmls: JsonMLs, sep: string | JsonML): JsonMLs {
     r.splice(-1);
     return r;
 }
+
+// Experiments
+
+// export type JsonML = JsonMlNoAttr | JsonMlAttr;
+// export type JsonML = string | JsonMLFnc | JsonMLObj | JsonMlNoAttr | JsonMlAttr;
+// type JsonML1 = [
+//     string,
+//     (string | JsonMLFnc | JsonMLObj | JsonML)?
+// ];
+// type JsonML2 = [
+//     string,
+//     Attrs,
+//     (string | JsonMLFnc | JsonMLObj | JsonML)?
+// ];
+// export interface JsonMlNoAttr extends Array<string | JsonMLFnc | JsonMLObj | JsonML> {
+//     // 0: string;
+//     // [i: number]: string | JsonMLFnc | JsonMLObj | JsonML;
+// }
+// export interface JsonMlAttr extends Array<string | Attrs | JsonMLFnc | JsonMLObj | JsonML> {
+//     // 0: string;
+//     // 1: Attrs;
+//     // [i: number]: Attrs | string | JsonMLFnc | JsonMLObj | JsonML;
+// }
+
+// const xs: XJsonMLs = ["xxx", ["d", []], "x", ["t", {}, []]];
+// const x: XJsonMlEl = ["xxx", {}, [
+//         "d",
+//         ...xs,
+//         ["t", ["t", "a", ""]],
+//         ["t", {}, ["t", "a", ""]]
+//     ]];
+// console.log(x, xs);
+
+// export type Tag = string;
+// export type XJsonMlEl = XJsonMlElNoAttr | XJsonMlElAttr;
+// export type XJsonMlElNoAttr = [Tag, XJsonMlFrag?];
+// export type XJsonMlElAttr = [Tag, Attrs, XJsonMlFrag?];
+// export interface XJsonMlFrag extends Array<string | XJsonMlEl> {}
+// export type XJsonMLs = Array<string | XJsonMlEl>;

@@ -1,17 +1,17 @@
 import {
+    jsonml,
     JsonML,
     JsonMLs,
-    JsonMLObj,
+    JsonMLAttrs,
     JsonMLFnc,
-    Attrs,
-    JsonMLHandler,
-    jsonml
+    JsonMLObj,
+    JsonMLHandler
 } from "./jsonml";
 import * as idom from "incremental-dom";
 
 class JsonmlIDomHandler implements JsonMLHandler {
 
-    open(tag: string, attrs: Attrs, children: number, ctx?: any): boolean {
+    open(tag: string, attrs: JsonMLAttrs, children: number, ctx?: any): boolean {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -31,7 +31,13 @@ class JsonmlIDomHandler implements JsonMLHandler {
                         id = attrs[a];
                         break;
                     case "classes":
-                        classes = classes.concat(attrs[a]);
+                        classes = classes.concat(attrs[a]
+                            ? attrs[a]
+                                .map<string>(c => c.constructor === String
+                                    ? c as string
+                                    : (c[1] ? c[0] : undefined))
+                                .filter(c => c)
+                            : []);
                         break;
                     case "class":
                         classes = classes.concat(attrs[a].split(" "));

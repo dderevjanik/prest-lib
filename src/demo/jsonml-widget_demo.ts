@@ -2,7 +2,7 @@ import { remove, select, Widget, selectAll } from "../main/dom";
 import { jsonml2html } from "../main/jsonml-html";
 import { jsonml2dom } from "../main/jsonml-dom";
 import { jsonmls2idomPatch } from "../main/jsonml-idom";
-
+import { JsonML } from "../main/jsonml";
 
 class Item {
     constructor(public text: string,
@@ -92,7 +92,7 @@ class MyWidget implements Widget {
                     ["input", { type: "submit", value: "add" }]
                 ],
                 ["ol",
-                    ...this._items.map(item => {
+                    ...this._items.map<JsonML>(item => {
                         return (
                             ["li",
                                 {
@@ -130,7 +130,7 @@ new MyWidget()
 
 // renderers test
 
-const jml = [
+const jml: JsonML = [
     "a#b.c1.c2",
     {
         _ref: "ref-root",
@@ -142,7 +142,7 @@ const jml = [
             console.log(e);
         },
         data: { x: "x", y: "y", o: { a: "a" } },
-        classes: ["c3"],
+        classes: ["c3", ["c-true", true], ["c-false", false]],
         styles: { color: "green", borderTop: "1px solid red" }
     },
     ["#x.y~ref-div", "div", (e: HTMLElement) => console.log("fnc div", e)],
