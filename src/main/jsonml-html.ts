@@ -56,7 +56,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
                             ? attrs[a]
                                 .map<string>(c => c.constructor === String
                                     ? c as string
-                                    : (c[1] ? c[0] : undefined))
+                                    : (c[1] ? c[0] as string : undefined))
                                 .filter(c => c)
                             : []);
                     break;

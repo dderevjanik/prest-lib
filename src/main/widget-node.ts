@@ -56,7 +56,7 @@ export abstract class Widget implements JsonMLObj, DomWidget {
                 );
             }
         }
-        const jsonMLs = (this as any).render();
+        const jsonMLs = (this as any).render() as JsonMLs;
         return (
             ["div",
                 {

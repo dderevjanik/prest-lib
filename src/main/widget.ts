@@ -119,7 +119,7 @@ export abstract class Widget implements JsonMLObj, DomWidget {
                 );
             }
         }
-        const jsonMLs = (this as any).render();
+        const jsonMLs = (this as any).render() as JsonMLs;
         return (
             ["div",
                 {
@@ -128,7 +128,7 @@ export abstract class Widget implements JsonMLObj, DomWidget {
                     widget: this.type
                 },
                 ...jsonMLs,
-                (e: HTMLElement) => {
+                (e: Element) => {
                     if (!this.dom) {
                         (this as any).dom = e;
                         (e as any).widget = this;
