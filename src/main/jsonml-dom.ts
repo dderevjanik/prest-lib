@@ -32,7 +32,7 @@ class JsonmlDomHandler implements JsonMLHandler {
                     case "_widget":
                         break;
                     case "id":
-                        id = attrs[a];
+                        id = attrs[a] as string;
                         break;
                     case "classes":
                         classes = classes.concat(attrs[a]
@@ -44,7 +44,7 @@ class JsonmlDomHandler implements JsonMLHandler {
                             : []);
                     break;
                     case "class":
-                        classes = classes.concat(attrs[a].split(" "));
+                        classes = classes.concat((attrs[a] as string).split(" "));
                         break;
                     case "data":
                         for (const d in attrs[a]) {
@@ -66,11 +66,11 @@ class JsonmlDomHandler implements JsonMLHandler {
                         break;
                     default:
                         if (typeof attrs[a] === "function") {
-                            e.addEventListener(a, attrs[a]);
+                            e.addEventListener(a, attrs[a] as (e: Event) => void);
                         } else if (typeof attrs[a] === "boolean") {
                             attrs[a] && e.setAttribute(a, "");
                         } else {
-                            e.setAttribute(a, attrs[a]);
+                            e.setAttribute(a, attrs[a] as string);
                         }
                 }
             }

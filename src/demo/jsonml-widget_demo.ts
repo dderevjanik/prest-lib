@@ -137,7 +137,7 @@ const jml: JsonML = [
         _key: "key",
         _skip: false,
         href: "localhost",
-        click: function (e: Event) {
+        click: (e: Event) => {
             e.preventDefault();
             console.log(e);
         },
@@ -145,11 +145,11 @@ const jml: JsonML = [
         classes: ["c3", ["c-true", true], ["c-false", false]],
         styles: { color: "green", borderTop: "1px solid red" }
     },
-    ["#x.y~ref-div", "div", (e: HTMLElement) => console.log("fnc div", e)],
+    ["#x.y~ref-div", "div", (e: Element) => console.log("fnc div", e)],
     ["strong", "link"],
     " text",
     ["~ref-empty", "empty"],
-    (e: HTMLElement) => console.log("fnc anchor", e)
+    (e: Element) => console.log("fnc anchor", e)
 ];
 
 jsonml2html(jml, html => console.log(html));

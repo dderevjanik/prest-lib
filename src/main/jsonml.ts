@@ -10,10 +10,17 @@ export interface JsonMLAttrs {
     data?: { [key: string]: any };
     styles?: { [key: string]: string };
     classes?: Array<string | [string, boolean]>;
-    [key: string]: any;
+    [key: string]: string
+        | string[]
+        | number
+        | boolean
+        | { [key: string]: string | number | Array<string> | Object }
+        | Array<string | [string, boolean]>
+        | ((e: Event) => void)
+        | JsonMLObj;
 }
 
-export type JsonMLFnc = (e?: Element) => boolean;
+export type JsonMLFnc = (e?: Element) => boolean | void;
 
 export interface JsonMLObj {
     toJsonML?(): JsonML;

@@ -28,7 +28,7 @@ class JsonmlIDomHandler implements JsonMLHandler {
                     case "_widget":
                         break;
                     case "id":
-                        id = attrs[a];
+                        id = attrs[a] as string;
                         break;
                     case "classes":
                         classes = classes.concat(attrs[a]
@@ -40,7 +40,7 @@ class JsonmlIDomHandler implements JsonMLHandler {
                             : []);
                         break;
                     case "class":
-                        classes = classes.concat(attrs[a].split(" "));
+                        classes = classes.concat((attrs[a] as string).split(" "));
                         break;
                     case "data":
                         for (const d in attrs[a]) {
