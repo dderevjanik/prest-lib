@@ -220,10 +220,13 @@ const jmls: JsonMLs = [
     ["tage"],
     ["tag", [
         "d",
-        ["tagb", [
-            "text 1",
-            ["div", [e => console.log(e)]]
-        ]]
+        ["tagb",
+            { click: (e: Event) => console.log(e) },
+            [
+                "text 1",
+                ["div", [(e: Element) => console.log(e)]]
+            ]
+        ]
     ]],
     ["taga", { attr: "attr", classes: ["class"] }, [
         "text 2",
