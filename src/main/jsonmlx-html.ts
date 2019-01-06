@@ -49,7 +49,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
                     case "_widget":
                         break;
                     case "id":
-                        id = attrs[a];
+                        id = attrs[a] as string;
                         break;
                     case "classes":
                         classes = classes.concat(attrs[a]
@@ -61,7 +61,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
                             : []);
                     break;
                     case "class":
-                        classes = classes.concat(attrs[a].split(" "));
+                        classes = classes.concat((attrs[a] as string).split(" "));
                         break;
                     case "data":
                         for (const d in attrs[a]) {
@@ -220,10 +220,13 @@ const jmls: JsonMLs = [
     ["tage"],
     ["tag", [
         "d",
-        ["tagb", "div text", (e: Event) => console.log(e)] // TODO: invalid tag
+        ["tagb", [
+            "text 1",
+            ["div", [e => console.log(e)]]
+        ]]
     ]],
     ["taga", { attr: "attr", classes: ["class"] }, [
-        "text",
+        "text 2",
         123,
         true
     ]]
@@ -232,8 +235,8 @@ const jmls: JsonMLs = [
 const jml: JsonML = ["xxx", {}, [
         "d",
         ...jmls,
-        ["t", ["t", [], "a", 3]], // TODO: invalid tag
-        ["t", {}, ["t", "a", 7]]
+        ["t1", ["t2", [""], "a", 3]],
+        ["t3", {}, ["t4", "a", 7]]
     ]];
 
 const html = jsonml2htmls(jml, true);
