@@ -5,11 +5,11 @@ type Component<State> = (state: State, dispatch: Dispatch) => JsonMLs;
 
 type Dispatch = (event: string, data?: any) => void;
 
-type Action<State> = (state: State, data: any, dispatch: Dispatch, event: string) => State;
+type Action<State> = (event: string, data: any, state: State, dispatch: Dispatch) => State;
 
 function render<State>(element: HTMLElement,
-                       state: State,
                        component: Component<State>,
+                       state: State,
                        dispatch: Dispatch): void {
     (render as any).scheduled || ((render as any).scheduled = null);
     if (!state) return;
@@ -24,16 +24,16 @@ function render<State>(element: HTMLElement,
 }
 
 function dispatcher<State>(element: HTMLElement,
-                           state: State,
                            component: Component<State>,
-                           reducer: Action<State>
+                           state: State,
+                           action: Action<State>
                 ): Dispatch {
-    function dispatch(event: string, data?: any): void {
+    const dispatch = (event: string, data?: any): void => {
         // console.log("\ndispatch", event, data);
-        const stateNew = reducer(state, data, dispatch, event);
+        const stateNew = action(event, data, state, dispatch);
         // console.log("state", stateNew);
-        render(element, stateNew, component, dispatch);
-    }
+        render(element, component, stateNew, dispatch);
+    };
     return dispatch;
 }
 
@@ -64,7 +64,7 @@ function button(label: string, cb: (e: Event) => void): JsonML {
     return ["button", { click: cb }, label];
 }
 
-function reducer(state: AppState, data: any, dispatch: Dispatch, event: string): any {
+function action(event: string, data: any, state: AppState, dispatch: Dispatch): any {
     // console.log("reduce", event, data);
     switch (event) {
         case "inc":
@@ -86,8 +86,8 @@ function reducer(state: AppState, data: any, dispatch: Dispatch, event: string):
 
 const appElement = document.getElementById("app");
 
-const dispatch = dispatcher<AppState>(appElement, appState, app, reducer);
+const dispatch = dispatcher<AppState>(appElement, app, appState, action);
 
-render(appElement, appState, app, dispatch);
+render(appElement, app, appState, dispatch);
 
 dispatch("event", {});
