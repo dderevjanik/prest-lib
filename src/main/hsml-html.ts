@@ -1,16 +1,15 @@
-
 import {
-    jsonml,
-    JsonML,
-    JsonMLs,
-    JsonMLAttrs,
-    JsonMLFnc,
-    JsonMLObj,
-    JsonMLHandler
-} from "./jsonmlx";
+    hsml,
+    Hsml,
+    Hsmls,
+    HsmlAttrs,
+    HsmlFnc,
+    HsmlObj,
+    HsmlHandler
+} from "./hsml";
 
 
-class JsonmlHtmlHandler implements JsonMLHandler {
+class HsmlHtmlHandler implements HsmlHandler {
 
     private static _pairTags = [
         "script",
@@ -33,7 +32,7 @@ class JsonmlHtmlHandler implements JsonMLHandler {
         this._indent = indent;
     }
 
-    open(tag: string, attrs: JsonMLAttrs, children: JsonMLs, ctx?: any): boolean {
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: any): boolean {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -110,31 +109,31 @@ class JsonmlHtmlHandler implements JsonMLHandler {
             html += this._mkIndent(this._depth);
             this._depth++;
         }
-        const pairTag = (children || JsonmlHtmlHandler._pairTags.indexOf(tag) !== -1);
+        const pairTag = (children || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         html += "<" + tag + (args ? " " + args : "") + (pairTag ? ">" : "/>");
         if (this._pretty) {
             html += "\n";
         }
         this._onHtml(html);
         if (widget && "render" in widget && widget.render.constructor === Function) {
-            const jsonMLs = widget.render() as JsonMLs;
-            for (const jml of jsonMLs) {
+            const hsmls = widget.render() as Hsmls;
+            for (const jml of hsmls) {
                 if (jml.constructor === String) {
                     this._onHtml(jml + (this._pretty ? "\n" : ""));
-                } else if ("toJsonML" in (jml as any)) {
-                    const obj = jml as JsonMLObj;
-                    jsonml(obj.toJsonML(), this);
+                } else if ("toHsml" in (jml as any)) {
+                    const obj = jml as HsmlObj;
+                    hsml(obj.toHsml(), this);
                 } else {
-                    jsonml(jml as JsonML, this);
+                    hsml(jml as Hsml, this);
                 }
             }
         }
         return false;
     }
 
-    close(tag: string, children: JsonMLs, ctx?: any): void {
+    close(tag: string, children: Hsmls, ctx?: any): void {
         let html = "";
-        const pairTag = (children || JsonmlHtmlHandler._pairTags.indexOf(tag) !== -1);
+        const pairTag = (children || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         if (this._pretty) {
             this._depth--;
             if (pairTag) {
@@ -162,12 +161,12 @@ class JsonmlHtmlHandler implements JsonMLHandler {
         this._onHtml(html);
     }
 
-    fnc(fnc: JsonMLFnc, ctx?: any): void {
+    fnc(fnc: HsmlFnc, ctx?: any): void {
     }
 
-    obj(obj: JsonMLObj, ctx?: any): void {
-        if ("toJsonML" in obj) {
-            jsonml(obj.toJsonML(), this, obj);
+    obj(obj: HsmlObj, ctx?: any): void {
+        if ("toHsml" in obj) {
+            hsml(obj.toHsml(), this, obj);
         } else {
             this.text("" + obj, ctx);
         }
@@ -183,64 +182,64 @@ class JsonmlHtmlHandler implements JsonMLHandler {
 
 }
 
-export function jsonml2html(jsonML: JsonML, onHtml: (html: string) => void, pretty = false): void {
-    const handler = new JsonmlHtmlHandler(onHtml, pretty);
-    jsonml(jsonML, handler);
+export function hsml2html(hsmlEl: Hsml, onHtml: (html: string) => void, pretty = false): void {
+    const handler = new HsmlHtmlHandler(onHtml, pretty);
+    hsml(hsmlEl, handler);
 }
 
-export function jsonmls2html(jsonMLs: JsonMLs, onHtml: (html: string) => void, pretty = false): void {
-    for (const jml of jsonMLs) {
+export function hsmls2html(hsmls: Hsmls, onHtml: (html: string) => void, pretty = false): void {
+    for (const jml of hsmls) {
         if (jml.constructor === String) {
             onHtml(jml + (pretty ? "\n" : ""));
-        } else if ("toJsonML" in (jml as any)) {
-            const obj = jml as JsonMLObj;
-            jsonml2html(obj.toJsonML(), onHtml, pretty);
+        } else if ("toHsml" in (jml as any)) {
+            const obj = jml as HsmlObj;
+            hsml2html(obj.toHsml(), onHtml, pretty);
         } else {
-            jsonml2html(jml as JsonML, onHtml, pretty);
+            hsml2html(jml as Hsml, onHtml, pretty);
         }
     }
 }
 
-export function jsonml2htmls(jsonML: JsonML, pretty = false): string[] {
+export function hsml2htmls(hsml: Hsml, pretty = false): string[] {
     const htmls: string[] = [];
-    jsonml2html(jsonML, html => htmls.push(html), pretty);
+    hsml2html(hsml, html => htmls.push(html), pretty);
     return htmls;
 }
 
-export function jsonmls2htmls(jsonMLs: JsonMLs, pretty = false): string[] {
+export function hsmls2htmls(hsmls: Hsmls, pretty = false): string[] {
     const htmls: string[] = [];
-    jsonmls2html(jsonMLs, html => htmls.push(html), pretty);
+    hsmls2html(hsmls, html => htmls.push(html), pretty);
     return htmls;
 }
 
 // Test
 
-const jmls: JsonMLs = [
-    "text",
-    ["tage"],
-    ["tag", [
-        "d",
-        ["tagb",
-            { click: (e: Event) => console.log(e) },
-            [
-                "text 1",
-                ["div", [(e: Element) => console.log(e)]]
-            ]
-        ]
-    ]],
-    ["taga", { attr: "attr", classes: ["class"] }, [
-        "text 2",
-        123,
-        true
-    ]]
-];
+// const jmls: Hsmls = [
+//     "text",
+//     ["tage"],
+//     ["tag", [
+//         "d",
+//         ["tagb",
+//             { click: (e: Event) => console.log(e) },
+//             [
+//                 "text 1",
+//                 ["div", [(e: Element) => console.log(e)]]
+//             ]
+//         ]
+//     ]],
+//     ["taga", { attr: "attr", classes: ["class"] }, [
+//         "text 2",
+//         123,
+//         true
+//     ]]
+// ];
 
-const jml: JsonML = ["xxx", {}, [
-        "d",
-        ...jmls,
-        ["t1", ["t2", [""], "a", 3]],
-        ["t3", {}, ["t4", "a", 7]]
-    ]];
+// const jml: Hsml = ["xxx", {}, [
+//         "d",
+//         ...jmls,
+//         ["t1", ["t2", [""], "a", 3]],
+//         ["t3", {}, ["t4", "a", 7]]
+//     ]];
 
-const html = jsonml2htmls(jml, true);
-console.log(html.join(""));
+// const html = hsml2htmls(jml, true);
+// console.log(html.join(""));

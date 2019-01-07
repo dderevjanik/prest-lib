@@ -1,7 +1,6 @@
+export type HsmlHead = string; // "tag#id.class1.class2~handler"
 
-export type JsonMLHead = string; // "tag#id.class1.class2~handler"
-
-export interface JsonMLAttrs {
+export interface HsmlAttrs {
     _id?: string;
     _classes?: string[];
     _ref?: string;
@@ -17,40 +16,40 @@ export interface JsonMLAttrs {
         | { [key: string]: string | number | Array<string> | Object }
         | Array<string | [string, boolean]>
         | ((e: Event) => void)
-        | JsonMLObj;
+        | HsmlObj;
 }
 
-export type JsonMLFnc = (e?: Element) => boolean | void;
+export type HsmlFnc = (e?: Element) => boolean | void;
 
-export interface JsonMLObj {
-    toJsonML?(): JsonML;
+export interface HsmlObj {
+    toHsml?(): Hsml;
 }
 
-export interface JsonMLs extends Array<JsonML> {}
+export interface Hsmls extends Array<Hsml> { }
 
-export type JsonMLTagAttrNo = [JsonMLHead, JsonMLs?];
-export type JsonMLTagAttrYes = [JsonMLHead, JsonMLAttrs, JsonMLs?];
+export type HsmlTagAttrNo = [HsmlHead, Hsmls?];
+export type HsmlTagAttrYes = [HsmlHead, HsmlAttrs, Hsmls?];
 
-export type JsonMLTag =  JsonMLTagAttrNo | JsonMLTagAttrYes;
+export type HsmlTag = HsmlTagAttrNo | HsmlTagAttrYes;
 
-export type JsonML = string | number | boolean | JsonMLFnc | JsonMLObj | JsonMLTag;
+export type Hsml = string | number | boolean | HsmlFnc | HsmlObj | HsmlTag;
 
-export interface JsonMLHandler {
-    open(tag: string, attrs: JsonMLAttrs, children: JsonMLs, ctx?: any): boolean;
-    close(tag: string, children: JsonMLs, ctx?: any): void;
+export interface HsmlHandler {
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: any): boolean;
+    close(tag: string, children: Hsmls, ctx?: any): void;
     text(text: string, ctx?: any): void;
-    fnc(fnc: JsonMLFnc, ctx?: any): void;
-    obj(obj: JsonMLObj, ctx?: any): void;
+    fnc(fnc: HsmlFnc, ctx?: any): void;
+    obj(obj: HsmlObj, ctx?: any): void;
 }
 
-export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void {
-    // console.log("jsonml", jsonML);
-    if (jsonML === undefined) {
+export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
+    // console.log("hsml", hsml);
+    if (hml === undefined) {
         return;
     }
-    switch (jsonML.constructor) {
+    switch (hml.constructor) {
         case Array:
-            const tag = jsonML as JsonMLTag;
+            const tag = hml as HsmlTag;
             if (
                 (
                     tag.length === 1 &&
@@ -68,35 +67,35 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
                     tag[2].constructor === Array
                 )
             ) {
-                jsonmlTag(jsonML as JsonMLTag, handler, ctx);
+                hsmlTag(hml as HsmlTag, handler, ctx);
             } else {
-                throw Error(`error parse tag: ${JSON.stringify(jsonML)}`);
+                throw Error(`error parse tag: ${JSON.stringify(hml)}`);
             }
             break;
         case Function:
-            handler.fnc(jsonML as JsonMLFnc, ctx);
+            handler.fnc(hml as HsmlFnc, ctx);
             break;
         case String:
-            handler.text(jsonML as string, ctx);
+            handler.text(hml as string, ctx);
             break;
         case Number:
-            handler.text("" + jsonML, ctx);
+            handler.text("" + hml, ctx);
             break;
         case Boolean:
-            handler.text("" + jsonML, ctx);
+            handler.text("" + hml, ctx);
             break;
         default:
-            handler.obj(jsonML as JsonMLObj, ctx);
+            handler.obj(hml as HsmlObj, ctx);
     }
 
-    function jsonmlTag(jsonML: JsonMLTag, handler: JsonMLHandler, ctx?: any): void {
-        // console.log("jsonmlTag", jsonML);
+    function hsmlTag(hmlTag: HsmlTag, handler: HsmlHandler, ctx?: any): void {
+        // console.log("hsml tag", hmlTag);
 
-        const head = jsonML[0] as JsonMLHead;
-        const attrsObj = jsonML[1] as any;
+        const head = hmlTag[0] as HsmlHead;
+        const attrsObj = hmlTag[1] as any;
         const hasAttrs = attrsObj && attrsObj.constructor === Object;
         const childIdx = hasAttrs ? 2 : 1;
-        const children = (jsonML[childIdx] || []) as JsonMLs;
+        const children = (hmlTag[childIdx] || []) as Hsmls;
 
         const refSplit = head.split("~");
         const ref = refSplit[1];
@@ -106,9 +105,9 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
         const id = hashSplit[1];
         const classes = dotSplit.slice(1);
 
-        let attrs: JsonMLAttrs;
+        let attrs: HsmlAttrs;
         if (hasAttrs) {
-            attrs = attrsObj as JsonMLAttrs;
+            attrs = attrsObj as HsmlAttrs;
         } else {
             attrs = {};
         }
@@ -126,21 +125,21 @@ export function jsonml(jsonML: JsonML, handler: JsonMLHandler, ctx?: any): void 
         const skip = handler.open(tag, attrs, children, ctx);
 
         if (!skip) {
-            children.forEach(jml => jsonml(jml, handler, ctx));
+            children.forEach(jml => hsml(jml, handler, ctx));
         }
 
         handler.close(tag, children, ctx);
     }
 }
 
-export function join(jsonmls: JsonMLs, sep: string | JsonML): JsonMLs {
-    const r = jsonmls
-        .reduce<JsonMLs>(
+export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
+    const r = hsmls
+        .reduce<Hsmls>(
             (prev, cur) => {
                 prev.push(cur, sep);
                 return prev;
             },
-            [] as JsonMLs
+            [] as Hsmls
         );
     r.splice(-1);
     return r;
@@ -148,7 +147,7 @@ export function join(jsonmls: JsonMLs, sep: string | JsonML): JsonMLs {
 
 // Test
 
-// const jmls: JsonMLs = [
+// const jmls: Hsmls = [
 //     "text",
 //     ["tag", [
 //         "d",
@@ -161,7 +160,7 @@ export function join(jsonmls: JsonMLs, sep: string | JsonML): JsonMLs {
 //     ]]
 // ];
 
-// const jml: JsonML = ["xxx", {}, [
+// const jml: Hsml = ["xxx", {}, [
 //         "d",
 //         ...jmls,
 //         ["t", ["t", "a", ""]],
