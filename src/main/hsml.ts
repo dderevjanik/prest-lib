@@ -49,28 +49,35 @@ export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
     }
     switch (hml.constructor) {
         case Array:
-            const tag = hml as HsmlTag;
-            if (
-                (
-                    tag.length === 1 &&
-                    tag[0].constructor === String
-                ) ||
-                (
-                    tag.length === 2 &&
-                    tag[0].constructor === String &&
-                    tag[1].constructor === Array
-                ) ||
-                (
-                    tag.length === 3 &&
-                    tag[0].constructor === String &&
-                    tag[1].constructor === Object &&
-                    tag[2].constructor === Array
-                )
-            ) {
-                hsmlTag(hml as HsmlTag, handler, ctx);
-            } else {
-                throw Error(`error parse tag: ${JSON.stringify(hml)}`);
-            }
+            // const tag = hml as HsmlTag;
+            // if (
+            //     (
+            //         tag.length === 1 &&
+            //         tag[0].constructor === String
+            //     ) ||
+            //     (
+            //         tag.length === 2 &&
+            //         (
+            //             tag[0].constructor === String &&
+            //             tag[1].constructor === Array
+            //         ) ||
+            //         (
+            //             tag[0].constructor === String &&
+            //             tag[1].constructor === Object
+            //         )
+            //     ) ||
+            //     (
+            //         tag.length === 3 &&
+            //         tag[0].constructor === String &&
+            //         tag[1].constructor === Object &&
+            //         tag[2].constructor === Array
+            //     )
+            // ) {
+            //     hsmlTag(hml as HsmlTag, handler, ctx);
+            // } else {
+            //     throw Error(`error parse tag: ${JSON.stringify(hml)}`);
+            // }
+            hsmlTag(hml as HsmlTag, handler, ctx);
             break;
         case Function:
             handler.fnc(hml as HsmlFnc, ctx);
