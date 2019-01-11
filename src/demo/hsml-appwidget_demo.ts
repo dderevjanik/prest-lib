@@ -19,7 +19,7 @@ function appWiew(state: AppState, events: Events): Hsmls {
             button("xxx", () => events.emit("xxx")),
         ]],
         ["div", [
-            AppWidget.hsmlFnc<AppState>(sectionView, state, events)
+            AppWidget.hsmlFnc<AppState>("section", sectionView, state, events)
             // subpage(state, events)
         ]]
         // ["div@c_name", { view: subpage, state, events }]
@@ -44,7 +44,7 @@ const appState: AppState = {
     count: 77
 };
 
-const app = new AppWidget<AppState>(appWiew, appState);
+const app = new AppWidget<AppState>("app", appWiew, appState);
 
 // flux dispatcher
 app.events

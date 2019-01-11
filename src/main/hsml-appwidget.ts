@@ -6,14 +6,16 @@ export type View<S> = (state: S, events: Events<AppWidget<S>>) => Hsmls;
 
 export class AppWidget<S = any> extends Widget {
 
-    static hsmlFnc<S>(view: View<S>, state: S, events: Events): HsmlFnc {
+    static hsmlFnc<S>(name: string,
+                      view: View<S>,
+                      state: S,
+                      events?: Events): HsmlFnc {
         return (e: Element) => {
-            // console.log("--->", e, (e as any).widget);
             if ((e as any).widget) {
                 const w = (e as any).widget as AppWidget;
                 w.state = state;
             } else {
-                const w = new AppWidget<S>(view, state, events);
+                const w = new AppWidget<S>(name, view, state, events);
                 w.mount(e);
             }
             return true;
@@ -25,10 +27,11 @@ export class AppWidget<S = any> extends Widget {
     readonly view: View<S>;
     readonly events: Events<AppWidget<S>>;
 
-    constructor(view: View<S>,
+    constructor(name: string,
+                view: View<S>,
                 state: S,
                 events?: Events) {
-        super("AppWidget");
+        super(name || "AppWidget");
         this._state = state;
         this.view = view;
         this.events = events ? events : new Events<AppWidget<S>>(this);
@@ -52,7 +55,6 @@ export class AppWidget<S = any> extends Widget {
     }
 
     render(): Hsmls {
-        // console.log("--->", "render");
         return this.view(this._state, this.events);
     }
 
