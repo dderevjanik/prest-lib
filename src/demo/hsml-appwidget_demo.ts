@@ -48,36 +48,36 @@ const app = new AppWidget<AppState>(appWiew, appState);
 
 // flux dispatcher
 app.events
-    .any((data, container, event) => {
-        console.log("event:", event, data, container);
+    .any((data, widget, event) => {
+        console.log("event:", event, data, widget);
     })
-    .on("inc", (num, container) => {
-        container.events.emit("dec", 1);
+    .on("inc", (num, widget) => {
+        widget.events.emit("dec", 1);
     })
-    .on("inc", (num, container) => {
-        container.state.count += num;
-        container.update();
+    .on("inc", (num, widget) => {
+        widget.state.count += num;
+        widget.update();
     })
-    .on("dec", (num, container) => {
-        const s = container.state;
+    .on("dec", (num, widget) => {
+        const s = widget.state;
         s.count -= num;
-        container.state = s;
+        widget.state = s;
     });
     // .many(
     //     {
-    //         inc: (num, container) => {
-    //             container.events.emit("dec", 1);
+    //         inc: (num, widget) => {
+    //             widget.events.emit("dec", 1);
     //         },
-    //         dec: (num, container) => {
-    //             const s = container.state;
+    //         dec: (num, widget) => {
+    //             const s = widget.state;
     //             s.count -= num;
-    //             container.state = s;
+    //             widget.state = s;
     //         }
     //     },
     //     {
-    //         inc: (num, container) => {
-    //             container.state.count += num;
-    //             container.update();
+    //         inc: (num, widget) => {
+    //             widget.state.count += num;
+    //             widget.update();
     //         }
     //     }
     // );
