@@ -27,12 +27,12 @@ export interface HsmlObj {
 
 export interface Hsmls extends Array<Hsml> { }
 
-export type HsmlTagAttrNo = [HsmlHead, Hsmls?];
-export type HsmlTagAttrYes = [HsmlHead, HsmlAttrs, Hsmls?];
+export type HsmlTagAttrNo = [HsmlHead, (Hsmls | HsmlFnc)?];
+export type HsmlTagAttrYes = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc)?];
 
 export type HsmlTag = HsmlTagAttrNo | HsmlTagAttrYes;
 
-export type Hsml = string | number | boolean | HsmlFnc | HsmlObj | HsmlTag;
+export type Hsml = string | boolean | number | Date | HsmlFnc | HsmlObj | HsmlTag;
 
 export interface HsmlHandler {
     open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: any): boolean;
@@ -85,11 +85,18 @@ export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
         case String:
             handler.text(hml as string, ctx);
             break;
-        case Number:
-            handler.text("" + hml, ctx);
-            break;
         case Boolean:
             handler.text("" + hml, ctx);
+            break;
+        case Number:
+            const n = hml as number;
+            const ns = n.toLocaleString ? n.toLocaleString() : n.toString();
+            handler.text(ns, ctx);
+            break;
+        case Date:
+            const d = hml as number;
+            const ds = d.toLocaleString ? d.toLocaleString() : d.toString();
+            handler.text(ds, ctx);
             break;
         default:
             handler.obj(hml as HsmlObj, ctx);
@@ -102,7 +109,18 @@ export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
         const attrsObj = hmlTag[1] as any;
         const hasAttrs = attrsObj && attrsObj.constructor === Object;
         const childIdx = hasAttrs ? 2 : 1;
-        const children = (hmlTag[childIdx] || []) as Hsmls;
+
+        let children: Hsmls = [];
+        let hsmlFnc: HsmlFnc;
+
+        switch (hmlTag[childIdx].constructor) {
+            case Array:
+                children = hmlTag[childIdx] as Hsmls;
+                break;
+            case Function:
+                hsmlFnc = hmlTag[childIdx] as HsmlFnc;
+                break;
+        }
 
         const refSplit = head.split("~");
         const ref = refSplit[1];
@@ -135,6 +153,8 @@ export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
             children.forEach(jml => hsml(jml, handler, ctx));
         }
 
+        hsmlFnc && handler.fnc(hsmlFnc, ctx);
+
         handler.close(tag, children, ctx);
     }
 }
@@ -154,7 +174,7 @@ export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
 
 // Test
 
-// const jmls: Hsmls = [
+// const hsmls: Hsmls = [
 //     "text",
 //     ["tag", [
 //         "d",
@@ -167,11 +187,11 @@ export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
 //     ]]
 // ];
 
-// const jml: Hsml = ["xxx", {}, [
-//         "d",
-//         ...jmls,
+// const hml: Hsml = ["xxx", {}, [
+//         "types", " ", 1235.456, " ", new Date(), " ",
+//         ...hsmls,
 //         ["t", ["t", "a", ""]],
 //         ["t", {}, ["t", "a", ""]]
 //     ]];
 
-// console.log(jmls, jml);
+// console.log(hsmls, hml);

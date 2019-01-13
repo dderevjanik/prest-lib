@@ -214,32 +214,27 @@ export function hsmls2htmls(hsmls: Hsmls, pretty = false): string[] {
 
 // Test
 
-// const jmls: Hsmls = [
+// const hsmls: Hsmls = [
 //     "text",
-//     ["tage"],
 //     ["tag", [
 //         "d",
-//         ["tagb",
-//             { click: (e: Event) => console.log(e) },
-//             [
-//                 "text 1",
-//                 ["div", [(e: Element) => console.log(e)]]
-//             ]
-//         ]
+//         [""]
 //     ]],
 //     ["taga", { attr: "attr", classes: ["class"] }, [
-//         "text 2",
+//         "text",
 //         123,
 //         true
 //     ]]
 // ];
 
-// const jml: Hsml = ["xxx", {}, [
-//         "d",
-//         ...jmls,
-//         ["t1", ["t2", [""], "a", 3]],
-//         ["t3", {}, ["t4", "a", 7]]
+// const hml: Hsml = ["xxx", {}, [
+//         "types", " ", 1235.456, " ", new Date(), " ",
+//         ...hsmls,
+//         ["t", ["t", "a", ""]],
+//         ["t", {}, ["t", "a", ""]]
 //     ]];
 
-// const html = hsml2htmls(jml, true);
+// console.log(hsmls, hml);
+
+// const html = hsml2htmls(hml, true);
 // console.log(html.join(""));

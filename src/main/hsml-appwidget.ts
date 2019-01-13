@@ -2,24 +2,32 @@ import { Hsmls, HsmlFnc } from "./hsml";
 import { Widget } from "./hsml-widget";
 import { Events } from "./events";
 
+declare const process: any;
+
+const __NODE = typeof process === "object" && process.versions && process.versions.node;
+
 export type View<S> = (state: S, events: Events<AppWidget<S>>) => Hsmls;
 
 export class AppWidget<S = any> extends Widget {
 
-    static hsmlFnc<S>(name: string,
-                      view: View<S>,
-                      state: S,
-                      events?: Events): HsmlFnc {
-        return (e: Element) => {
-            if ((e as any).widget) {
-                const w = (e as any).widget as AppWidget;
-                w.state = state;
-            } else {
-                const w = new AppWidget<S>(name, view, state, events);
-                w.mount(e);
-            }
-            return true;
-        };
+    static mount<S>(name: string,
+                    view: View<S>,
+                    state: S,
+                    events?: Events): HsmlFnc | Hsmls {
+        if (__NODE) {
+            return view(state, events);
+        } else {
+            return (e: Element) => {
+                if ((e as any).widget) {
+                    const w = (e as any).widget as AppWidget;
+                    w.state = state;
+                } else {
+                    const w = new AppWidget<S>(name, view, state, events);
+                    w.mount(e);
+                }
+                return true;
+            };
+        }
     }
 
     private _state: S;

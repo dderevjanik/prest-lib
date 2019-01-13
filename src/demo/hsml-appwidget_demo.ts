@@ -18,11 +18,10 @@ function appWiew(state: AppState, events: Events): Hsmls {
             " ",
             button("xxx", () => events.emit("xxx")),
         ]],
-        ["div", [
-            AppWidget.hsmlFnc<AppState>("section", sectionView, state, events)
-            // subpage(state, events)
-        ]]
-        // ["div@c_name", { view: subpage, state, events }]
+        ["div",
+            AppWidget.mount<AppState>("section", sectionView, state, events)
+        ]
+        // ["div@section", { view: subpage, state, events }]
     ];
 }
 
