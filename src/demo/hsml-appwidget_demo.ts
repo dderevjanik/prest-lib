@@ -19,7 +19,7 @@ function appWiew(state: AppState, events: Events): Hsmls {
             button("xxx", () => events.emit("xxx")),
         ]],
         ["div",
-            AppWidget.mount<AppState>("section", sectionView, state, events)
+            AppWidget.manage<AppState>("section", sectionView, state, events)
         ]
         // ["div@section", { view: subpage, state, events }]
     ];

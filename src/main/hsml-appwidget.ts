@@ -10,10 +10,10 @@ export type View<S> = (state: S, events: Events<AppWidget<S>>) => Hsmls;
 
 export class AppWidget<S = any> extends Widget {
 
-    static mount<S>(name: string,
-                    view: View<S>,
-                    state: S,
-                    events?: Events): HsmlFnc | Hsmls {
+    static manage<S>(name: string,
+                     view: View<S>,
+                     state: S,
+                     events?: Events): HsmlFnc | Hsmls {
         if (__NODE) {
             return view(state, events);
         } else {
