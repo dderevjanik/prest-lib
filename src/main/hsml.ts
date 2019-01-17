@@ -113,12 +113,13 @@ export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
         let children: Hsmls = [];
         let hsmlFnc: HsmlFnc;
 
-        switch (hmlTag[childIdx].constructor) {
+        const htc = hmlTag[childIdx];
+        switch (htc && htc.constructor) {
             case Array:
-                children = hmlTag[childIdx] as Hsmls;
+                children = htc as Hsmls;
                 break;
             case Function:
-                hsmlFnc = hmlTag[childIdx] as HsmlFnc;
+                hsmlFnc = htc as HsmlFnc;
                 break;
         }
 
