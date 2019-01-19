@@ -1,4 +1,4 @@
-import { Hsmls, HsmlFnc } from "./hsml";
+import { Hsmls, HsmlFnc, HsmlAttrOnData, HsmlAttrOnDataFnc } from "./hsml";
 import { Widget } from "./hsml-widget";
 import { Events } from "./events";
 
@@ -66,4 +66,45 @@ export class AppWidget<S = any> extends Widget {
         return this.view(this._state, this.events);
     }
 
+    protected _on(action: string, data: HsmlAttrOnData, e: Event) {
+        this.events.emit(action,
+            (data && data.constructor === Function)
+                ? (data as HsmlAttrOnDataFnc)(e)
+                : data);
+    }
+
 }
+
+
+// TEST
+
+// import { hsmls2htmls } from "./hsml-html";
+
+// const events = new Events();
+// const data = { attr: "action-data" };
+
+// const hmls: Hsmls = [
+//     ["button",
+//         { on: ["click", "action", data] },
+//         ["send"]
+//     ],
+//     ["input",
+//         {
+//             on: [
+//                 ["mouseover", "hover-action", data],
+//                 ["change", "click-action", e => (e.target as HTMLInputElement).value],
+//                 ["click", () => { events.emit("action-name", data); }],
+//             ],
+//             click: e => { events.emit("action-name", data); }
+//         }
+//     ],
+//     ["button",
+//         {
+//             on: ["click", () => { events.emit("action-name", data); }],
+//             click: e => { events.emit("action-name", data); }
+//         },
+//         ["send"]
+//     ]
+// ];
+
+// console.log(hsmls2htmls(hmls));

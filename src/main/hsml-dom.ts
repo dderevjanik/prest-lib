@@ -10,7 +10,7 @@ import {
 } from "./hsml";
 
 
-class JsonmlDomHandler implements HsmlHandler {
+class HsmlDomHandler implements HsmlHandler {
 
     element: HTMLElement;
 
@@ -20,6 +20,7 @@ class JsonmlDomHandler implements HsmlHandler {
         const e = document.createElement(tag);
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
+        let ref: string = attrs._ref;
         let widget: any = attrs._widget;
         for (const a in attrs) {
             if (attrs.hasOwnProperty(a)) {
@@ -42,7 +43,7 @@ class JsonmlDomHandler implements HsmlHandler {
                                     : (c[1] ? c[0] as string : undefined))
                                 .filter(c => c)
                             : []);
-                    break;
+                        break;
                     case "class":
                         classes = classes.concat((attrs[a] as string).split(" "));
                         break;
@@ -50,7 +51,7 @@ class JsonmlDomHandler implements HsmlHandler {
                         for (const d in attrs[a]) {
                             if (attrs[a].hasOwnProperty(d)) {
                                 if (attrs[a][d].constructor === String) {
-                                    e.dataset[d] = attrs[a][d];
+                                    e.dataset[d] = attrs[a][d] as string;
                                 } else {
                                     e.dataset[d] = JSON.stringify(attrs[a][d]);
                                 }
@@ -62,6 +63,17 @@ class JsonmlDomHandler implements HsmlHandler {
                             if (attrs[a].hasOwnProperty(d)) {
                                 (e.style as any)[d] = attrs[a][d];
                             }
+                        }
+                        break;
+                    case "on":
+                        if (typeof attrs[a][1] === "function") {
+                            e.addEventListener(attrs[a][0] as string, attrs[a][1] as (e: Event) => void);
+                        } else if (typeof attrs[a][1] === "string") {
+                            e.addEventListener(attrs[a][0] as string, (e: Event) => {
+                                ctx && ctx._on &&
+                                typeof ctx._on === "function" &&
+                                ctx._on(attrs[a][1], attrs[a][2], e);
+                            });
                         }
                         break;
                     default:
@@ -87,6 +99,9 @@ class JsonmlDomHandler implements HsmlHandler {
         } else {
             this.element = e;
             this._current = e;
+        }
+        if (ctx && ref) {
+            ctx.refs[ref] = this._current;
         }
         if (widget && widget.mount && widget.mount.constructor === Function) {
             widget.mount(e);
@@ -119,7 +134,7 @@ class JsonmlDomHandler implements HsmlHandler {
 }
 
 export function hsml2dom(hml: Hsml, ctx?: any): HTMLElement {
-    const handler = new JsonmlDomHandler();
+    const handler = new HsmlDomHandler();
     hsml(hml, handler, ctx);
     return handler.element;
 }

@@ -1,21 +1,41 @@
 export type HsmlHead = string; // "tag#id.class1.class2~handler"
 
+export type HsmlAttrClasses = Array<string | [string, boolean]>;
+
+export type HsmlAttrStyles = { [key: string]: string };
+
+export type HsmlAttrData = { [key: string]: string | number | Array<any> | Object };
+
+export type HsmlAttrOnDataFnc = (e: Event) => any;
+
+export type HsmlAttrOnData = string | number | Array<any> | Object | HsmlAttrOnDataFnc;
+
+export type HsmlAttrOn =
+    | [keyof HTMLElementEventMap, EventListener]
+    | [keyof HTMLElementEventMap, string, HsmlAttrOnData?]
+    | Array<
+        | [keyof HTMLElementEventMap, EventListener]
+        | [keyof HTMLElementEventMap, string, HsmlAttrOnData?]
+    >;
+
 export interface HsmlAttrs {
-    _id?: string;
-    _classes?: string[];
-    _ref?: string;
-    _key?: string;
-    _skip?: boolean;
-    data?: { [key: string]: any };
-    styles?: { [key: string]: string };
-    classes?: Array<string | [string, boolean]>;
-    [key: string]: string
+    readonly _id?: string;
+    readonly _classes?: string[];
+    readonly _ref?: string;
+    readonly _key?: string;
+    readonly _skip?: boolean;
+    readonly classes?: HsmlAttrClasses;
+    readonly styles?: HsmlAttrStyles;
+    readonly data?: HsmlAttrData;
+    readonly on?: HsmlAttrOn;
+    readonly [key: string]:
+        | string
         | string[]
         | number
         | boolean
-        | { [key: string]: string | number | Array<string> | Object }
-        | Array<string | [string, boolean]>
-        | ((e: Event) => void)
+        | HsmlAttrClasses
+        | HsmlAttrOn
+        | EventListener
         | HsmlObj;
 }
 
@@ -135,17 +155,17 @@ export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
         if (hasAttrs) {
             attrs = attrsObj as HsmlAttrs;
         } else {
-            attrs = {};
+            attrs = {} as HsmlAttrs;
         }
 
         if (id) {
-            attrs._id = id;
+            (attrs as any)._id = id;
         }
         if (classes.length) {
-            attrs._classes = classes;
+            (attrs as any)._classes = classes;
         }
         if (ref) {
-            attrs._ref = ref;
+            (attrs as any)._ref = ref;
         }
 
         const skip = handler.open(tag, attrs, children, ctx);

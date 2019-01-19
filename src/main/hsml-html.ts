@@ -83,6 +83,10 @@ class HsmlHtmlHandler implements HsmlHandler {
                         }
                         props.push(["style", style]);
                         break;
+                    case "styles":
+                        break;
+                    case "on":
+                        break;
                     default:
                         if (typeof attrs[a] === "function") {
                             // ignore
