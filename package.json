@@ -36,10 +36,10 @@
     "url": "https://gitlab.com/peter-rybar/prest-lib/issues"
   },
   "private": false,
-  "main": "dist/main/index.js",
-  "types": "dist/main/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "typescript": {
-    "main": "src/main/index.ts"
+    "main": "src/index.ts"
   },
   "scripts": {
     "prepare": "npm run dist",
@@ -49,11 +49,12 @@
     "clean": "rm -rf build; rm -rf dist; cd tools; npm run clean",
     "clean:all": "npm run clean; rm -rf node_modules; cd tools; npm run clean:all",
     "tslint": "tslint --project tsconfig.json",
-    "dev": "webpack --mode development --watch",
+    "build:watch": "webpack --mode development --watch",
     "build": "webpack --mode production",
-    "dist": "tsc",
+    "demo": "npm run build:watch",
+    "dist": "rm -rf dist; tsc --declaration --outDir dist",
     "test": "npm run tslint; npm run build",
-    "start": "npm run dev"
+    "start": "npm run demo"
   },
   "dependencies": {},
   "devDependencies": {

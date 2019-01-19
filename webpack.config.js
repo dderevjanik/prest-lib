@@ -1,12 +1,20 @@
 const path = require('path');
 const glob = require("glob");
 
-const entries = glob.sync('./src/**/*.ts')
+const entries = {
+    ...glob.sync('./src/*.ts')
         .reduce(
             (entries, entry) =>
                 Object.assign(entries,
                     { [entry.replace('./src/', '').replace('.ts', '')]: entry }),
+            {}),
+    ...glob.sync('./demo/*.ts')
+        .reduce(
+            (entries, entry) =>
+                Object.assign(entries,
+                    { [entry.replace('./demo/', '').replace('.ts', '')]: entry }),
             {})
+};
 console.log("entries:", entries);
 
 module.exports = {
@@ -24,7 +32,7 @@ module.exports = {
     // devtool: "nosources-source-map",
     entry: entries,
     // entry: {
-    //     index: "./src/main/index.ts"
+    //     index: "./src/index.ts"
     // },
     output: {
         // filename: '[name].[chunkhash].js',
@@ -39,7 +47,7 @@ module.exports = {
         rules: [
             // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
             { test: /\.tsx?$/, loader: "ts-loader" }
-            // { include: [path.resolve(__dirname, 'src/main')] }
+            // { include: [path.resolve(__dirname, 'src')] }
         ]
     }
 };

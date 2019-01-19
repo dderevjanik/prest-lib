@@ -15,7 +15,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": false,
         "strictNullChecks": false,
-        "declaration": true,
+        "declaration": false,
         "sourceMap": true,
         "inlineSourceMap": false,
         "removeComments": true,
@@ -23,14 +23,13 @@
         "strict": true,
         "strictFunctionTypes": true,
         "allowUnreachableCode": false,
-        "noFallthroughCasesInSwitch": true,
+        "noFallthroughCasesInSwitch": true
         // "preserveConstEnums": true,
         // "pretty": true,
-        "outDir": "dist"
+        // "outDir": "dist"
     },
     "include": [
-        "src/main/**/*",
-        "src/demo/**/*"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules",
