@@ -15,7 +15,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": false,
         "strictNullChecks": false,
-        "declaration": false,
+        "declaration": true,
         "sourceMap": true,
         "inlineSourceMap": false,
         "removeComments": true,
@@ -26,12 +26,11 @@
         "noFallthroughCasesInSwitch": true,
         // "preserveConstEnums": true,
         // "pretty": true,
-        "outDir": "build"
+        "outDir": "dist"
     },
     "include": [
         "src/main/**/*",
-        "src/demo/**/*",
-        "src/test/**/*"
+        "src/demo/**/*"
     ],
     "exclude": [
         "node_modules",

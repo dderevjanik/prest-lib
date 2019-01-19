@@ -1,6 +1,6 @@
 {
   "name": "prest-lib",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "pREST TypeScript library and tools for rapid web development",
   "keywords": [
     "pREST",
@@ -28,17 +28,23 @@
   },
   "private": false,
   "license": "GPL-3.0",
-  "main": "./dist/umd/prest.js",
+  "main": "dist/main/index.js",
+  "types": "dist/main/index.d.ts",
   "typescript": {
-    "main": "./src/main/index.ts"
+    "main": "src/main/index.ts"
   },
   "scripts": {
     "postinstall": "cd tools; npm install",
+    "prepare": "npm run dist",
+    "prepublishOnly": "npm test",
+    "preversion": "npm run test",
+    "postversion": "git push && git push --tags",
     "clean": "rm -rf build; rm -rf dist; cd tools; npm run clean",
     "clean:all": "npm run clean; rm -rf node_modules; cd tools; npm run clean:all",
     "tslint": "tslint --project tsconfig.json",
     "dev": "webpack --mode development --watch",
     "build": "webpack --mode production",
+    "dist": "tsc",
     "test": "npm run tslint; npm run build",
     "start": "npm run dev"
   },
@@ -84,5 +90,9 @@
         }
       }
     ]
-  }
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ]
 }
