@@ -21,20 +21,27 @@
     "validators",
     "widgets"
   ],
+  "license": "GPL-3.0",
   "author": {
     "name": "Peter Rybar",
     "email": "pr.rybar@gmail.com",
     "url": "http://prest-tech.appspot.com/peter-rybar"
   },
+  "homepage": "https://gitlab.com/peter-rybar/prest-lib",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/peter-rybar/prest-lib.git"
+  },
+  "bugs": {
+    "url": "https://gitlab.com/peter-rybar/prest-lib/issues"
+  },
   "private": false,
-  "license": "GPL-3.0",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
   "typescript": {
     "main": "src/main/index.ts"
   },
   "scripts": {
-    "postinstall": "cd tools; npm install",
     "prepare": "npm run dist",
     "prepublishOnly": "npm test",
     "preversion": "npm run test",
@@ -48,14 +55,6 @@
     "test": "npm run tslint; npm run build",
     "start": "npm run dev"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/peter-rybar/prest-lib.git"
-  },
-  "pre-commit": [
-    "test"
-  ],
-  "pre-push": [],
   "dependencies": {},
   "devDependencies": {
     "@types/incremental-dom": "^0.5.0",
@@ -73,6 +72,10 @@
     "webpack": "^4.28.2",
     "webpack-cli": "^3.1.2"
   },
+  "pre-commit": [
+    "test"
+  ],
+  "pre-push": [],
   "prettier": {
     "tabWidth": 4,
     "printWidth": 80,
