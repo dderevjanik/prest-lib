@@ -1,88 +1,88 @@
-import { AppWidget } from "../main/hsml-appwidget";
+import { AppWidget, Action } from "../main/hsml-appwidget";
 import { Hsmls } from "../main/hsml";
-import { Events } from "../main/events";
 
 interface AppState {
     title: string;
     count: number;
 }
 
-function appWiew(state: AppState, events: Events): Hsmls {
+enum Actions {
+    title = "title",
+    dec = "dec",
+    inc = "inc",
+    xXx = "xXx"
+}
+
+function appView(state: AppState, action: Action<AppState>): Hsmls {
     return [
         ["h2", [state.title]],
         ["p", [
+            "Title: ",
+            ["input",
+                {
+                    type: "text",
+                    value: state.title,
+                    on: ["input", Actions.title, e => (e.target as HTMLInputElement).value]
+                }
+            ],
+        ]],
+        ["p", [
             ["em", ["Count"]], ": ", state.count,
             " ",
-            // button("-", () => events.emit("dec", 1)),
-            // button("+", () => events.emit("inc", 2)),
-            ["button", { on: ["click", "dec", 1] }, ["-"]],
-            ["button", { on: ["click", "inc", 2] }, ["+"]],
-            " ",
-            // button("xxx", () => events.emit("xxx"))
-            ["button", { on: ["click", "xxx"] }, ["xxx"]],
+            ["button", { on: ["click", Actions.dec, 1] }, ["-"]],
+            ["button", { on: ["click", Actions.inc, 2] }, ["+"]]
         ]],
         ["div",
-            AppWidget.manage<AppState>("section", sectionView, state, events)
+            AppWidget.manage<AppState>("section", sectionView, state, action)
         ]
         // ["div@section", { view: subpage, state, events }]
     ];
 }
 
-function sectionView(state: AppState, events: Events): Hsmls {
+function sectionView(state: AppState, action: Action): Hsmls {
     return [
         ["h3", [state.title]],
         ["p", [
-            ["em", ["Count"]], ": ", state.count.toString(),
+            ["em", ["Count"]], ": ", state.count,
+            " ",
+            ["button", { on: ["click", Actions.xXx] }, ["xXx"]]
         ]]
     ];
 }
-
-// function button(label: string, cb: (e: Event) => void): Hsml {
-//     return ["button", { click: cb }, [label]];
-// }
 
 const appState: AppState = {
     title: "Counter",
     count: 77
 };
 
-const app = new AppWidget<AppState>("app", appWiew, appState);
+const action: Action = (name: string, data: any, widget: AppWidget) => {
+    console.log("action:", name, data, widget);
+    switch (name) {
 
-// flux dispatcher
-app.events
-    .any((data, widget, event) => {
-        console.log("event:", event, data, widget);
-    })
-    .on("inc", (num, widget) => {
-        widget.events.emit("dec", 1);
-    })
-    .on("inc", (num, widget) => {
-        widget.state.count += num;
-        widget.update();
-    })
-    .on("dec", (num, widget) => {
-        const s = widget.state;
-        s.count -= num;
-        widget.state = s;
-    });
-    // .many(
-    //     {
-    //         inc: (num, widget) => {
-    //             widget.events.emit("dec", 1);
-    //         },
-    //         dec: (num, widget) => {
-    //             const s = widget.state;
-    //             s.count -= num;
-    //             widget.state = s;
-    //         }
-    //     },
-    //     {
-    //         inc: (num, widget) => {
-    //             widget.state.count += num;
-    //             widget.update();
-    //         }
-    //     }
-    // );
+        case Actions.title:
+            widget.state.title = data as string;
+            widget.update();
+            break;
+
+        case Actions.inc:
+            widget.state.count += data as number;
+            widget.update();
+            setTimeout(widget.action, 1e3, "dec", 1, widget); // async call
+            break;
+
+        case Actions.dec:
+            const s = widget.state;
+            s.count -= data as number;
+            widget.update();
+            break;
+
+        default:
+            console.warn("action unhandled:", name, data, widget);
+            break;
+    }
+};
+
+const app = new AppWidget<AppState>("app", appView, appState, action);
 
 app.mount(document.getElementById("app"));
 

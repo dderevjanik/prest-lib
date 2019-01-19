@@ -1,28 +1,30 @@
 import { Hsmls, HsmlFnc, HsmlAttrOnData, HsmlAttrOnDataFnc } from "./hsml";
 import { Widget } from "./hsml-widget";
-import { Events } from "./events";
 
 declare const process: any;
 
 const __NODE = typeof process === "object" && process.versions && process.versions.node;
 
-export type View<S> = (state: S, events: Events<AppWidget<S>>) => Hsmls;
+export type Action<S = any> = (name: string, data?: any, appWidget?: AppWidget<S>) => void;
+
+export type View<S = any> = (state: S, action: Action<S>) => Hsmls;
 
 export class AppWidget<S = any> extends Widget {
 
     static manage<S>(name: string,
                      view: View<S>,
                      state: S,
-                     events?: Events): HsmlFnc | Hsmls {
+                     action: Action<S>): HsmlFnc | Hsmls {
         if (__NODE) {
-            return view(state, events);
+            return view(state, action);
         } else {
             return (e: Element) => {
                 if ((e as any).widget) {
                     const w = (e as any).widget as AppWidget;
                     w.state = state;
+                    w.update();
                 } else {
-                    const w = new AppWidget<S>(name, view, state, events);
+                    const w = new AppWidget<S>(name, view, state, action);
                     w.mount(e);
                 }
                 return true;
@@ -30,47 +32,37 @@ export class AppWidget<S = any> extends Widget {
         }
     }
 
-    private _state: S;
-
-    readonly view: View<S>;
-    readonly events: Events<AppWidget<S>>;
+    state: S;
+    view: View<S>;
+    action: Action<S>;
 
     constructor(name: string,
                 view: View<S>,
                 state: S,
-                events?: Events) {
+                action: Action<S>) {
         super(name || "AppWidget");
-        this._state = state;
+        this.state = state;
         this.view = view;
-        this.events = events ? events : new Events<AppWidget<S>>(this);
+        this.action = action;
     }
 
     onMount(): void {
-        this.events.emit("_mount", this);
+        this.action("_mount", this.dom, this);
     }
 
     onUmount(): void {
-        this.events.emit("_umount", this);
-    }
-
-    set state(state: S) {
-        this._state = state;
-        this.update();
-    }
-
-    get state(): S {
-        return this._state;
+        this.action("_umount", this.dom, this);
     }
 
     render(): Hsmls {
-        return this.view(this._state, this.events);
+        return this.view(this.state, this.action);
     }
 
     protected _on(action: string, data: HsmlAttrOnData, e: Event) {
-        this.events.emit(action,
-            (data && data.constructor === Function)
-                ? (data as HsmlAttrOnDataFnc)(e)
-                : data);
+        data = (data && data.constructor === Function)
+            ? (data as HsmlAttrOnDataFnc)(e)
+            : data;
+        this.action(action, data, this);
     }
 
 }
@@ -80,7 +72,10 @@ export class AppWidget<S = any> extends Widget {
 
 // import { hsmls2htmls } from "./hsml-html";
 
-// const events = new Events();
+// const action: Action = (name: string, data: any, appWidget: AppWidget) => {
+//     console.log("action:", name, data, appWidget);
+// };
+
 // const data = { attr: "action-data" };
 
 // const hmls: Hsmls = [
@@ -93,18 +88,18 @@ export class AppWidget<S = any> extends Widget {
 //             on: [
 //                 ["mouseover", "hover-action", data],
 //                 ["change", "click-action", e => (e.target as HTMLInputElement).value],
-//                 ["click", () => { events.emit("action-name", data); }],
+//                 ["click", () => action("action-name", data)],
 //             ],
-//             click: e => { events.emit("action-name", data); }
+//             click: e => action("action-name", data)
 //         }
 //     ],
 //     ["button",
 //         {
-//             on: ["click", () => { events.emit("action-name", data); }],
-//             click: e => { events.emit("action-name", data); }
+//             on: ["click", () => action("action-name", data)],
+//             click: e => action("action-name", data)
 //         },
 //         ["send"]
 //     ]
 // ];
 
-// console.log(hsmls2htmls(hmls));
+// console.log(hsmls2htmls(hmls).join("\n"));
