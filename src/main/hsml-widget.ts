@@ -1,4 +1,4 @@
-import { Hsml, Hsmls, HsmlObj } from "./hsml";
+import { Hsml, Hsmls, HsmlObj, HsmlAttrOnData } from "./hsml";
 import { hsmls2idomPatch } from "./hsml-idom";
 import * as idom from "incremental-dom";
 
@@ -39,6 +39,10 @@ export abstract class Widget implements HsmlObj, DomWidget {
     }
 
     abstract render(): Hsmls;
+
+    protected _on(action: string, data: HsmlAttrOnData, e: Event) {
+        console.log("on", action, data, e);
+    }
 
     mount(e: Element = document.body): this {
         if (!__NODE) {

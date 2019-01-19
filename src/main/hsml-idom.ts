@@ -56,6 +56,17 @@ class JsonmlIDomHandler implements HsmlHandler {
                     case "styles":
                         props.push("style", attrs[a]);
                         break;
+                    case "on":
+                        if (typeof attrs[a][1] === "function") {
+                            props.push("on" + attrs[a][0], attrs[a][1]);
+                        } else if (typeof attrs[a][1] === "string") {
+                            props.push("on" + attrs[a][0], (e: Event) => {
+                                ctx && ctx._on &&
+                                typeof ctx._on === "function" &&
+                                ctx._on(attrs[a][1], attrs[a][2], e);
+                            });
+                        }
+                        break;
                     default:
                         if (typeof attrs[a] === "function") {
                             props.push("on" + a, attrs[a]);

@@ -1,5 +1,5 @@
 import { AppWidget } from "../main/hsml-appwidget";
-import { Hsmls, Hsml } from "../main/hsml";
+import { Hsmls } from "../main/hsml";
 import { Events } from "../main/events";
 
 interface AppState {
@@ -13,10 +13,13 @@ function appWiew(state: AppState, events: Events): Hsmls {
         ["p", [
             ["em", ["Count"]], ": ", state.count,
             " ",
-            button("-", () => events.emit("dec", 1)),
-            button("+", () => events.emit("inc", 2)),
+            // button("-", () => events.emit("dec", 1)),
+            // button("+", () => events.emit("inc", 2)),
+            ["button", { on: ["click", "dec", 1] }, ["-"]],
+            ["button", { on: ["click", "inc", 2] }, ["+"]],
             " ",
-            button("xxx", () => events.emit("xxx")),
+            // button("xxx", () => events.emit("xxx"))
+            ["button", { on: ["click", "xxx"] }, ["xxx"]],
         ]],
         ["div",
             AppWidget.manage<AppState>("section", sectionView, state, events)
@@ -34,9 +37,9 @@ function sectionView(state: AppState, events: Events): Hsmls {
     ];
 }
 
-function button(label: string, cb: (e: Event) => void): Hsml {
-    return ["button", { click: cb }, [label]];
-}
+// function button(label: string, cb: (e: Event) => void): Hsml {
+//     return ["button", { click: cb }, [label]];
+// }
 
 const appState: AppState = {
     title: "Counter",
