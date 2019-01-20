@@ -1,5 +1,6 @@
 const path = require('path');
 const glob = require("glob");
+const { CheckerPlugin } = require("awesome-typescript-loader");
 
 const entries = {
     ...glob.sync('./src/*.ts')
@@ -19,35 +20,25 @@ console.log("entries:", entries);
 
 module.exports = {
     mode: "development",
-    // devtool: false,
-    // devtool: "eval",
-    // devtool: "source-map",
-    // devtool: "inline-source-map",
-    // devtool: "eval-source-map",
     devtool: "cheap-source-map",
-    // devtool: "inline-cheap-source-map",
-    // devtool: "cheap-module-source-map",
-    // devtool: "cheap-eval-source-map",
-    // devtool: "hidden-source-map",
-    // devtool: "nosources-source-map",
     entry: entries,
-    // entry: {
-    //     index: "./src/index.ts"
-    // },
+    devServer: {
+        contentBase: path.join(__dirname, "build"),
+        port: 9009
+    },
     output: {
-        // filename: '[name].[chunkhash].js',
         filename: '[name].js',
 		path: path.resolve(__dirname, 'build')
     },
     resolve: {
-        // Add `.ts` and `.tsx` as a resolvable extension.
         extensions: [".ts", ".tsx", ".js"]
     },
     module: {
         rules: [
-            // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-            { test: /\.tsx?$/, loader: "ts-loader" }
-            // { include: [path.resolve(__dirname, 'src')] }
+            { test: /\.tsx?$/, loader: "awesome-typescript-loader" }
         ]
-    }
+    },
+    plugins: [
+        new CheckerPlugin()
+    ]
 };

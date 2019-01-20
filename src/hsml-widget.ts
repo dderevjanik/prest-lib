@@ -46,6 +46,9 @@ export abstract class Widget implements HsmlObj, DomWidget {
 
     mount(e: Element = document.body): this {
         if (!__NODE) {
+            if (!e) {
+                throw new Error("Cannot mount widget on non existing element. Please, make sure that you are mounting widget on existing node");
+            }
             if ("widget" in e) {
                 const w = (e as any).widget as Widget;
                 w && w.umount();
