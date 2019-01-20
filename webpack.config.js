@@ -1,5 +1,6 @@
 const path = require('path');
 const glob = require("glob");
+// const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 const entries = {
     ...glob.sync('./src/*.ts')
@@ -30,9 +31,21 @@ module.exports = {
     // devtool: "cheap-eval-source-map",
     // devtool: "hidden-source-map",
     // devtool: "nosources-source-map",
-    entry: entries,
     // entry: {
     //     index: "./src/index.ts"
+    // },
+    entry: entries,
+    // optimization: {
+    //     minimizer: [
+    //         new UglifyJsPlugin({
+    //             uglifyOptions: {
+    //                 output: {
+    //                     comments: false
+    //                 },
+    //             },
+    //             extractComments: true, // /(?:^!|@(?:license|preserve))/i
+    //         })
+    //     ]
     // },
     output: {
         // filename: '[name].[chunkhash].js',
