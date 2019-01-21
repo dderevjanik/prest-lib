@@ -66,8 +66,10 @@ function boardView(board: AppState["board"], playerTurn: number): Hsmls {
 function appView(state: AppState, action: Action<AppState>): Hsmls {
     console.log(state);
     return [
-        ["h1", ["Tic-Tac-Toe Demo"]],
-        ["p", ["Player: ", state.turn ? CROS : CIRC]],
+        ["h1", "Tic-Tac-Toe Demo"],
+        ["p", [
+            "Player: ", state.turn ? CROS : CIRC
+        ]],
         ["p", boardView(state.board, state.turn)]
     ];
 }

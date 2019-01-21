@@ -33,8 +33,9 @@ function appView(state: AppState, action: Action<AppState>): Hsmls {
             ["button", { on: ["click", Actions.inc, 2] }, ["+"]]
         ]],
         ["div",
-            // AppWidget.hsml("app1")
-            AppWidget.hsml("app1", state)
+            AppWidget.hsml("app1")
+            // AppWidget.hsml("app1", state)
+            // AppWidget.hsml("app1", state, action)
             // AppWidget.hsml<AppState>("app1", app1View, state, action)
         ]
         // ["div@app1"]
