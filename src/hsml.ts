@@ -146,6 +146,12 @@ export function hsml<C = any>(hml: Hsml, handler: HsmlHandler<C>, ctx?: C): void
             case Function:
                 hsmlFnc = htc as HsmlFnc;
                 break;
+            case String:
+            case Boolean:
+            case Number:
+            case Date:
+                children = [htc as Hsml];
+                break;
         }
 
         const refSplit = head.split("~");

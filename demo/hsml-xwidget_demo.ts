@@ -1,4 +1,4 @@
-import { AppWidget, Action } from "../src/hsml-appwidget";
+import { XWidget, Action } from "../src/hsml-xwidget";
 import { Hsmls } from "../src/hsml";
 
 interface AppState {
@@ -33,10 +33,10 @@ function appView(state: AppState, action: Action<AppState>): Hsmls {
             ["button", { on: ["click", Actions.inc, 2] }, ["+"]]
         ]],
         ["div",
-            // AppWidget.hsml("app1")
-            AppWidget.hsml("app1", state)
-            // AppWidget.hsml("app1", state, action)
-            // AppWidget.hsml<AppState>("app1", app1View, state, action)
+            // XWidget.hsml("app1")
+            XWidget.hsml("app1", state)
+            // XWidget.hsml("app1", state, action)
+            // XWidget.hsml<AppState>("app1", app1View, state, action)
         ]
         // ["div@app1"]
         // ["div@app1", { state }]
@@ -66,7 +66,7 @@ const app1State: AppState = {
     count: 33
 };
 
-const appAction: Action = (name: string, data: any, widget: AppWidget) => {
+const appAction: Action = (name: string, data: any, widget: XWidget) => {
     console.log("action:", name, data, widget);
     switch (name) {
 
@@ -93,11 +93,11 @@ const appAction: Action = (name: string, data: any, widget: AppWidget) => {
     }
 };
 
-AppWidget.def("app", appView, appState, appAction);
-AppWidget.def("app1", app1View, app1State, appAction);
+XWidget.def("app", appView, appState, appAction);
+XWidget.def("app1", app1View, app1State, appAction);
 
-const app = AppWidget.create("app");
-// const app = new AppWidget<AppState>("app", appView, appState, appAction);
+const app = XWidget.create("app");
+// const app = new XWidget<AppState>("app", appView, appState, appAction);
 
 app.mount(document.getElementById("app"));
 
@@ -106,23 +106,23 @@ app.mount(document.getElementById("app"));
 // Experiment
 
 // // registera apps
-// AppWidget.register("app", appView, appState, appAction);
-// AppWidget.register("app1", app1View, app1State, app1Action);
-// AppWidget.register("app2", app2View, app2State, app2Action);
+// XWidget.def("app", appView, appState, appAction);
+// XWidget.def("app1", app1View, app1State, app1Action);
+// XWidget.def("app2", app2View, app2State, app2Action);
 
 // // create root app
-// const app = AppWidget.create("app");
-// // const app = AppWidget.create("app-not-registered", appView, appState, appAction);
+// const app = XWidget.create("app");
+// // const app = XWidget.create("app-not-registered", appView, appState, appAction);
 
-// // const app = AppWidget.apps["app"];
+// // const app = XWidget.apps["app"];
 
 // // mount app
 // app.mount(document.getElementById("app"));
 
-// AppWidget.hsml("app");
-// AppWidget.hsml("app", appState);
+// XWidget.hsml("app");
+// XWidget.hsml("app", appState);
 
 // // in HSML:
 // // ["div@appN"]
 // // will do this:
-// // ["div", AppWidget.hsml("appN") ]
+// // ["div", XWidget.hsml("appN") ]

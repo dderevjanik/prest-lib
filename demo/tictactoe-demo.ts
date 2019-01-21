@@ -1,4 +1,4 @@
-import { AppWidget, Action } from "../src/hsml-appwidget";
+import { XWidget, Action } from "../src/hsml-xwidget";
 import { Hsmls, Hsml } from "../src/hsml";
 
 const NBSP = "\u00A0";
@@ -23,7 +23,7 @@ enum Actions {
     mark = "mark"
 }
 
-const action: Action = (name: string, data: any, widget: AppWidget) => {
+const action: Action = (name: string, data: any, widget: XWidget) => {
     console.log("action", name, data, widget);
     switch (name) {
 
@@ -74,7 +74,7 @@ function appView(state: AppState, action: Action<AppState>): Hsmls {
     ];
 }
 
-const app = new AppWidget("app", appView, initState, action);
+const app = new XWidget("app", appView, initState, action);
 
 app.mount(document.getElementById("app"));
 
