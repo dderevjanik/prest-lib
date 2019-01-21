@@ -50,8 +50,10 @@ export interface HsmlObj {
 
 export interface Hsmls extends Array<Hsml> { }
 
-export type HsmlTagAttrN = [HsmlHead, (Hsmls | HsmlFnc)?];
-export type HsmlTagAttrY = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc)?];
+export type HsmlTagAttrN = [HsmlHead, (Hsmls | HsmlFnc
+    | string | boolean | number | Date)?];
+export type HsmlTagAttrY = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc
+    | string | boolean | number | Date)?];
 
 export type HsmlTag = HsmlTagAttrN | HsmlTagAttrY;
 
