@@ -97,32 +97,7 @@ XWidget.def("app", appView, appState, appAction);
 XWidget.def("app1", app1View, app1State, appAction);
 
 const app = XWidget.create("app");
-// const app = new XWidget<AppState>("app", appView, appState, appAction);
 
 app.mount(document.getElementById("app"));
 
 (self as any).app = app;
-
-// Experiment
-
-// // registera apps
-// XWidget.def("app", appView, appState, appAction);
-// XWidget.def("app1", app1View, app1State, app1Action);
-// XWidget.def("app2", app2View, app2State, app2Action);
-
-// // create root app
-// const app = XWidget.create("app");
-// // const app = XWidget.create("app-not-registered", appView, appState, appAction);
-
-// // const app = XWidget.apps["app"];
-
-// // mount app
-// app.mount(document.getElementById("app"));
-
-// XWidget.hsml("app");
-// XWidget.hsml("app", appState);
-
-// // in HSML:
-// // ["div@appN"]
-// // will do this:
-// // ["div", XWidget.hsml("appN") ]
