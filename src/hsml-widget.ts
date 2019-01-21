@@ -45,7 +45,7 @@ export abstract class Widget implements HsmlObj, DomWidget {
     }
 
     mount(e: Element = document.body): this {
-        if (!__NODE) {
+        if (!__NODE && e) {
             if ("widget" in e) {
                 const w = (e as any).widget as Widget;
                 w && w.umount();
