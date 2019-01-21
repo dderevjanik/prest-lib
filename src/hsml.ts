@@ -35,6 +35,8 @@ export interface HsmlAttrs {
         | number
         | boolean
         | HsmlAttrClasses
+        | HsmlAttrStyles
+        // | HsmlAttrData
         | HsmlAttrOn
         | EventListener
         | HsmlObj;
@@ -48,10 +50,10 @@ export interface HsmlObj {
 
 export interface Hsmls extends Array<Hsml> { }
 
-export type HsmlTagAttrNo = [HsmlHead, (Hsmls | HsmlFnc)?];
-export type HsmlTagAttrYes = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc)?];
+export type HsmlTagAttrN = [HsmlHead, (Hsmls | HsmlFnc)?];
+export type HsmlTagAttrY = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc)?];
 
-export type HsmlTag = HsmlTagAttrNo | HsmlTagAttrYes;
+export type HsmlTag = HsmlTagAttrN | HsmlTagAttrY;
 
 export type Hsml = string | boolean | number | Date | HsmlFnc | HsmlObj | HsmlTag;
 
@@ -217,3 +219,10 @@ export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
 //     ]];
 
 // console.log(hsmls, hml);
+
+// const hml: Hsml = ["ppp", [
+//     ["sss", [
+//         ["aaa"]
+//     ]]
+// ]];
+// console.log(hml);
