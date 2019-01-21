@@ -33,8 +33,8 @@ function appView(state: AppState, action: Action<AppState>): Hsmls {
             ["button", { on: ["click", Actions.inc, 2] }, ["+"]]
         ]],
         ["div",
-            AppWidget.hsml("app1")
-            // AppWidget.hsml("app1", state)
+            // AppWidget.hsml("app1")
+            AppWidget.hsml("app1", state)
             // AppWidget.hsml("app1", state, action)
             // AppWidget.hsml<AppState>("app1", app1View, state, action)
         ]
@@ -93,8 +93,8 @@ const appAction: Action = (name: string, data: any, widget: AppWidget) => {
     }
 };
 
-AppWidget.register("app", appView, appState, appAction);
-AppWidget.register("app1", app1View, app1State, appAction);
+AppWidget.def("app", appView, appState, appAction);
+AppWidget.def("app1", app1View, app1State, appAction);
 
 const app = AppWidget.create("app");
 // const app = new AppWidget<AppState>("app", appView, appState, appAction);

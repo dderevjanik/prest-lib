@@ -5,13 +5,19 @@ import {
     HsmlAttrs,
     HsmlFnc,
     HsmlObj,
-    HsmlHandler
+    HsmlHandler,
+    HsmlAttrOnData
 } from "./hsml";
 import * as idom from "incremental-dom";
 
-class JsonmlIDomHandler implements HsmlHandler {
+export interface Ctx extends HsmlObj {
+    refs: { [name: string]: Element };
+    onHsml(action: string, data: HsmlAttrOnData, e: Event): void;
+}
 
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: any): boolean {
+class JsonmlIDomHandler implements HsmlHandler<Ctx> {
+
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: Ctx): boolean {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -61,9 +67,11 @@ class JsonmlIDomHandler implements HsmlHandler {
                             props.push("on" + attrs[a][0], attrs[a][1]);
                         } else if (typeof attrs[a][1] === "string") {
                             props.push("on" + attrs[a][0], (e: Event) => {
-                                ctx && ctx._on &&
-                                typeof ctx._on === "function" &&
-                                ctx._on(attrs[a][1], attrs[a][2], e);
+                                ctx && ctx.onHsml &&
+                                typeof ctx.onHsml === "function" &&
+                                ctx.onHsml(attrs[a][1] as string,
+                                           attrs[a][2] as HsmlAttrOnData,
+                                           e);
                             });
                         }
                         break;
@@ -98,20 +106,20 @@ class JsonmlIDomHandler implements HsmlHandler {
         return attrs._skip ? true : false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: any): void {
+    close(tag: string, children: Hsmls, ctx?: Ctx): void {
         idom.elementClose(tag);
     }
 
-    text(text: string, ctx?: any): void {
+    text(text: string, ctx?: Ctx): void {
         idom.text(text);
     }
 
-    fnc(fnc: HsmlFnc, ctx?: any): void {
+    fnc(fnc: HsmlFnc, ctx?: Ctx): void {
         const skip = fnc(idom.currentElement());
         skip && idom.skip();
     }
 
-    obj(obj: HsmlObj, ctx?: any): void {
+    obj(obj: HsmlObj, ctx?: Ctx): void {
         if ("toHsml" in obj) {
             hsml(obj.toHsml(), this, obj);
         } else {
@@ -121,17 +129,17 @@ class JsonmlIDomHandler implements HsmlHandler {
 
 }
 
-function hsml2idom(hml: Hsml, ctx?: any): void {
+function hsml2idom(hml: Hsml, ctx?: Ctx): void {
     hsml(hml, new JsonmlIDomHandler(), ctx);
 }
 
 
-function hsmls2idom(hmls: Hsmls, ctx?: any): void {
+function hsmls2idom(hmls: Hsmls, ctx?: Ctx): void {
     for (const hml of hmls) {
         if (hml.constructor === String) {
             idom.text(hml as string);
         } else if ("toHsml" in (hml as any)) {
-            const obj = hml as HsmlObj;
+            const obj = hml as Ctx;
             hsml2idom(obj.toHsml(), obj);
         } else {
             hsml2idom(hml as Hsml, ctx);
@@ -140,12 +148,12 @@ function hsmls2idom(hmls: Hsmls, ctx?: any): void {
 }
 
 
-export function hsml2idomPatch(node: Element, hml: Hsml, ctx?: any): void {
+export function hsml2idomPatch(node: Element, hml: Hsml, ctx?: Ctx): void {
     idom.patch(node,
         (data: Hsml) => hsml2idom(data, ctx), hml);
 }
 
-export function hsmls2idomPatch(node: Element, hmls: Hsmls, ctx?: any): void {
+export function hsmls2idomPatch(node: Element, hmls: Hsmls, ctx?: Ctx): void {
     idom.patch(node,
         (data: Hsmls) => hsmls2idom(data, ctx), hmls);
 }

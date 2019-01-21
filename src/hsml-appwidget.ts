@@ -9,7 +9,7 @@ export type Action<S = any> = (name: string, data?: any, appWidget?: AppWidget<S
 
 export type View<S = any> = (state: S, action: Action<S>) => Hsmls;
 
-export type AppReg<S = any> = {
+export type Defs<S = any> = {
     [name: string]: {
         view: View<S>,
         state: S,
@@ -19,17 +19,17 @@ export type AppReg<S = any> = {
 
 export class AppWidget<S = any> extends Widget {
 
-    static appReg: AppReg = {};
+    static defs: Defs = {};
 
-    static register<S = any>(name: string,
-                             view: View<S>,
-                             state: S,
-                             action: Action<S>): void {
-        AppWidget.appReg[name] = { view, state, action };
+    static def<S = any>(name: string,
+                        view: View<S>,
+                        state: S,
+                        action: Action<S>): void {
+        AppWidget.defs[name] = { view, state, action };
     }
 
     static create(name: string): AppWidget {
-        const reg = AppWidget.appReg[name];
+        const reg = AppWidget.defs[name];
         return reg
             ? new AppWidget(name, reg.view, reg.state, reg.action)
             : undefined;
@@ -38,7 +38,7 @@ export class AppWidget<S = any> extends Widget {
     static hsml<S = any>(name: string,
                          state?: S,
                          action?: Action<S>): HsmlFnc | Hsmls {
-        const reg = AppWidget.appReg[name];
+        const reg = AppWidget.defs[name];
         if (!reg) {
             console.error("AppWidget unregistered name:", name);
             return undefined;
@@ -63,27 +63,6 @@ export class AppWidget<S = any> extends Widget {
             };
         }
     }
-
-    // static hsml<S = any>(name: string,
-    //                      view: View<S>,
-    //                      state: S,
-    //                      action: Action<S>): HsmlFnc | Hsmls {
-    //     if (__NODE) {
-    //         return view(state, action);
-    //     } else {
-    //         return (e: Element) => {
-    //             if ((e as any).widget) {
-    //                 const w = (e as any).widget as AppWidget;
-    //                 w.state = state;
-    //                 w.update();
-    //             } else {
-    //                 const w = new AppWidget<S>(name, view, state, action);
-    //                 w.mount(e);
-    //             }
-    //             return true;
-    //         };
-    //     }
-    // }
 
     readonly name: string;
 
@@ -114,7 +93,7 @@ export class AppWidget<S = any> extends Widget {
         return this.view(this.state, this.action);
     }
 
-    protected _on(action: string, data: HsmlAttrOnData, e: Event) {
+    onHsml(action: string, data: HsmlAttrOnData, e: Event): void {
         data = (data && data.constructor === Function)
             ? (data as HsmlAttrOnDataFnc)(e)
             : data;

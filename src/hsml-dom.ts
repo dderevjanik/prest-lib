@@ -5,16 +5,22 @@ import {
     HsmlAttrs,
     HsmlFnc,
     HsmlObj,
-    HsmlHandler
+    HsmlHandler,
+    HsmlAttrOnData
 } from "./hsml";
 
-class HsmlDomHandler implements HsmlHandler {
+export interface Ctx extends HsmlObj {
+    refs: { [name: string]: Element };
+    onHsml(action: string, data: HsmlAttrOnData, e: Event): void;
+}
+
+class HsmlDomHandler implements HsmlHandler<Ctx> {
 
     element: HTMLElement;
 
     private _current: HTMLElement;
 
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: any): boolean {
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: Ctx): boolean {
         const e = document.createElement(tag);
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -68,9 +74,11 @@ class HsmlDomHandler implements HsmlHandler {
                             e.addEventListener(attrs[a][0] as string, attrs[a][1] as (e: Event) => void);
                         } else if (typeof attrs[a][1] === "string") {
                             e.addEventListener(attrs[a][0] as string, (e: Event) => {
-                                ctx && ctx._on &&
-                                typeof ctx._on === "function" &&
-                                ctx._on(attrs[a][1], attrs[a][2], e);
+                                ctx && ctx.onHsml &&
+                                typeof ctx.onHsml === "function" &&
+                                ctx.onHsml(attrs[a][1] as string,
+                                           attrs[a][2] as HsmlAttrOnData,
+                                           e);
                             });
                         }
                         break;
@@ -107,21 +115,21 @@ class HsmlDomHandler implements HsmlHandler {
         return attrs._skip ? true : false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: any): void {
+    close(tag: string, children: Hsmls, ctx?: Ctx): void {
         if (this._current !== this.element) {
             this._current = this._current.parentElement;
         }
     }
 
-    text(text: string, ctx?: any): void {
+    text(text: string, ctx?: Ctx): void {
         this._current.appendChild(document.createTextNode(text));
     }
 
-    fnc(fnc: HsmlFnc, ctx?: any): void {
+    fnc(fnc: HsmlFnc, ctx?: Ctx): void {
         fnc(this._current);
     }
 
-    obj(obj: HsmlObj, ctx?: any): void {
+    obj(obj: HsmlObj, ctx?: Ctx): void {
         if ("toHsml" in obj) {
             hsml(obj.toHsml(), this, obj);
         } else {
@@ -131,19 +139,19 @@ class HsmlDomHandler implements HsmlHandler {
 
 }
 
-export function hsml2dom(hml: Hsml, ctx?: any): HTMLElement {
+export function hsml2dom(hml: Hsml, ctx?: Ctx): HTMLElement {
     const handler = new HsmlDomHandler();
     hsml(hml, handler, ctx);
     return handler.element;
 }
 
-export function hsmls2dom(hmls: Hsmls, ctx?: any): Node[] {
+export function hsmls2dom(hmls: Hsmls, ctx?: Ctx): Node[] {
     const elems: Node[] = [];
     for (const hml of hmls) {
         if (hml.constructor === String) {
             elems.push(document.createTextNode(hml as string));
         } else if ("toHsml" in (hml as any)) {
-            const obj = hml as HsmlObj;
+            const obj = hml as Ctx;
             elems.push(hsml2dom(obj.toHsml(), obj));
         } else {
             elems.push(hsml2dom(hml as Hsml, ctx));

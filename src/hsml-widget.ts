@@ -1,5 +1,5 @@
-import { Hsml, Hsmls, HsmlObj, HsmlAttrOnData } from "./hsml";
-import { hsmls2idomPatch } from "./hsml-idom";
+import { Hsml, Hsmls, HsmlAttrOnData } from "./hsml";
+import { hsmls2idomPatch, Ctx } from "./hsml-idom";
 import * as idom from "incremental-dom";
 
 declare const process: any;
@@ -21,7 +21,7 @@ export interface DomWidget {
     onUmount?(): void;
 }
 
-export abstract class Widget implements HsmlObj, DomWidget {
+export abstract class Widget implements Ctx, DomWidget {
 
     private static __count = 0;
 
@@ -40,7 +40,7 @@ export abstract class Widget implements HsmlObj, DomWidget {
 
     abstract render(): Hsmls;
 
-    protected _on(action: string, data: HsmlAttrOnData, e: Event) {
+    onHsml(action: string, data: HsmlAttrOnData, e: Event) {
         console.log("on", action, data, e);
     }
 
