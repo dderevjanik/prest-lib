@@ -8,7 +8,9 @@ import {
     HsmlHandler
 } from "./hsml";
 
-class HsmlHtmlHandler implements HsmlHandler {
+export interface Ctx extends HsmlObj { }
+
+class HsmlHtmlHandler implements HsmlHandler<Ctx> {
 
     private static _pairTags = [
         "script",
@@ -31,7 +33,7 @@ class HsmlHtmlHandler implements HsmlHandler {
         this._indent = indent;
     }
 
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: any): boolean {
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: Ctx): boolean {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -134,7 +136,7 @@ class HsmlHtmlHandler implements HsmlHandler {
         return false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: any): void {
+    close(tag: string, children: Hsmls, ctx?: Ctx): void {
         let html = "";
         const pairTag = (children || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         if (this._pretty) {
@@ -152,7 +154,7 @@ class HsmlHtmlHandler implements HsmlHandler {
         }
     }
 
-    text(text: string, ctx?: any): void {
+    text(text: string, ctx?: Ctx): void {
         let html = "";
         if (this._pretty) {
             html += this._mkIndent(this._depth);
@@ -164,10 +166,10 @@ class HsmlHtmlHandler implements HsmlHandler {
         this._onHtml(html);
     }
 
-    fnc(fnc: HsmlFnc, ctx?: any): void {
+    fnc(fnc: HsmlFnc, ctx?: Ctx): void {
     }
 
-    obj(obj: HsmlObj, ctx?: any): void {
+    obj(obj: HsmlObj, ctx?: Ctx): void {
         if ("toHsml" in obj) {
             hsml(obj.toHsml(), this, obj);
         } else {

@@ -50,22 +50,24 @@ export interface HsmlObj {
 
 export interface Hsmls extends Array<Hsml> { }
 
-export type HsmlTagAttrN = [HsmlHead, (Hsmls | HsmlFnc)?];
-export type HsmlTagAttrY = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc)?];
+export type HsmlTagAttrN = [HsmlHead, (Hsmls | HsmlFnc
+    | string | boolean | number | Date)?];
+export type HsmlTagAttrY = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc
+    | string | boolean | number | Date)?];
 
 export type HsmlTag = HsmlTagAttrN | HsmlTagAttrY;
 
 export type Hsml = string | boolean | number | Date | HsmlFnc | HsmlObj | HsmlTag;
 
-export interface HsmlHandler {
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: any): boolean;
-    close(tag: string, children: Hsmls, ctx?: any): void;
-    text(text: string, ctx?: any): void;
-    fnc(fnc: HsmlFnc, ctx?: any): void;
-    obj(obj: HsmlObj, ctx?: any): void;
+export interface HsmlHandler<C> {
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: C): boolean;
+    close(tag: string, children: Hsmls, ctx?: C): void;
+    text(text: string, ctx?: C): void;
+    fnc(fnc: HsmlFnc, ctx?: C): void;
+    obj(obj: HsmlObj, ctx?: C): void;
 }
 
-export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
+export function hsml<C = any>(hml: Hsml, handler: HsmlHandler<C>, ctx?: C): void {
     // console.log("hsml", hsml);
     if (hml === undefined) {
         return;
@@ -125,7 +127,7 @@ export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
             handler.obj(hml as HsmlObj, ctx);
     }
 
-    function hsmlTag(hmlTag: HsmlTag, handler: HsmlHandler, ctx?: any): void {
+    function hsmlTag(hmlTag: HsmlTag, handler: HsmlHandler<C>, ctx?: C): void {
         // console.log("hsml tag", hmlTag);
 
         const head = hmlTag[0] as HsmlHead;
@@ -143,6 +145,12 @@ export function hsml(hml: Hsml, handler: HsmlHandler, ctx?: any): void {
                 break;
             case Function:
                 hsmlFnc = htc as HsmlFnc;
+                break;
+            case String:
+            case Boolean:
+            case Number:
+            case Date:
+                children = [htc as Hsml];
                 break;
         }
 

@@ -4,7 +4,7 @@ import * as encode from "./encode";
 import * as form from "./form";
 import * as hash from "./hash";
 import * as history from "./history";
-import * as hsmlAppWidget from "./hsml-appwidget";
+import * as hsmlXWidget from "./hsml-xwidget";
 import * as hsmlDom from "./hsml-dom";
 import * as hsmlHtml from "./hsml-html";
 import * as hsmlIDom from "./hsml-idom";
@@ -35,7 +35,7 @@ export {
     form,
     hash,
     history,
-    hsmlAppWidget,
+    hsmlXWidget,
     hsmlDom,
     hsmlHtml,
     hsmlIDom,

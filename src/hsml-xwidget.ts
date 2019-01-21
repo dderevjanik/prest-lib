@@ -5,32 +5,66 @@ declare const process: any;
 
 const __NODE = typeof process === "object" && process.versions && process.versions.node;
 
-export type Action<S = any> = (name: string, data?: any, appWidget?: AppWidget<S>) => void;
+export type Action<S = any> = (name: string, data?: any, xWidget?: XWidget<S>) => void;
 
 export type View<S = any> = (state: S, action: Action<S>) => Hsmls;
 
-export class AppWidget<S = any> extends Widget {
+export type Defs<S = any> = {
+    [name: string]: {
+        view: View<S>,
+        state: S,
+        action: Action<S>
+    }
+};
 
-    static manage<S>(name: string,
-                     view: View<S>,
-                     state: S,
-                     action: Action<S>): HsmlFnc | Hsmls {
+export class XWidget<S = any> extends Widget {
+
+    static defs: Defs = {};
+
+    static def<S = any>(name: string,
+                        view: View<S>,
+                        state: S,
+                        action: Action<S>): void {
+        XWidget.defs[name] = { view, state, action };
+    }
+
+    static create(name: string): XWidget {
+        const reg = XWidget.defs[name];
+        return reg
+            ? new XWidget(name, reg.view, reg.state, reg.action)
+            : undefined;
+    }
+
+    static hsml<S = any>(name: string,
+                         state?: S,
+                         action?: Action<S>): HsmlFnc | Hsmls {
+        const reg = XWidget.defs[name];
+        if (!reg) {
+            console.error("XWidget unregistered name:", name);
+            return undefined;
+        }
         if (__NODE) {
-            return view(state, action);
+            return reg.view(reg.state, reg.action);
         } else {
             return (e: Element) => {
                 if ((e as any).widget) {
-                    const w = (e as any).widget as AppWidget;
-                    w.state = state;
-                    w.update();
+                    if (state) {
+                        const w = (e as any).widget as XWidget;
+                        w.state = state;
+                        w.update();
+                    }
                 } else {
-                    const w = new AppWidget<S>(name, view, state, action);
+                    const w = new XWidget(name, reg.view,
+                        state || reg.state,
+                        action || reg.action);
                     w.mount(e);
                 }
                 return true;
             };
         }
     }
+
+    readonly name: string;
 
     state: S;
     view: View<S>;
@@ -40,7 +74,8 @@ export class AppWidget<S = any> extends Widget {
                 view: View<S>,
                 state: S,
                 action: Action<S>) {
-        super(name || "AppWidget");
+        super("XWidget");
+        this.name = name;
         this.state = state;
         this.view = view;
         this.action = action;
@@ -58,7 +93,7 @@ export class AppWidget<S = any> extends Widget {
         return this.view(this.state, this.action);
     }
 
-    protected _on(action: string, data: HsmlAttrOnData, e: Event) {
+    onHsml(action: string, data: HsmlAttrOnData, e: Event): void {
         data = (data && data.constructor === Function)
             ? (data as HsmlAttrOnDataFnc)(e)
             : data;
@@ -72,8 +107,8 @@ export class AppWidget<S = any> extends Widget {
 
 // import { hsmls2htmls } from "./hsml-html";
 
-// const action: Action = (name: string, data: any, appWidget: AppWidget) => {
-//     console.log("action:", name, data, appWidget);
+// const action: Action = (name: string, data: any, xWidget: XWidget) => {
+//     console.log("action:", name, data, xWidget);
 // };
 
 // const data = { attr: "action-data" };
