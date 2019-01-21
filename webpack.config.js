@@ -1,5 +1,6 @@
 const path = require('path');
 const glob = require("glob");
+const { CheckerPlugin } = require("awesome-typescript-loader");
 
 const entries = {
     ...glob.sync('./src/*.ts')
@@ -46,8 +47,12 @@ module.exports = {
     module: {
         rules: [
             // all files with a `.ts` or `.tsx` extension will be handled by `ts-loader`
-            { test: /\.tsx?$/, loader: "ts-loader" }
+            // { test: /\.tsx?$/, loader: "ts-loader" }
+            { test: /\.tsx?$/, loader: "awesome-typescript-loader" }
             // { include: [path.resolve(__dirname, 'src')] }
         ]
-    }
+    },
+    plugins: [
+        new CheckerPlugin()
+    ]
 };
