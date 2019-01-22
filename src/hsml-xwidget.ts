@@ -48,15 +48,15 @@ export class XWidget<S = any> extends Widget {
         } else {
             return (e: Element) => {
                 if ((e as any).widget) {
-                    if (state) {
-                        const w = (e as any).widget as XWidget;
+                    const w = (e as any).widget as XWidget;
+                    if (state !== undefined) {
                         w.state = state;
-                        w.update();
                     }
+                    w.update();
                 } else {
                     const w = new XWidget(name, reg.view,
-                        state || reg.state,
-                        action || reg.action);
+                        state === undefined ? reg.state : state,
+                        action === undefined ? reg.action : action);
                     w.mount(e);
                 }
                 return true;
