@@ -8,10 +8,12 @@
     "build": "tsc",
     "clean": "rm -rf build",
     "clean:all": "npm run clean; rm -rf node_modules;",
-    "html2jsonml": "node ./build/html2jsonml-cli.js"
+    "html2jsonml": "node ./build/html2jsonml-cli.js",
+    "html2hsml": "node ./build/html2hsml-cli.js"
   },
   "bin": {
-    "prest-html2jsonml": "./build/html2jsonml-cli.js"
+    "prest-html2jsonml": "./build/html2jsonml-cli.js",
+    "prest-html2hsml": "./build/html2hsml-cli.js"
   },
   "repository": {},
   "dependencies": {
