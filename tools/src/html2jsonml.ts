@@ -5,22 +5,24 @@ export function html2jsonml(html: string): any {
     const strict = false; // set to false for html-mode
     const parser = sax.parser(strict, {});
 
-    const jsonml = [] as any;
-    const jsonmlPath = [] as any;
-    let jsonmlNode = jsonml;
+    const root = [] as any;
+    const nodePath = [] as any;
+    let pointer = root;
 
     parser.onerror = error => {
         console.error("error:\t", error);
     };
+
     parser.ontext = text => {
         // console.log("text:\t", JSON.stringify(text));
         // console.log(jsonml, jsonmlNode, jsonmlPath);
         const textTrimmed = text.trim().replace(/\s+/mg, " ");
         // console.log("text:\t", JSON.stringify(textTrimmed));
         if (textTrimmed) {
-            jsonmlNode.push(textTrimmed);
+            pointer.push(textTrimmed);
         }
     };
+
     parser.onopentag = node => {
         // console.log("open:\t", JSON.stringify(node));
         const attrKeys = Object.keys(node.attributes);
@@ -54,20 +56,20 @@ export function html2jsonml(html: string): any {
         if (Object.keys(attrData).length) {
             attrs["data"] = attrData;
         }
-        const n = [name] as any[];
+        const jsonmlNode = [name] as any[];
         if (Object.keys(attrs).length) {
-            n.push(attrs);
+            jsonmlNode.push(attrs);
         }
 
-        jsonmlNode.push(n);
-        jsonmlPath.push(n);
-        jsonmlNode = n;
+        pointer.push(jsonmlNode);
+        nodePath.push(jsonmlNode);
+        pointer = jsonmlNode;
         // console.log(">>>", jsonmlPath.map(x => x[0]));
     };
     parser.onclosetag = tag => {
         // console.log("close:\t", JSON.stringify(tag));
-        jsonmlPath.pop();
-        jsonmlNode = jsonmlPath[jsonmlPath.length - 1];
+        nodePath.pop();
+        pointer = nodePath[nodePath.length - 1];
         // console.log(">>>", jsonmlPath.map(x => x[0]));
     };
     // parser.onattribute = attr => {
@@ -79,7 +81,7 @@ export function html2jsonml(html: string): any {
 
     parser.write(html.trim()).close();
 
-    return jsonml[0];
+    return root[0];
 }
 
 // const html = '<body>Hello<hr id="id1" class="c1 c2" data-x="dx"  data-y="dy" />, <em name="world">world</em>!</body>';

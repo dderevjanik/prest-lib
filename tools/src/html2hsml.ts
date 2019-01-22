@@ -7,8 +7,8 @@ export function html2hsml(html: string): any {
 
     const root = [[]] as any;
     const nodePath = [] as any; // path that consist of previous hsml nodes
-
     let pointer = root;
+
     parser.onerror = error => {
         console.error("error:\t", error);
     };
@@ -65,7 +65,6 @@ export function html2hsml(html: string): any {
 
         pointer[pointer.length - 1].push(hsmlNode);
         nodePath.push(hsmlNode);
-
         pointer = hsmlNode;
         // console.log(">>>", jsonmlPath.map(x => x[0]));
     };
