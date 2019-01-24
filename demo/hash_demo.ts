@@ -22,7 +22,7 @@ const h = new hash.Hash<any>()
         console.log("hash: " + JSON.stringify(data));
         out.innerHTML += "<br/>" + "hash: " + JSON.stringify(data);
     })
-    .start()
+    .listen()
     .write({ message: "hello" });
 
 select("#hash").onclick = (e: MouseEvent) => {
