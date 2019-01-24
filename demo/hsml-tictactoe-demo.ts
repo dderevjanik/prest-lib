@@ -56,14 +56,14 @@ class App extends XWidget<AppState> {
         ];
     }
 
-    onAction(action: string, data: any): void {
+    onAction(action: string, data: any, widget: XWidget<AppState>): void {
         console.log("action", action, data);
         switch (action) {
 
             case Actions.mark:
-                this.state.board[data.y][data.x] = data.turn ? CROS : CIRC;
-                this.state.turn = data.turn ? 0 : 1;
-                this.update();
+                widget.state.board[data.y][data.x] = data.turn ? CROS : CIRC;
+                widget.state.turn = data.turn ? 0 : 1;
+                widget.update();
                 break;
 
             default:

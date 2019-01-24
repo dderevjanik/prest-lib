@@ -16,29 +16,29 @@ const __NODE = typeof process === "object" && process.versions && process.versio
 
 export type Action = (action: string, data?: HsmlAttrOnData) => void;
 
-export type XAction<S> = (widget: XWidget<S>, action: string, data?: HsmlAttrOnData) => void;
+export type XAction<S> = (action: string, data: HsmlAttrOnData, widget: XWidget<S>) => void;
 
 export type View<S> = (state: S, action: Action) => Hsmls;
 
 const actionNode: Action = (action: string, data?: HsmlAttrOnData) => { };
 
-export interface DomWidget {
+export interface DomWidget<S> {
     mount(e: Element): this;
     umount(): this;
-    onHsml(action: string, data?: HsmlAttrOnData, e?: Event): void;
-    onAction?(action: string, data?: HsmlAttrOnData): void;
+    onHsml(action: string, data: HsmlAttrOnData, e: Event): void;
+    onAction?(action: string, data: HsmlAttrOnData, widget: XWidget<S>): void;
     onMount?(): void;
     onUmount?(): void;
 }
 
-export abstract class XWidget<S> implements Ctx, DomWidget {
+export abstract class XWidget<S> implements Ctx, DomWidget<S> {
 
     private static __count = 0;
 
     static readonly mounted: { [wid: string]: XWidget<any> } = {};
 
-    static onAction: XAction<any> = (w: XWidget<any>, action: string, data?: HsmlAttrOnData) => {
-        console.log("action:", w, action, data);
+    static onAction: XAction<any> = (action: string, data: HsmlAttrOnData, widget: XWidget<any>) => {
+        console.log("action:", action, data, widget);
     }
 
     static hsml<S, T extends XWidget<S> = XWidget<S>>(
@@ -76,16 +76,16 @@ export abstract class XWidget<S> implements Ctx, DomWidget {
 
     abstract state: S;
     abstract view(state: S, action: Action): Hsmls;
-    abstract onAction(action: string, data?: HsmlAttrOnData): void;
+    abstract onAction(action: string, data: HsmlAttrOnData, widget: XWidget<S>): void;
     // abstract onMount(): void;
     // abstract onUmount(): void;
 
     action(action: string, data?: HsmlAttrOnData): void {
-        this.onAction(action, data);
+        this.onAction(action, data, this);
     }
 
     actionGlobal(action: string, data?: HsmlAttrOnData): void {
-        XWidget.onAction(this, action, data);
+        XWidget.onAction(action, data, this);
     }
 
     constructor(type?: string) {
@@ -98,7 +98,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget {
         return this.view(this.state, this.action);
     }
 
-    onHsml(action: string, data?: HsmlAttrOnData, e?: Event): void {
+    onHsml(action: string, data: HsmlAttrOnData, e: Event): void {
         data = (data && data.constructor === Function)
             ? (data as HsmlAttrOnDataFnc)(e)
             : data;

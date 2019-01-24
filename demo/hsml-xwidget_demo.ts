@@ -63,26 +63,26 @@ class App extends XWidget<AppState> {
         console.log("umount", this.type, XWidget.mounted);
     }
 
-    onAction(action: string, data?: HsmlAttrOnData): void {
+    onAction(action: string, data: HsmlAttrOnData, widget: XWidget<AppState>): void {
         console.log("action:", action, data);
         switch (action) {
 
             case Actions.title:
-                this.state.title = data as string;
-                this.update();
+                widget.state.title = data as string;
+                widget.update();
                 break;
 
             case Actions.inc:
-                this.state.count += data as number;
-                this.update();
+                widget.state.count += data as number;
+                widget.update();
                 // async call
                 setTimeout(() => this.action(Actions.dec, 1), 1e3);
                 break;
 
             case Actions.dec:
-                const s = this.state;
+                const s = widget.state;
                 s.count -= data as number;
-                this.update();
+                widget.update();
                 break;
 
             default:
