@@ -16,7 +16,7 @@ const __NODE = typeof process === "object" && process.versions && process.versio
 
 export type Action = (action: string, data?: HsmlAttrOnData) => void;
 
-export type YAction<S> = (widget: YWidget<S>, action: string, data?: HsmlAttrOnData) => void;
+export type XAction<S> = (widget: XWidget<S>, action: string, data?: HsmlAttrOnData) => void;
 
 export type View<S> = (state: S, action: Action) => Hsmls;
 
@@ -31,17 +31,17 @@ export interface DomWidget {
     onUmount?(): void;
 }
 
-export abstract class YWidget<S> implements Ctx, DomWidget {
+export abstract class XWidget<S> implements Ctx, DomWidget {
 
     private static __count = 0;
 
-    static readonly mounted: { [wid: string]: YWidget<any> } = {};
+    static readonly mounted: { [wid: string]: XWidget<any> } = {};
 
-    static onAction: YAction<any> = (w: YWidget<any>, action: string, data?: HsmlAttrOnData) => {
+    static onAction: XAction<any> = (w: XWidget<any>, action: string, data?: HsmlAttrOnData) => {
         console.log("action:", w, action, data);
     }
 
-    static hsml<S, T extends YWidget<S> = YWidget<S>>(
+    static hsml<S, T extends XWidget<S> = XWidget<S>>(
             widgetClass: { new (...args: any[]): T; },
             state?: S): HsmlFnc | Hsmls {
         if (__NODE) {
@@ -49,7 +49,7 @@ export abstract class YWidget<S> implements Ctx, DomWidget {
         } else {
             return (e: Element) => {
                 if ((e as any).widget) {
-                    const w = (e as any).widget as YWidget<S>;
+                    const w = (e as any).widget as XWidget<S>;
                     if (state !== undefined) {
                         w.state = state;
                     }
@@ -68,7 +68,7 @@ export abstract class YWidget<S> implements Ctx, DomWidget {
 
     readonly type: string = "YWidget"; // this.constructor.name;
     // readonly id: string = this.type + "-" + YWidget.__count++;
-    readonly id: string = "w" + YWidget.__count++;
+    readonly id: string = "w" + XWidget.__count++;
     readonly dom: Element;
     readonly refs: { [key: string]: HTMLElement } = {};
 
@@ -85,7 +85,7 @@ export abstract class YWidget<S> implements Ctx, DomWidget {
     }
 
     actionGlobal(action: string, data?: HsmlAttrOnData): void {
-        YWidget.onAction(this, action, data);
+        XWidget.onAction(this, action, data);
     }
 
     constructor(type?: string) {
@@ -109,11 +109,11 @@ export abstract class YWidget<S> implements Ctx, DomWidget {
         !e && console.warn("invalit element", e);
         if (!__NODE && e) {
             if ("widget" in e) {
-                const w = (e as any).widget as YWidget<S>;
+                const w = (e as any).widget as XWidget<S>;
                 w && w.umount();
             }
             if (!this.dom) {
-                YWidget.mounted[this.id] = this;
+                XWidget.mounted[this.id] = this;
                 (this as any).dom = e;
                 (e as any).widget = this;
                 const hsmls = (this as any).render();
@@ -130,7 +130,7 @@ export abstract class YWidget<S> implements Ctx, DomWidget {
     umount(): this {
         if (!__NODE) {
             if (this.dom) {
-                delete YWidget.mounted[this.id];
+                delete XWidget.mounted[this.id];
                 if ((this as any).onUmount) {
                     (this as any).onUmount();
                 }
@@ -139,7 +139,7 @@ export abstract class YWidget<S> implements Ctx, DomWidget {
                 }
                 const wNodes = this.dom.querySelectorAll("[widget]");
                 for (let i = 0; i < wNodes.length; i++) {
-                    const w = (wNodes[i] as any).widget as YWidget<S>;
+                    const w = (wNodes[i] as any).widget as XWidget<S>;
                     w && w.umount();
                 }
                 while (this.dom.firstChild /*.hasChildNodes()*/) {
@@ -215,7 +215,7 @@ if (!__NODE) {
     (idom as any).notifications.nodesDeleted = (nodes: Node[]) => {
         nodes.forEach(node => {
             if (node.nodeType === 1 && "widget" in node) {
-                const w = (node as any).widget as YWidget<any>;
+                const w = (node as any).widget as XWidget<any>;
                 w && w.umount();
             }
         });

@@ -1,4 +1,4 @@
-import { YWidget, Action } from "../src/hsml-ywidget";
+import { XWidget, Action } from "../src/hsml-xwidget";
 import { Hsmls, Hsml } from "../src/hsml";
 
 const NBSP = "\u00A0";
@@ -14,7 +14,11 @@ enum Actions {
     mark = "mark"
 }
 
-class App extends YWidget<AppState> {
+class App extends XWidget<AppState> {
+
+    constructor() {
+        super("App");
+    }
 
     state = {
         board: [
@@ -24,10 +28,6 @@ class App extends YWidget<AppState> {
         ],
         turn: 0
     };
-
-    constructor() {
-        super("App");
-    }
 
     view(state: AppState, action: Action): Hsmls {
         return [
