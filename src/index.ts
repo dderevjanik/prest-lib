@@ -4,7 +4,7 @@ import * as encode from "./encode";
 import * as form from "./form";
 import * as hash from "./hash";
 import * as history from "./history";
-import * as hsmlXWidget from "./hsml-xwidget";
+import * as hsmlXWidget from "./hsml-ywidget";
 import * as hsmlDom from "./hsml-dom";
 import * as hsmlHtml from "./hsml-html";
 import * as hsmlIDom from "./hsml-idom";

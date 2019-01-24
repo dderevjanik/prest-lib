@@ -1,4 +1,4 @@
-import { XWidget, Action } from "../src/hsml-xwidget";
+import { YWidget, Action } from "../src/hsml-ywidget";
 import { Hsmls, Hsml } from "../src/hsml";
 
 const NBSP = "\u00A0";
@@ -10,72 +10,71 @@ interface AppState {
     turn: number;
 }
 
-const initState: AppState = {
-    board: [
-        [NBSP, NBSP, NBSP],
-        [NBSP, NBSP, NBSP],
-        [NBSP, NBSP, NBSP]
-    ],
-    turn: 0
-};
-
 enum Actions {
     mark = "mark"
 }
 
-const action: Action = (name: string, data: any, widget: XWidget) => {
-    console.log("action", name, data, widget);
-    switch (name) {
+class App extends YWidget<AppState> {
 
-        case Actions.mark:
-            widget.state.board[data.y][data.x] = data.playerTurn ? CROS : CIRC;
-            widget.state.turn = data.playerTurn ? 0 : 1;
-            widget.update();
-            break;
+    state = {
+        board: [
+            [NBSP, NBSP, NBSP],
+            [NBSP, NBSP, NBSP],
+            [NBSP, NBSP, NBSP]
+        ],
+        turn: 0
+    };
 
-        default:
-            console.warn("action unhandled:", name, data, widget);
-            break;
+    constructor() {
+        super("App");
     }
-};
 
-function boardView(board: AppState["board"], playerTurn: number): Hsmls {
-    console.log(board);
-    return [
-        ["div", board.map<Hsml>((row, y) =>
-            ["div", row.map<Hsml>((col, x) =>
-                ["button",
-                    {
-                        styles: {
-                            fontFamily: "monospace",
-                            fontSize: "300%",
-                            display: "inline-block",
-                            width: "2em", height: "2em"
+    view(state: AppState, action: Action): Hsmls {
+        return [
+            ["h1", "Tic-Tac-Toe Demo"],
+            ["p", [
+                "Player: ", state.turn ? CROS : CIRC
+            ]],
+            ["div", state.board.map<Hsml>((row, y) =>
+                ["div", row.map<Hsml>((col, x) =>
+                    ["button",
+                        {
+                            styles: {
+                                fontFamily: "monospace",
+                                fontSize: "300%",
+                                display: "inline-block",
+                                width: "2em", height: "2em"
+                            },
+                            on: ["click", Actions.mark, { x, y, turn: state.turn }]
                         },
-                        on: ["click", Actions.mark, { x, y, playerTurn }]
-                    },
-                    [
-                        col === NBSP ? NBSP : col
-                    ]
+                        [
+                            col === NBSP ? NBSP : col
+                        ]
+                    ])
                 ])
-            ])
-        ]
-    ];
+            ]
+        ];
+    }
+
+    onAction(action: string, data: any): void {
+        console.log("action", action, data);
+        switch (action) {
+
+            case Actions.mark:
+                this.state.board[data.y][data.x] = data.turn ? CROS : CIRC;
+                this.state.turn = data.turn ? 0 : 1;
+                this.update();
+                break;
+
+            default:
+                console.warn("action unhandled:", action, data, this);
+                break;
+        }
+    }
+
 }
 
-function appView(state: AppState, action: Action<AppState>): Hsmls {
-    console.log(state);
-    return [
-        ["h1", "Tic-Tac-Toe Demo"],
-        ["p", [
-            "Player: ", state.turn ? CROS : CIRC
-        ]],
-        ["p", boardView(state.board, state.turn)]
-    ];
-}
 
-const app = new XWidget("app", appView, initState, action);
-
-app.mount(document.getElementById("app"));
+const app = new App().mount(document.getElementById("app"));
 
 (self as any).app = app;
