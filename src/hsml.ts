@@ -236,3 +236,39 @@ export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
 //     ]]
 // ]];
 // console.log(hml);
+
+// TEST
+
+// import { hsmls2htmls } from "./hsml-html";
+
+// const action: Action = (name: string, data: any, xWidget: YWidget) => {
+//     console.log("action:", name, data, xWidget);
+// };
+
+// const data = { attr: "action-data" };
+
+// const hmls: Hsmls = [
+//     ["button",
+//         { on: ["click", "action", data] },
+//         ["send"]
+//     ],
+//     ["input",
+//         {
+//             on: [
+//                 ["mouseover", "hover-action", data],
+//                 ["change", "click-action", e => (e.target as HTMLInputElement).value],
+//                 ["click", () => action("action-name", data)],
+//             ],
+//             click: e => action("action-name", data)
+//         }
+//     ],
+//     ["button",
+//         {
+//             on: ["click", () => action("action-name", data)],
+//             click: e => action("action-name", data)
+//         },
+//         ["send"]
+//     ]
+// ];
+
+// console.log(hsmls2htmls(hmls).join("\n"));
