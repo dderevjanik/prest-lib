@@ -1,4 +1,3 @@
-
 import * as sax from "sax";
 
 export function html2hsml(html: string): any {
@@ -15,7 +14,7 @@ export function html2hsml(html: string): any {
 
     parser.ontext = text => {
         // console.log("text:\t", JSON.stringify(text));
-        // console.log(jsonml, jsonmlNode, jsonmlPath);
+        // console.log(hsml, hsmlNode, hsmlPath);
         const textTrimmed = text.trim().replace(/\s+/mg, " ");
         // console.log("text:\t", JSON.stringify(textTrimmed));
         if (textTrimmed) {
@@ -66,7 +65,7 @@ export function html2hsml(html: string): any {
         pointer[pointer.length - 1].push(hsmlNode);
         nodePath.push(hsmlNode);
         pointer = hsmlNode;
-        // console.log(">>>", jsonmlPath.map(x => x[0]));
+        // console.log(">>>", hsmlPath.map(x => x[0]));
     };
 
     parser.onclosetag = tag => {
@@ -82,7 +81,7 @@ export function html2hsml(html: string): any {
             }
         }
         pointer = nodePath[nodePath.length - 1];
-        // console.log(">>>", jsonmlPath.map(x => x[0]));
+        // console.log(">>>", hsmlPath.map(x => x[0]));
     };
     // parser.onattribute = attr => {
     //     // console.log("attr:\t", attr);
@@ -96,14 +95,18 @@ export function html2hsml(html: string): any {
     return root[0][0];
 }
 
+export function hsml2string(hsml: any): string {
+    return JSON.stringify(hsml, null, 4).replace(/\[\s+"/mg, `["`);
+}
+
 // const html = '<body>Hello<hr id="id1" class="c1 c2" data-x="dx"  data-y="dy" />, <em name="world">world</em>!</body>';
 // console.log(html, "\n");
 
-// const jsonml = html2jsonml(html);
+// const hsml = html2hsml(html);
 
-// // console.log(jsonml);
-// // console.log(JSON.stringify(jsonml));
-// console.log(JSON.stringify(jsonml, null, 4));
+// // console.log(hsml);
+// // console.log(JSON.stringify(hsml));
+// console.log(JSON.stringify(hsml, null, 4));
 
 
 
@@ -116,13 +119,13 @@ export function html2hsml(html: string): any {
 //     return indent;
 // }
 
-// function jsonmlPrint(node, depth=0) {
+// function hsmlPrint(node, depth=0) {
 //     switch (node.constructor) {
 //         case Array:
 //             console.log(mkIndent(depth) + "[" + JSON.stringify(node[0]) +
 //                 (node.length > 1 ? "," : ""));
 //             for (const i = 1; i < node.length; i++) {
-//                 jsonmlPrint(node[i], depth + 1);
+//                 hsmlPrint(node[i], depth + 1);
 //             }
 //             console.log(mkIndent(depth) + "]");
 //             break;
@@ -141,6 +144,6 @@ export function html2hsml(html: string): any {
 // const html = '<body>Hello<hr id="id1" class="c1 c2" data-x="dx"  data-y="dy" />, <em name="world">world</em>!</body>';
 // console.log(html, "\n");
 
-// const jsonml = html2jsonml(html);
+// const hsml = html2hsml(html);
 
-// jsonmlPrint(jsonml);
+// hsmlPrint(hsml);

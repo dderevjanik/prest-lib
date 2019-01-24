@@ -1,4 +1,3 @@
-
 import * as sax from "sax";
 
 export function html2jsonml(html: string): any {
@@ -82,6 +81,10 @@ export function html2jsonml(html: string): any {
     parser.write(html.trim()).close();
 
     return root[0];
+}
+
+export function jsonml2string(jsonml: any): string {
+    return JSON.stringify(jsonml, null, 4).replace(/\[\s+"/mg, `["`);
 }
 
 // const html = '<body>Hello<hr id="id1" class="c1 c2" data-x="dx"  data-y="dy" />, <em name="world">world</em>!</body>';

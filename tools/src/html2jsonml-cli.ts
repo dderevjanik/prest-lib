@@ -1,13 +1,9 @@
 #!/usr/bin/env node
 
 import * as fs from "fs";
-import { html2jsonml } from "./html2jsonml";
+import { html2jsonml, jsonml2string } from "./html2jsonml";
 
 const args = process.argv.slice(2);
-
-function jsonml2string(jsonml: any): string {
-    return JSON.stringify(jsonml, null, 4).replace(/\[\s+"/mg, `["`);
-}
 
 switch (args.length) {
     case 1: {
