@@ -51,9 +51,9 @@ export interface HsmlObj {
 export interface Hsmls extends Array<Hsml> { }
 
 export type HsmlTagAttrN = [HsmlHead, (Hsmls | HsmlFnc
-    | string | boolean | number | Date)?];
+    | HsmlObj | string | boolean | number | Date)?];
 export type HsmlTagAttrY = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc
-    | string | boolean | number | Date)?];
+    | HsmlObj | string | boolean | number | Date)?];
 
 export type HsmlTag = HsmlTagAttrN | HsmlTagAttrY;
 
@@ -137,6 +137,7 @@ export function hsml<C = any>(hml: Hsml, handler: HsmlHandler<C>, ctx?: C): void
 
         let children: Hsmls = [];
         let hsmlFnc: HsmlFnc;
+        let hsmlObj: HsmlObj;
 
         const htc = hmlTag[childIdx];
         switch (htc && htc.constructor) {
@@ -151,6 +152,9 @@ export function hsml<C = any>(hml: Hsml, handler: HsmlHandler<C>, ctx?: C): void
             case Number:
             case Date:
                 children = [htc as Hsml];
+                break;
+            default: // HsmlObj
+                hsmlObj = htc as HsmlObj;
                 break;
         }
 
@@ -178,28 +182,26 @@ export function hsml<C = any>(hml: Hsml, handler: HsmlHandler<C>, ctx?: C): void
         if (ref) {
             (attrs as any)._ref = ref;
         }
+        if (hsmlObj) {
+            (attrs as any)._widget = hsmlObj;
+        }
 
         const skip = handler.open(tag, attrs, children, ctx);
+
+        if (hsmlFnc) {
+            handler.fnc(hsmlFnc, ctx);
+        }
 
         if (!skip) {
             children.forEach(jml => hsml(jml, handler, ctx));
         }
-
-        hsmlFnc && handler.fnc(hsmlFnc, ctx);
 
         handler.close(tag, children, ctx);
     }
 }
 
 export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
-    const r = hsmls
-        .reduce<Hsmls>(
-            (prev, cur) => {
-                prev.push(cur, sep);
-                return prev;
-            },
-            [] as Hsmls
-        );
+    const r = hsmls.reduce<Hsmls>((p, c) => (p.push(c, sep), p), [] as Hsmls);
     r.splice(-1);
     return r;
 }

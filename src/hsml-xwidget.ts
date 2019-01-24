@@ -93,7 +93,7 @@ export class XWidget<S = any> extends Widget {
         return this.view(this.state, this.action);
     }
 
-    onHsml(action: string, data: HsmlAttrOnData, e: Event): void {
+    onHsml(action: string, data?: HsmlAttrOnData, e?: Event): void {
         data = (data && data.constructor === Function)
             ? (data as HsmlAttrOnDataFnc)(e)
             : data;

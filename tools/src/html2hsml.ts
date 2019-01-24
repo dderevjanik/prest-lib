@@ -73,7 +73,7 @@ export function html2hsml(html: string): any {
         // console.log("close:\t", JSON.stringify(tag));
         const currentNode = nodePath.pop();
 
-        let children = currentNode[currentNode.length -1];
+        let children = currentNode[currentNode.length - 1];
         if (children.length === 0) {
             currentNode.pop(); // remove children
         } else if (children.length === 1) {
