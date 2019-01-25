@@ -16,7 +16,7 @@ const __NODE = typeof process === "object" && process.versions && process.versio
 
 export type Action = (action: string, data?: HsmlAttrOnData) => void;
 
-export type XAction<S> = (action: string, data: HsmlAttrOnData, widget: XWidget<S>) => void;
+export type XAction<S> = (action: string, data: any, widget: XWidget<S>) => void;
 
 export type View<S> = (state: S, action: Action) => Hsmls;
 
@@ -26,9 +26,9 @@ export interface DomWidget<S> {
     mount: (e: Element) => this;
     umount: () => this;
     onHsml: (action: string, data: HsmlAttrOnData, e: Event) => void;
-    onAction?: (action: string, data: HsmlAttrOnData, widget: XWidget<S>) => void;
-    onMount?: () => void;
-    onUmount?: () => void;
+    onAction?: (action: string, data: any, widget: XWidget<S>) => void;
+    onMount?: (widget: XWidget<S>) => void;
+    onUmount?: (widget: XWidget<S>) => void;
 }
 
 export abstract class XWidget<S> implements Ctx, DomWidget<S> {
@@ -37,7 +37,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
 
     static readonly mounted: { [wid: string]: XWidget<any> } = {};
 
-    static onAction: XAction<any> = (action: string, data: HsmlAttrOnData, widget: XWidget<any>) => {
+    static onAction: XAction<any> = (action: string, data: any, widget: XWidget<any>) => {
         console.log("action:", action, data, widget);
     }
 
@@ -75,15 +75,15 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
 
     abstract state: S;
     abstract view: (state: S, action: Action) => Hsmls;
-    abstract onAction: (action: string, data: HsmlAttrOnData, widget: XWidget<S>) => void;
-    // abstract onMount(): void;
-    // abstract onUmount(): void;
+    abstract onAction: (action: string, data: any, widget: XWidget<S>) => void;
+    // abstract onMount(widget: XWidget<S>): void;
+    // abstract onUmount(widget: XWidget<S>): void;
 
-    action = (action: string, data?: HsmlAttrOnData): void => {
+    action = (action: string, data?: any): void => {
         this.onAction(action, data, this);
     }
 
-    actionGlobal = (action: string, data?: HsmlAttrOnData): void => {
+    actionGlobal = (action: string, data?: any): void => {
         XWidget.onAction(action, data, this);
     }
 
@@ -94,7 +94,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
     onHsml = (action: string, data: HsmlAttrOnData, e: Event): void => {
         data = (data && data.constructor === Function)
             ? (data as HsmlAttrOnDataFnc)(e)
-            : data;
+            : data || e;
         this.action(action, data);
     }
 
@@ -112,8 +112,8 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
                 const hsmls = (this as any).render();
                 hsmls2idomPatch(e, hsmls, this);
                 e.setAttribute("widget", this.type);
-                if ((this as any).onMount) {
-                    (this as any).onMount();
+                if ((this as DomWidget<S>).onMount) {
+                    (this as DomWidget<S>).onMount(this);
                 }
             }
         }
@@ -124,8 +124,8 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         if (!__NODE) {
             if (this.dom) {
                 delete XWidget.mounted[this.id];
-                if ((this as any).onUmount) {
-                    (this as any).onUmount();
+                if ((this as DomWidget<S>).onUmount) {
+                    (this as DomWidget<S>).onUmount(this);
                 }
                 if (this.dom.hasAttribute("widget")) {
                     this.dom.removeAttribute("widget");
@@ -145,7 +145,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         return this;
     }
 
-    update = (state?: S): this => {
+    update = (state?: Partial<S>): this => {
         if (!__NODE) {
             if (state) {
                 this.state = merge(this.state, state);
@@ -219,17 +219,10 @@ if (!__NODE) {
 }
 
 
-const merge = <T extends object & { [k: string]: any } = object>(target: T, ...sources: T[]): T => {
-    if (!sources.length) {
-        return target;
-    }
-    const source = sources.shift();
-    if (source === undefined) {
-        return target;
-    }
-    if (isMergebleObject(target) && isMergebleObject(source)) {
-        Object.keys(source).forEach(function (key: string) {
-            if (isMergebleObject(source[key])) {
+const merge = <T extends { [k: string]: any }>(target: T, source: Partial<T>): T => {
+    if (isMergeble(target) && isMergeble(source)) {
+        Object.keys(source).forEach(key => {
+            if (isMergeble(source[key])) {
                 if (!target[key]) {
                     target[key] = {};
                 }
@@ -238,58 +231,16 @@ const merge = <T extends object & { [k: string]: any } = object>(target: T, ...s
                 target[key] = source[key];
             }
         });
+    } else {
+        console.warn("unable merge", target, source);
     }
-    return merge(target, ...sources);
+    return target;
 };
 
 const isObject = (item: any): boolean => {
     return item !== null && typeof item === "object";
 };
 
-const isMergebleObject = (item: object): boolean => {
+const isMergeble = (item: object): boolean => {
     return isObject(item) && !Array.isArray(item);
 };
-
-// const t = {a: {c: "c", b: [1, 2]}};
-// const r = mergeObjects(t, {a: {b: [3]}});
-// console.log(t, r, t === r);
-
-// function merge<A = Object, B = Object>(target: A, source: B): A & B {
-//     const isDeep = (prop: string) =>
-//         isObject((source as any)[prop])
-//             && target.hasOwnProperty(prop)
-//             && isObject((target as any)[prop]);
-//     const replaced = Object.getOwnPropertyNames(source)
-//         .map(prop => ({ [prop]: isDeep(prop)
-//             ? merge((target as any)[prop], (source as any)[prop])
-//             : (source as any)[prop] }))
-//         .reduce((a, b) => ({ ...a, ...b }), {});
-//     return {
-//         ...(target as Object),
-//         ...(replaced as Object)
-//     } as A & B;
-// }
-
-// function isObject(item: any) {
-//     return typeof item === "object" && !Array.isArray(item);
-// }
-
-// function mergeDeep(target, source) {
-//     if (typeof target == "object" && typeof source == "object") {
-//         for (const key in source) {
-//             if (source[key] === null && (target[key] === undefined || target[key] === null)) {
-//                 target[key] = null;
-//             } else if (source[key] instanceof Array) {
-//                 if (!target[key]) target[key] = [];
-//                 //concatenate arrays
-//                 target[key] = target[key].concat(source[key]);
-//             } else if (typeof source[key] == "object") {
-//                 if (!target[key]) target[key] = {};
-//                 this.mergeDeep(target[key], source[key]);
-//             } else {
-//                 target[key] = source[key];
-//             }
-//         }
-//     }
-//     return target;
-// }
