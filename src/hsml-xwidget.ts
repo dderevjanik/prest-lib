@@ -23,12 +23,12 @@ export type View<S> = (state: S, action: Action) => Hsmls;
 const actionNode: Action = (action: string, data?: HsmlAttrOnData) => { };
 
 export interface DomWidget<S> {
-    mount(e: Element): this;
-    umount(): this;
-    onHsml(action: string, data: HsmlAttrOnData, e: Event): void;
-    onAction?(action: string, data: HsmlAttrOnData, widget: XWidget<S>): void;
-    onMount?(): void;
-    onUmount?(): void;
+    mount: (e: Element) => this;
+    umount: () => this;
+    onHsml: (action: string, data: HsmlAttrOnData, e: Event) => void;
+    onAction?: (action: string, data: HsmlAttrOnData, widget: XWidget<S>) => void;
+    onMount?: () => void;
+    onUmount?: () => void;
 }
 
 export abstract class XWidget<S> implements Ctx, DomWidget<S> {
@@ -41,9 +41,9 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         console.log("action:", action, data, widget);
     }
 
-    static hsml<S, T extends XWidget<S> = XWidget<S>>(
+    static hsml = <S, T extends XWidget<S> = XWidget<S>>(
             widgetClass: { new (...args: any[]): T; },
-            state?: S): HsmlFnc | Hsmls {
+            state?: S): HsmlFnc | Hsmls  => {
         if (__NODE) {
             return widgetClass.prototype.view(state, actionNode);
         } else {
@@ -66,46 +66,39 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         }
     }
 
-    readonly type: string = "YWidget"; // this.constructor.name;
-    // readonly id: string = this.type + "-" + YWidget.__count++;
-    readonly id: string = "w" + XWidget.__count++;
+    readonly type: string = this.constructor.name; // "XWidget"
+    readonly id: string = this.type + "-" + XWidget.__count++;
     readonly dom: Element;
     readonly refs: { [key: string]: HTMLElement } = {};
 
     private __updateSched: number;
 
     abstract state: S;
-    abstract view(state: S, action: Action): Hsmls;
-    abstract onAction(action: string, data: HsmlAttrOnData, widget: XWidget<S>): void;
+    abstract view: (state: S, action: Action) => Hsmls;
+    abstract onAction: (action: string, data: HsmlAttrOnData, widget: XWidget<S>) => void;
     // abstract onMount(): void;
     // abstract onUmount(): void;
 
-    action(action: string, data?: HsmlAttrOnData): void {
+    action = (action: string, data?: HsmlAttrOnData): void => {
         this.onAction(action, data, this);
     }
 
-    actionGlobal(action: string, data?: HsmlAttrOnData): void {
+    actionGlobal = (action: string, data?: HsmlAttrOnData): void => {
         XWidget.onAction(action, data, this);
     }
 
-    constructor(type?: string) {
-        if (type) {
-            this.type = type;
-        }
-    }
-
-    render(): Hsmls {
+    render = (): Hsmls => {
         return this.view(this.state, this.action);
     }
 
-    onHsml(action: string, data: HsmlAttrOnData, e: Event): void {
+    onHsml = (action: string, data: HsmlAttrOnData, e: Event): void => {
         data = (data && data.constructor === Function)
             ? (data as HsmlAttrOnDataFnc)(e)
             : data;
         this.action(action, data);
     }
 
-    mount(e: Element = document.body): this {
+    mount = (e: Element = document.body): this => {
         !e && console.warn("invalit element", e);
         if (!__NODE && e) {
             if ("widget" in e) {
@@ -127,7 +120,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         return this;
     }
 
-    umount(): this {
+    umount = (): this => {
         if (!__NODE) {
             if (this.dom) {
                 delete XWidget.mounted[this.id];
@@ -152,8 +145,11 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         return this;
     }
 
-    update(): this {
+    update = (state?: S): this => {
         if (!__NODE) {
+            if (state) {
+                this.state = merge(this.state, state);
+            }
             if (this.dom && !this.__updateSched) {
                 this.__updateSched = setTimeout(() => {
                     if (this.dom) {
@@ -166,7 +162,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         return this;
     }
 
-    toHsml(): Hsml {
+    toHsml = (): Hsml => {
         if (this.dom) {
             if (this.__updateSched) {
                 clearTimeout(this.__updateSched);
@@ -221,3 +217,79 @@ if (!__NODE) {
         });
     };
 }
+
+
+const merge = <T extends object & { [k: string]: any } = object>(target: T, ...sources: T[]): T => {
+    if (!sources.length) {
+        return target;
+    }
+    const source = sources.shift();
+    if (source === undefined) {
+        return target;
+    }
+    if (isMergebleObject(target) && isMergebleObject(source)) {
+        Object.keys(source).forEach(function (key: string) {
+            if (isMergebleObject(source[key])) {
+                if (!target[key]) {
+                    target[key] = {};
+                }
+                merge(target[key], source[key]);
+            } else {
+                target[key] = source[key];
+            }
+        });
+    }
+    return merge(target, ...sources);
+};
+
+const isObject = (item: any): boolean => {
+    return item !== null && typeof item === "object";
+};
+
+const isMergebleObject = (item: object): boolean => {
+    return isObject(item) && !Array.isArray(item);
+};
+
+// const t = {a: {c: "c", b: [1, 2]}};
+// const r = mergeObjects(t, {a: {b: [3]}});
+// console.log(t, r, t === r);
+
+// function merge<A = Object, B = Object>(target: A, source: B): A & B {
+//     const isDeep = (prop: string) =>
+//         isObject((source as any)[prop])
+//             && target.hasOwnProperty(prop)
+//             && isObject((target as any)[prop]);
+//     const replaced = Object.getOwnPropertyNames(source)
+//         .map(prop => ({ [prop]: isDeep(prop)
+//             ? merge((target as any)[prop], (source as any)[prop])
+//             : (source as any)[prop] }))
+//         .reduce((a, b) => ({ ...a, ...b }), {});
+//     return {
+//         ...(target as Object),
+//         ...(replaced as Object)
+//     } as A & B;
+// }
+
+// function isObject(item: any) {
+//     return typeof item === "object" && !Array.isArray(item);
+// }
+
+// function mergeDeep(target, source) {
+//     if (typeof target == "object" && typeof source == "object") {
+//         for (const key in source) {
+//             if (source[key] === null && (target[key] === undefined || target[key] === null)) {
+//                 target[key] = null;
+//             } else if (source[key] instanceof Array) {
+//                 if (!target[key]) target[key] = [];
+//                 //concatenate arrays
+//                 target[key] = target[key].concat(source[key]);
+//             } else if (typeof source[key] == "object") {
+//                 if (!target[key]) target[key] = {};
+//                 this.mergeDeep(target[key], source[key]);
+//             } else {
+//                 target[key] = source[key];
+//             }
+//         }
+//     }
+//     return target;
+// }
