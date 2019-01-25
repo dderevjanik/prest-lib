@@ -14,7 +14,7 @@ enum Actions {
     mark = "mark"
 }
 
-class App extends XWidget<AppState> {
+class TicTacToe extends XWidget<AppState> {
 
     state = {
         board: [
@@ -71,6 +71,6 @@ class App extends XWidget<AppState> {
 }
 
 
-const app = new App().mount(document.getElementById("app"));
+const app = new TicTacToe().mount(document.getElementById("app"));
 
 (self as any).app = app;
