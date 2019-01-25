@@ -15,16 +15,12 @@ enum Actions {
 
 class App extends XWidget<AppState> {
 
-    constructor() {
-        super("App");
-    }
-
     state = {
         title: "Counter",
         count: 77
     };
 
-    view(state: AppState, action: Action): Hsmls {
+    view = (state: AppState, action: Action): Hsmls => {
         return [
             ["h2", state.title],
             ["p", [
@@ -49,40 +45,40 @@ class App extends XWidget<AppState> {
             // ["div",
             //     // { _widget: this.app1 }
             //     // this.app1
-            //     // YWidget.hsml(App1)
-            //     state.title ? YWidget.hsml<AppState>(App1, state) : "app"
+            //     // XWidget.hsml(App1)
+            //     state.title ? XWidget.hsml<AppState>(App1, state) : "app"
             // ]
         ];
     }
 
-    onMount(): void {
+    onMount = (): void => {
         console.log("mount", this.type, XWidget.mounted);
     }
 
-    onUmount(): void {
+    onUmount = (): void => {
         console.log("umount", this.type, XWidget.mounted);
     }
 
-    onAction(action: string, data: HsmlAttrOnData, widget: XWidget<AppState>): void {
+    onAction = (action: string, data: HsmlAttrOnData,
+                { state, update, action: actionSend }: XWidget<AppState>): void => {
         console.log("action:", action, data);
         switch (action) {
 
             case Actions.title:
-                widget.state.title = data as string;
-                widget.update();
+                state.title = data as string;
+                update();
                 break;
 
             case Actions.inc:
-                widget.state.count += data as number;
-                widget.update();
+                state.count += data as number;
+                update();
                 // async call
-                setTimeout(() => this.action(Actions.dec, 1), 1e3);
+                setTimeout(actionSend, 1e3, Actions.dec, 1);
                 break;
 
             case Actions.dec:
-                const s = widget.state;
-                s.count -= data as number;
-                widget.update();
+                state.count -= data as number;
+                update();
                 break;
 
             default:
@@ -94,16 +90,12 @@ class App extends XWidget<AppState> {
 
 class App1 extends XWidget<AppState> {
 
-    constructor() {
-        super("App1");
-    }
-
     state = {
         title: "Counter sec",
         count: 33
     };
 
-    view(state: AppState, action: Action): Hsmls {
+    view = (state: AppState, action: Action): Hsmls => {
         return [
             ["h3", state.title],
             ["p", [
@@ -114,15 +106,15 @@ class App1 extends XWidget<AppState> {
         ];
     }
 
-    onMount(): void {
+    onMount = (): void => {
         console.log("mount", this.type, XWidget.mounted);
     }
 
-    onUmount(): void {
+    onUmount = (): void => {
         console.log("umount", this.type, XWidget.mounted);
     }
 
-    onAction(action: string, data?: HsmlAttrOnData): void {
+    onAction = (action: string, data: HsmlAttrOnData): void => {
         console.log("action:", action, data);
         switch (action) {
 
@@ -135,6 +127,7 @@ class App1 extends XWidget<AppState> {
                 break;
         }
     }
+
 }
 
 const app = new App().mount(document.getElementById("app"));

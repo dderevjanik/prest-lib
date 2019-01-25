@@ -241,7 +241,7 @@ export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
 
 // import { hsmls2htmls } from "./hsml-html";
 
-// const action: Action = (name: string, data: any, xWidget: YWidget) => {
+// const action: Action = (name: string, data: any, xWidget: XWidget) => {
 //     console.log("action:", name, data, xWidget);
 // };
 

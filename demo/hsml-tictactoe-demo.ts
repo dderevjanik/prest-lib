@@ -16,10 +16,6 @@ enum Actions {
 
 class App extends XWidget<AppState> {
 
-    constructor() {
-        super("App");
-    }
-
     state = {
         board: [
             [NBSP, NBSP, NBSP],
@@ -29,7 +25,7 @@ class App extends XWidget<AppState> {
         turn: 0
     };
 
-    view(state: AppState, action: Action): Hsmls {
+    view = (state: AppState, action: Action): Hsmls => {
         return [
             ["h1", "Tic-Tac-Toe Demo"],
             ["p", [
@@ -56,7 +52,7 @@ class App extends XWidget<AppState> {
         ];
     }
 
-    onAction(action: string, data: any, widget: XWidget<AppState>): void {
+    onAction = (action: string, data: any, widget: XWidget<AppState>): void => {
         console.log("action", action, data);
         switch (action) {
 

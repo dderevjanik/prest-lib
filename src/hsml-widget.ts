@@ -29,9 +29,8 @@ export abstract class Widget implements Ctx, DomWidget {
 
     static readonly mounted: { [wid: string]: Widget } = {};
 
-    readonly type: string = "Widget"; // this.constructor.name;
-    // readonly id: string = this.type + "-" + Widget.__count++;
-    readonly id: string = "w" + Widget.__count++;
+    readonly type: string = this.constructor.name; // "Widget"
+    readonly id: string = this.type + "-" + Widget.__count++;
     readonly dom: Element;
     readonly refs: { [key: string]: HTMLElement } = {};
 
