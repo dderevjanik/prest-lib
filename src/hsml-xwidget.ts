@@ -14,13 +14,17 @@ const __NODE = typeof process === "object" && process.versions && process.versio
 //     idom = require("incremental-dom");
 // }
 
-export type Action = (action: string, data?: HsmlAttrOnData) => void;
+export type Action = (action: string, data?: any) => void;
 
 export type XAction<S> = (action: string, data: any, widget: XWidget<S>) => void;
 
 export type View<S> = (state: S, action: Action) => Hsmls;
 
-const actionNode: Action = (action: string, data?: HsmlAttrOnData) => { };
+export type Type<T> = { new (...args: any[]): T; };
+
+export type Manage = <S>(widgetType: Type<XWidget<S>>, state?: S) => HsmlFnc | Hsmls;
+
+const actionNode: Action = (action: string, data?: any) => { };
 
 export interface DomWidget<S> {
     mount: (e: Element) => this;
@@ -41,11 +45,10 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         console.log("action:", action, data, widget);
     }
 
-    static hsml = <S, T extends XWidget<S> = XWidget<S>>(
-            widgetClass: { new (...args: any[]): T; },
-            state?: S): HsmlFnc | Hsmls  => {
+    static hsml: Manage = <S>(widgetType: Type<XWidget<S>>,
+                              state?: S): HsmlFnc | Hsmls  => {
         if (__NODE) {
-            return widgetClass.prototype.view(state, actionNode);
+            return widgetType.prototype.view(state, actionNode);
         } else {
             return (e: Element) => {
                 if ((e as any).widget) {
@@ -55,7 +58,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
                     }
                     w.update();
                 } else {
-                    const w = new widgetClass();
+                    const w = new widgetType();
                     if (state !== undefined) {
                         w.state = state;
                     }
@@ -74,7 +77,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
     private __updateSched: number;
 
     abstract state: S;
-    abstract view: (state: S, action: Action) => Hsmls;
+    abstract view: (state: S, action: Action, manage: Manage ) => Hsmls;
     abstract onAction: (action: string, data: any, widget: XWidget<S>) => void;
     // abstract onMount(widget: XWidget<S>): void;
     // abstract onUmount(widget: XWidget<S>): void;
@@ -88,7 +91,7 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
     }
 
     render = (): Hsmls => {
-        return this.view(this.state, this.action);
+        return this.view(this.state, this.action, XWidget.hsml);
     }
 
     onHsml = (action: string, data: HsmlAttrOnData, e: Event): void => {

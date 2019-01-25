@@ -1,4 +1,4 @@
-import { XWidget, Action } from "../src/hsml-xwidget";
+import { XWidget, Action, Manage } from "../src/hsml-xwidget";
 import { Hsmls } from "../src/hsml";
 
 interface AppState {
@@ -20,7 +20,7 @@ class App extends XWidget<AppState> {
         count: 77
     };
 
-    view = (state: AppState, action: Action): Hsmls => {
+    view = (state: AppState, action: Action, manage: Manage): Hsmls => {
         return [
             ["h2", state.title],
             ["p", [
@@ -41,7 +41,7 @@ class App extends XWidget<AppState> {
                 ["button", { on: ["click", Actions.inc, 2] }, "+"]
             ]],
             state.title
-                ? ["div", state.title ? XWidget.hsml<AppState>(App1, state) : "app"]
+                ? ["div", state.title ? manage<AppState>(App1, state) : "app"]
                 : ""
             // ["div",
             //     // { _widget: this.app1 }
