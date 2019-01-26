@@ -23,7 +23,7 @@ export function xwidget<S>(xwClass: Class<IXWidget<S>>,
                            pretty = false) {
     const w = create<S>(xwClass);
     state && (w.state = state);
-    hsmls2html(w.render(), html => console.log(html), true);
+    hsmls2html(w.render(), onHtml, true);
 }
 
 export interface XWidget<S> extends Ctx, IXWidget<S> {

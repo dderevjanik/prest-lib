@@ -121,4 +121,6 @@ class App1 implements IXWidget<AppState> {
 
 }
 
-xwidget<AppState>(App, undefined, html => console.log(html), true);
+const out: string[] = [];
+xwidget<AppState>(App, undefined, html => out.push(html), true);
+console.log(out.join(""));
