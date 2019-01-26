@@ -31,8 +31,8 @@ export interface DomWidget<S> {
     umount: () => this;
     onHsml: (action: string, data: HsmlAttrOnData, e: Event) => void;
     onAction?: (action: string, data: any, widget: XWidget<S>) => void;
-    onMount?: (widget: XWidget<S>) => void;
-    onUmount?: (widget: XWidget<S>) => void;
+    // onMount?: (widget: XWidget<S>) => void;
+    // onUmount?: (widget: XWidget<S>) => void;
 }
 
 export abstract class XWidget<S> implements Ctx, DomWidget<S> {
@@ -115,9 +115,10 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
                 const hsmls = (this as any).render();
                 hsmls2idomPatch(e, hsmls, this);
                 e.setAttribute("widget", this.type);
-                if ((this as DomWidget<S>).onMount) {
-                    (this as DomWidget<S>).onMount(this);
-                }
+                this.action("_mount", this.dom);
+                // if ((this as DomWidget<S>).onMount) {
+                //     (this as DomWidget<S>).onMount(this);
+                // }
             }
         }
         return this;
@@ -127,9 +128,10 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
         if (!__NODE) {
             if (this.dom) {
                 delete XWidget.mounted[this.id];
-                if ((this as DomWidget<S>).onUmount) {
-                    (this as DomWidget<S>).onUmount(this);
-                }
+                this.action("_umount", this.dom);
+                // if ((this as DomWidget<S>).onUmount) {
+                //     (this as DomWidget<S>).onUmount(this);
+                // }
                 if (this.dom.hasAttribute("widget")) {
                     this.dom.removeAttribute("widget");
                 }

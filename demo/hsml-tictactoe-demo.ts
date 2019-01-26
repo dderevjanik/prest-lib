@@ -62,6 +62,10 @@ class TicTacToe extends XWidget<AppState> {
                 widget.update();
                 break;
 
+            case "_mount":
+            case "_umount":
+                break;
+
             default:
                 console.warn("action unhandled:", action, data, this);
                 break;

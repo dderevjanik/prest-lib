@@ -52,14 +52,6 @@ class App extends XWidget<AppState> {
         ];
     }
 
-    onMount = (widget: XWidget<AppState>): void => {
-        console.log("mount", this.type, XWidget.mounted);
-    }
-
-    onUmount = (widget: XWidget<AppState>): void => {
-        console.log("umount", this.type, XWidget.mounted);
-    }
-
     onAction = (action: string, data: any,
                 { state, update, action: actionSend }: XWidget<AppState>): void => {
         console.log("action:", action, data);
@@ -78,7 +70,14 @@ class App extends XWidget<AppState> {
                 update({ count: state.count - data as number });
                 break;
 
-            default:
+            case "_mount":
+                console.log("mount", data, XWidget.mounted);
+                break;
+            case "_umount":
+                console.log("umount", data, XWidget.mounted);
+                break;
+
+                default:
                 this.actionGlobal(action, data);
                 break;
         }
@@ -103,20 +102,19 @@ class App1 extends XWidget<AppState> {
         ];
     }
 
-    onMount = (): void => {
-        console.log("mount", this.type, XWidget.mounted);
-    }
-
-    onUmount = (): void => {
-        console.log("umount", this.type, XWidget.mounted);
-    }
-
     onAction = (action: string, data: any): void => {
         console.log("action:", action, data);
         switch (action) {
 
             case Actions.xXx:
                 console.log(Actions.xXx);
+                break;
+
+            case "_mount":
+                console.log("mount", data, XWidget.mounted);
+                break;
+            case "_umount":
+                console.log("umount", data, XWidget.mounted);
                 break;
 
             default:
@@ -130,3 +128,31 @@ class App1 extends XWidget<AppState> {
 const app = new App().mount(document.getElementById("app"));
 
 (self as any).app = app;
+
+
+// interface IWidget {
+//     m: () => string;
+// }
+
+// class MyWidget implements IWidget {
+//     m = () => "MyWidget.m " + this.constructor.name;
+// }
+
+// type Class<T = {}> = new (...args: any[]) => T;
+
+// function webOrNode<WidgetClass extends Class<IWidget>>(widgetClass: WidgetClass) {
+//     class WebOrNodeWidget extends widgetClass {
+//         // constructor(...args: any[]) {
+//         //     super();
+//         // }
+//         type = widgetClass.prototype.constructor.name;
+//         c = () => "WebOrNodeWidget.c " + this.constructor.name;
+//     }
+//     return new WebOrNodeWidget();
+// }
+
+// const webOrNodeMyWidget = webOrNode(MyWidget);
+// console.log(webOrNodeMyWidget.m());
+// console.log(webOrNodeMyWidget.c());
+// console.log(webOrNodeMyWidget.type);
+// console.log(webOrNodeMyWidget);
