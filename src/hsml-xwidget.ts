@@ -1,137 +1,134 @@
 import { Hsml, Hsmls, HsmlFnc, HsmlAttrOnData, HsmlAttrOnDataFnc } from "./hsml";
-import { hsmls2idomPatch, Ctx } from "./hsml-idom";
+import { Ctx, hsmls2idomPatch } from "./hsml-idom";
 import * as idom from "incremental-dom";
 
-declare const process: any;
+export type Class<T = object> = new (...args: any[]) => T;
 
-const __NODE = typeof process === "object" && process.versions && process.versions.node;
+export type Manage = <S>(xwClass: Class<IXWidget<S>>, state?: S) => HsmlFnc | Hsmls;
 
-// let hsmls2idomPatch: (node: Element, hmls: Hsmls, ctx?: any) => void;
-// let idom: any;
-// declare const require: any;
-// if (!__NODE) {
-//     hsmls2idomPatch = require("./hsml-idom").hsmls2idomPatch;
-//     idom = require("incremental-dom");
-// }
+export type View<S> = (state: S, action: Action, manage: Manage) => Hsmls;
 
 export type Action = (action: string, data?: any) => void;
 
-export type XAction<S> = (action: string, data: any, widget: XWidget<S>) => void;
+export type OnAction<S> = (action: string, data: any, xwidget: XWidget<S>) => void;
 
-export type View<S> = (state: S, action: Action) => Hsmls;
-
-export type Type<T> = { new (...args: any[]): T; };
-
-export type Manage = <S>(widgetType: Type<XWidget<S>>, state?: S) => HsmlFnc | Hsmls;
-
-const actionNode: Action = (action: string, data?: any) => { };
-
-export interface DomWidget<S> {
-    mount: (e: Element) => this;
-    umount: () => this;
-    onHsml: (action: string, data: HsmlAttrOnData, e: Event) => void;
-    onAction?: (action: string, data: any, widget: XWidget<S>) => void;
-    // onMount?: (widget: XWidget<S>) => void;
-    // onUmount?: (widget: XWidget<S>) => void;
+export interface IXWidget<S> {
+    state: S;
+    view(state: S, action: Action, manage: Manage): Hsmls;
+    onAction(action: string, data: any, widget: IXWidget<S>): void;
 }
 
-export abstract class XWidget<S> implements Ctx, DomWidget<S> {
+export function xwidget<S>(xwClass: Class<IXWidget<S>>,
+                           e: Element = document.body,
+                           onActionGlobal?: OnAction<S>): XWidget<S> {
+    onActionGlobal && (widgets.onActionGlobal = onActionGlobal);
+    return create<S>(xwClass).mount(e);
+}
 
-    private static __count = 0;
+export interface XWidget<S> extends Ctx, IXWidget<S> {
+    widgets: Widgets;
+    type: string;
+    id: string;
+    dom: Element;
+    state: S;
+    action: Action;
+    actionGlobal: Action;
+    render: () => Hsmls;
+    mount: (e: Element) => this;
+    umount: () => this;
+    update: (state?: Partial<S>) => this;
+    toHsml: () => Hsml;
+}
 
-    static readonly mounted: { [wid: string]: XWidget<any> } = {};
+export interface Widgets {
+    mounted: { [wid: string]: XWidget<any> };
+    onActionGlobal: OnAction<any>;
+}
 
-    static onAction: XAction<any> = (action: string, data: any, widget: XWidget<any>) => {
+const widgets: Widgets = {
+    mounted: {},
+    onActionGlobal: (action: string, data: any, widget: XWidget<any>) => {
         console.log("action:", action, data, widget);
     }
+};
 
-    static hsml: Manage = <S>(widgetType: Type<XWidget<S>>,
-                              state?: S): HsmlFnc | Hsmls  => {
-        if (__NODE) {
-            return widgetType.prototype.view(state, actionNode);
+let __count = 0;
+
+const manage: Manage = <S>(xwClass: Class<IXWidget<S>>, state?: S): HsmlFnc | Hsmls  => {
+    return (e: Element) => {
+        if ((e as any).widget) {
+            const w = (e as any).widget as XWidget<S>;
+            if (state !== undefined) {
+                w.state = state;
+            }
+            w.update();
         } else {
-            return (e: Element) => {
-                if ((e as any).widget) {
+            const w = create<S>(xwClass);
+            if (state !== undefined) {
+                w.state = state;
+            }
+            w.mount(e);
+        }
+        return true;
+    };
+};
+
+function create<S>(xwClass: Class<IXWidget<S>>): XWidget<S> {
+
+    class XW extends xwClass implements Ctx, IXWidget<S> {
+
+        readonly widgets = widgets;
+
+        readonly type: string = this.constructor.name; // "XWidget"
+        readonly id: string = this.type + "-" + __count++;
+        readonly dom: Element;
+        readonly refs: { [key: string]: HTMLElement } = {};
+
+        private __updateSched: number;
+
+        action = (action: string, data?: any): void => {
+            this.onAction(action, data, this);
+        }
+
+        actionGlobal = (action: string, data?: any): void => {
+            this.widgets.onActionGlobal(action, data, this);
+        }
+
+        render = (): Hsmls => {
+            return this.view(this.state, this.action, manage);
+        }
+
+        onHsml = (action: string, data: HsmlAttrOnData, e: Event): void => {
+            data = (data && data.constructor === Function)
+                ? (data as HsmlAttrOnDataFnc)(e)
+                : data || e;
+            this.action(action, data);
+        }
+
+        mount = (e: Element = document.body): this => {
+            !e && console.warn("invalit element", e);
+            if (e) {
+                if ("widget" in e) {
                     const w = (e as any).widget as XWidget<S>;
-                    if (state !== undefined) {
-                        w.state = state;
-                    }
-                    w.update();
-                } else {
-                    const w = new widgetType();
-                    if (state !== undefined) {
-                        w.state = state;
-                    }
-                    w.mount(e);
+                    w && w.umount();
                 }
-                return true;
-            };
-        }
-    }
-
-    readonly type: string = this.constructor.name; // "XWidget"
-    readonly id: string = this.type + "-" + XWidget.__count++;
-    readonly dom: Element;
-    readonly refs: { [key: string]: HTMLElement } = {};
-
-    private __updateSched: number;
-
-    abstract state: S;
-    abstract view: (state: S, action: Action, manage: Manage ) => Hsmls;
-    abstract onAction: (action: string, data: any, widget: XWidget<S>) => void;
-    // abstract onMount(widget: XWidget<S>): void;
-    // abstract onUmount(widget: XWidget<S>): void;
-
-    action = (action: string, data?: any): void => {
-        this.onAction(action, data, this);
-    }
-
-    actionGlobal = (action: string, data?: any): void => {
-        XWidget.onAction(action, data, this);
-    }
-
-    render = (): Hsmls => {
-        return this.view(this.state, this.action, XWidget.hsml);
-    }
-
-    onHsml = (action: string, data: HsmlAttrOnData, e: Event): void => {
-        data = (data && data.constructor === Function)
-            ? (data as HsmlAttrOnDataFnc)(e)
-            : data || e;
-        this.action(action, data);
-    }
-
-    mount = (e: Element = document.body): this => {
-        !e && console.warn("invalit element", e);
-        if (!__NODE && e) {
-            if ("widget" in e) {
-                const w = (e as any).widget as XWidget<S>;
-                w && w.umount();
+                if (!this.dom) {
+                    this.widgets.mounted[this.id] = this;
+                    (this as any).dom = e;
+                    (e as any).widget = this;
+                    const hsmls = (this as any).render();
+                    hsmls2idomPatch(e, hsmls, this);
+                    e.setAttribute("widget", this.type);
+                    this.action("_mount", this.dom);
+                }
             }
-            if (!this.dom) {
-                XWidget.mounted[this.id] = this;
-                (this as any).dom = e;
-                (e as any).widget = this;
-                const hsmls = (this as any).render();
-                hsmls2idomPatch(e, hsmls, this);
-                e.setAttribute("widget", this.type);
-                this.action("_mount", this.dom);
-                // if ((this as DomWidget<S>).onMount) {
-                //     (this as DomWidget<S>).onMount(this);
-                // }
-            }
+            return this;
         }
-        return this;
-    }
 
-    umount = (): this => {
-        if (!__NODE) {
+        umount = (): this => {
             if (this.dom) {
-                delete XWidget.mounted[this.id];
+                delete this.widgets.mounted[this.id];
                 this.action("_umount", this.dom);
-                // if ((this as DomWidget<S>).onUmount) {
-                //     (this as DomWidget<S>).onUmount(this);
-                // }
                 if (this.dom.hasAttribute("widget")) {
                     this.dom.removeAttribute("widget");
                 }
@@ -146,12 +143,10 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
                 delete (this.dom as any).widget;
                 (this as any).dom = undefined;
             }
+            return this;
         }
-        return this;
-    }
 
-    update = (state?: Partial<S>): this => {
-        if (!__NODE) {
+        update = (state?: Partial<S>): this => {
             if (state) {
                 this.state = merge(this.state, state);
             }
@@ -163,66 +158,65 @@ export abstract class XWidget<S> implements Ctx, DomWidget<S> {
                     this.__updateSched = null;
                 }, 0);
             }
+            return this;
         }
-        return this;
-    }
 
-    toHsml = (): Hsml => {
-        if (this.dom) {
-            if (this.__updateSched) {
-                clearTimeout(this.__updateSched);
-                this.__updateSched = undefined;
-            } else {
-                return (
-                    ["div",
-                        {
-                            _skip: true,
-                            _id: this.id,
-                            _key: this.id,
-                            widget: this.type
-                        }
-                    ]
-                );
+        toHsml = (): Hsml => {
+            if (this.dom) {
+                if (this.__updateSched) {
+                    clearTimeout(this.__updateSched);
+                    this.__updateSched = undefined;
+                } else {
+                    return (
+                        ["div",
+                            {
+                                _skip: true,
+                                _id: this.id,
+                                _key: this.id,
+                                widget: this.type
+                            }
+                        ]
+                    );
+                }
             }
-        }
-        const hsmls = (this as any).render() as Hsmls;
-        if (!__NODE) {
+            const hsmls = this.render() as Hsmls;
             hsmls.push(
                 (e: Element) => {
                     if (!this.dom) {
                         (this as any).dom = e;
                         (e as any).widget = this;
-                        if ((this as any).onMount) {
-                            (this as any).onMount();
-                        }
+                        this.widgets.mounted[this.id] = this;
+                        this.action("_mount", this.dom);
                     }
                 });
+            return (
+                ["div",
+                    {
+                        _id: this.id,
+                        _key: this.id,
+                        widget: this.type
+                    },
+                    hsmls
+                ]
+            );
         }
-        return (
-            ["div",
-                {
-                    _id: this.id,
-                    _key: this.id,
-                    widget: this.type
-                },
-                hsmls
-            ]
-        );
+
     }
 
+    const w = new XW();
+    (w as any).type = xwClass.name;
+    return w;
+
 }
 
-if (!__NODE) {
-    (idom as any).notifications.nodesDeleted = (nodes: Node[]) => {
-        nodes.forEach(node => {
-            if (node.nodeType === 1 && "widget" in node) {
-                const w = (node as any).widget as XWidget<any>;
-                w && w.umount();
-            }
-        });
-    };
-}
-
+(idom as any).notifications.nodesDeleted = (nodes: Node[]) => {
+    nodes.forEach(node => {
+        if (node.nodeType === 1 && "widget" in node) {
+            const w = (node as any).widget as XWidget<any>;
+            w && w.umount();
+        }
+    });
+};
 
 const merge = <T extends { [k: string]: any }>(target: T, source: Partial<T>): T => {
     if (isMergeble(target) && isMergeble(source)) {

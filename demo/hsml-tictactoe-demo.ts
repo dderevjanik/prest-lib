@@ -1,11 +1,11 @@
-import { XWidget, Action } from "../src/hsml-xwidget";
+import { XWidget, Action, IXWidget, xwidget } from "../src/hsml-xwidget";
 import { Hsmls, Hsml } from "../src/hsml";
 
 const NBSP = "\u00A0";
 const CIRC = "\u25EF";
 const CROS = "\u2A2F";
 
-interface AppState {
+interface TicTacToeState {
     board: string[][];
     turn: number;
 }
@@ -14,7 +14,7 @@ enum Actions {
     mark = "mark"
 }
 
-class TicTacToe extends XWidget<AppState> {
+class TicTacToe implements IXWidget<TicTacToeState> {
 
     state = {
         board: [
@@ -25,7 +25,7 @@ class TicTacToe extends XWidget<AppState> {
         turn: 0
     };
 
-    view = (state: AppState, action: Action): Hsmls => ([
+    view = (state: TicTacToeState, action: Action): Hsmls => ([
         ["h1", "Tic-Tac-Toe Demo"],
         ["p", [
             "Player: ", state.turn ? CROS : CIRC
@@ -50,7 +50,7 @@ class TicTacToe extends XWidget<AppState> {
         ]
     ])
 
-    onAction = (action: string, data: any, widget: XWidget<AppState>): void => {
+    onAction = (action: string, data: any, widget: XWidget<TicTacToeState>): void => {
         console.log("action", action, data);
         switch (action) {
 
@@ -73,6 +73,6 @@ class TicTacToe extends XWidget<AppState> {
 }
 
 
-const app = new TicTacToe().mount(document.getElementById("app"));
+const app = xwidget<TicTacToeState>(TicTacToe, document.getElementById("app"));
 
 (self as any).app = app;

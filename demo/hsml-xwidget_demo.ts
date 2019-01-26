@@ -1,4 +1,4 @@
-import { XWidget, Action, Manage } from "../src/hsml-xwidget";
+import { IXWidget, Action, Manage, XWidget, xwidget } from "../src/hsml-xwidget";
 import { Hsmls } from "../src/hsml";
 
 interface AppState {
@@ -13,45 +13,47 @@ enum Actions {
     xXx = "xXx"
 }
 
-class App extends XWidget<AppState> {
+class App implements IXWidget<AppState> {
 
     state = {
         title: "Counter",
         count: 77
     };
 
-    view = (state: AppState, action: Action, manage: Manage): Hsmls => ([
-        ["h2", state.title],
-        ["p", [
-            "Title: ",
-            ["input",
-                {
-                    type: "text",
-                    value: state.title,
-                    // on: ["input", Actions.title, e => (e.target as HTMLInputElement).value]
-                    on: ["input", Actions.title]
-                }
-            ],
-        ]],
-        ["p", [
-            ["em", "Count"], ": ", state.count,
-            " ",
-            ["button", { on: ["click", Actions.dec, 1] }, "-"],
-            ["button", { on: ["click", Actions.inc, 2] }, "+"]
-        ]],
-        state.title
-            ? ["div", state.title ? manage<AppState>(App1, state) : "app"]
-            : ""
-        // ["div",
-        //     // { _widget: this.app1 }
-        //     // this.app1
-        //     // XWidget.hsml(App1)
-        //     state.title ? XWidget.hsml<AppState>(App1, state) : "app"
-        // ]
-    ])
+    view(state: AppState, action: Action, manage: Manage): Hsmls {
+        return [
+            ["h2", state.title],
+            ["p", [
+                "Title: ",
+                ["input",
+                    {
+                        type: "text",
+                        value: state.title,
+                        // on: ["input", Actions.title, e => (e.target as HTMLInputElement).value]
+                        on: ["input", Actions.title]
+                    }
+                ],
+            ]],
+            ["p", [
+                ["em", "Count"], ": ", state.count,
+                " ",
+                ["button", { on: ["click", Actions.dec, 1] }, "-"],
+                ["button", { on: ["click", Actions.inc, 2] }, "+"]
+            ]],
+            state.title
+                ? ["div", state.title ? manage<AppState>(App1, state) : "app"]
+                : ""
+            // ["div",
+            //     // { _widget: this.app1 }
+            //     // this.app1
+            //     // XWidget.hsml(App1)
+            //     state.title ? XWidget.hsml<AppState>(App1, state) : "app"
+            // ]
+        ];
+    }
 
-    onAction = (action: string, data: any,
-                { state, update, action: actionSend }: XWidget<AppState>): void => {
+    onAction(action: string, data: any,
+             { state, update, action: actionSend, widgets }: XWidget<AppState>): void {
         console.log("action:", action, data);
         switch (action) {
 
@@ -69,36 +71,38 @@ class App extends XWidget<AppState> {
                 break;
 
             case "_mount":
-                console.log("mount", data, XWidget.mounted);
+                console.log("mount", data, widgets.mounted);
                 break;
             case "_umount":
-                console.log("umount", data, XWidget.mounted);
+                console.log("umount", data, widgets.mounted);
                 break;
 
-                default:
-                this.actionGlobal(action, data);
+            default:
+                // this.actionGlobal(action, data);
                 break;
         }
     }
 }
 
-class App1 extends XWidget<AppState> {
+class App1 implements IXWidget<AppState> {
 
     state = {
         title: "Counter sec",
         count: 33
     };
 
-    view = (state: AppState, action: Action): Hsmls => ([
-        ["h3", state.title],
-        ["p", [
-            ["em", "Count"], ": ", state.count,
-            " ",
-            ["button", { on: ["click", Actions.xXx] }, Actions.xXx]
-        ]]
-    ])
+    view(state: AppState, action: Action): Hsmls {
+        return [
+            ["h3", state.title],
+            ["p", [
+                ["em", "Count"], ": ", state.count,
+                " ",
+                ["button", { on: ["click", Actions.xXx] }, Actions.xXx]
+            ]]
+        ];
+    }
 
-    onAction = (action: string, data: any): void => {
+    onAction(action: string, data: any, { widgets }: XWidget<AppState>): void {
         console.log("action:", action, data);
         switch (action) {
 
@@ -107,20 +111,20 @@ class App1 extends XWidget<AppState> {
                 break;
 
             case "_mount":
-                console.log("mount", data, XWidget.mounted);
+                console.log("mount", data, widgets.mounted);
                 break;
             case "_umount":
-                console.log("umount", data, XWidget.mounted);
+                console.log("umount", data, widgets.mounted);
                 break;
 
             default:
-                this.actionGlobal(action, data);
+                // this.actionGlobal(action, data);
                 break;
         }
     }
 
 }
 
-const app = new App().mount(document.getElementById("app"));
+const app = xwidget<AppState>(App, document.getElementById("app"));
 
 (self as any).app = app;
