@@ -51,7 +51,7 @@ class App implements IXWidget<AppState> {
     ])
 
     onAction = (action: string, data: any,
-                { state, update, action: actionSend }: XWidget<AppState>): void => {
+                { state, update, action: actionSend, widgets }: XWidget<AppState>): void => {
         console.log("action:", action, data);
         switch (action) {
 
@@ -69,10 +69,10 @@ class App implements IXWidget<AppState> {
                 break;
 
             case "_mount":
-                console.log("mount", data, XWidget.mounted);
+                console.log("mount", data, widgets.mounted);
                 break;
             case "_umount":
-                console.log("umount", data, XWidget.mounted);
+                console.log("umount", data, widgets.mounted);
                 break;
 
             default:
@@ -98,7 +98,7 @@ class App1 implements IXWidget<AppState> {
         ]]
     ])
 
-    onAction = (action: string, data: any): void => {
+    onAction = (action: string, data: any, { widgets }: XWidget<AppState>): void => {
         console.log("action:", action, data);
         switch (action) {
 
@@ -107,10 +107,10 @@ class App1 implements IXWidget<AppState> {
                 break;
 
             case "_mount":
-                console.log("mount", data, XWidget.mounted);
+                console.log("mount", data, widgets.mounted);
                 break;
             case "_umount":
-                console.log("umount", data, XWidget.mounted);
+                console.log("umount", data, widgets.mounted);
                 break;
 
             default:
