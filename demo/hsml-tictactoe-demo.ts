@@ -25,32 +25,30 @@ class TicTacToe extends XWidget<AppState> {
         turn: 0
     };
 
-    view = (state: AppState, action: Action): Hsmls => {
-        return [
-            ["h1", "Tic-Tac-Toe Demo"],
-            ["p", [
-                "Player: ", state.turn ? CROS : CIRC
-            ]],
-            ["div", state.board.map<Hsml>((row, y) =>
-                ["div", row.map<Hsml>((col, x) =>
-                    ["button",
-                        {
-                            styles: {
-                                fontFamily: "monospace",
-                                fontSize: "300%",
-                                display: "inline-block",
-                                width: "2em", height: "2em"
-                            },
-                            on: ["click", Actions.mark, { x, y, turn: state.turn }]
+    view = (state: AppState, action: Action): Hsmls => ([
+        ["h1", "Tic-Tac-Toe Demo"],
+        ["p", [
+            "Player: ", state.turn ? CROS : CIRC
+        ]],
+        ["div", state.board.map<Hsml>((row, y) =>
+            ["div", row.map<Hsml>((col, x) =>
+                ["button",
+                    {
+                        styles: {
+                            fontFamily: "monospace",
+                            fontSize: "300%",
+                            display: "inline-block",
+                            width: "2em", height: "2em"
                         },
-                        [
-                            col === NBSP ? NBSP : col
-                        ]
-                    ])
+                        on: ["click", Actions.mark, { x, y, turn: state.turn }]
+                    },
+                    [
+                        col === NBSP ? NBSP : col
+                    ]
                 ])
-            ]
-        ];
-    }
+            ])
+        ]
+    ])
 
     onAction = (action: string, data: any, widget: XWidget<AppState>): void => {
         console.log("action", action, data);

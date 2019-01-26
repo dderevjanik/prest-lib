@@ -20,37 +20,35 @@ class App extends XWidget<AppState> {
         count: 77
     };
 
-    view = (state: AppState, action: Action, manage: Manage): Hsmls => {
-        return [
-            ["h2", state.title],
-            ["p", [
-                "Title: ",
-                ["input",
-                    {
-                        type: "text",
-                        value: state.title,
-                        // on: ["input", Actions.title, e => (e.target as HTMLInputElement).value]
-                        on: ["input", Actions.title]
-                    }
-                ],
-            ]],
-            ["p", [
-                ["em", "Count"], ": ", state.count,
-                " ",
-                ["button", { on: ["click", Actions.dec, 1] }, "-"],
-                ["button", { on: ["click", Actions.inc, 2] }, "+"]
-            ]],
-            state.title
-                ? ["div", state.title ? manage<AppState>(App1, state) : "app"]
-                : ""
-            // ["div",
-            //     // { _widget: this.app1 }
-            //     // this.app1
-            //     // XWidget.hsml(App1)
-            //     state.title ? XWidget.hsml<AppState>(App1, state) : "app"
-            // ]
-        ];
-    }
+    view = (state: AppState, action: Action, manage: Manage): Hsmls => ([
+        ["h2", state.title],
+        ["p", [
+            "Title: ",
+            ["input",
+                {
+                    type: "text",
+                    value: state.title,
+                    // on: ["input", Actions.title, e => (e.target as HTMLInputElement).value]
+                    on: ["input", Actions.title]
+                }
+            ],
+        ]],
+        ["p", [
+            ["em", "Count"], ": ", state.count,
+            " ",
+            ["button", { on: ["click", Actions.dec, 1] }, "-"],
+            ["button", { on: ["click", Actions.inc, 2] }, "+"]
+        ]],
+        state.title
+            ? ["div", state.title ? manage<AppState>(App1, state) : "app"]
+            : ""
+        // ["div",
+        //     // { _widget: this.app1 }
+        //     // this.app1
+        //     // XWidget.hsml(App1)
+        //     state.title ? XWidget.hsml<AppState>(App1, state) : "app"
+        // ]
+    ])
 
     onAction = (action: string, data: any,
                 { state, update, action: actionSend }: XWidget<AppState>): void => {
@@ -91,16 +89,14 @@ class App1 extends XWidget<AppState> {
         count: 33
     };
 
-    view = (state: AppState, action: Action): Hsmls => {
-        return [
-            ["h3", state.title],
-            ["p", [
-                ["em", "Count"], ": ", state.count,
-                " ",
-                ["button", { on: ["click", Actions.xXx] }, Actions.xXx]
-            ]]
-        ];
-    }
+    view = (state: AppState, action: Action): Hsmls => ([
+        ["h3", state.title],
+        ["p", [
+            ["em", "Count"], ": ", state.count,
+            " ",
+            ["button", { on: ["click", Actions.xXx] }, Actions.xXx]
+        ]]
+    ])
 
     onAction = (action: string, data: any): void => {
         console.log("action:", action, data);
