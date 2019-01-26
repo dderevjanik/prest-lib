@@ -1,4 +1,4 @@
-import { XWidget, Action, Manage } from "../src/hsml-xwidget";
+import { IXWidget, XWidget, Action, Manage, xwidget } from "../src/hsml-xwidget-node";
 import { Hsmls } from "../src/hsml";
 
 interface AppState {
@@ -13,7 +13,7 @@ enum Actions {
     xXx = "xXx"
 }
 
-class App extends XWidget<AppState> {
+class App implements IXWidget<AppState> {
 
     state = {
         title: "Counter",
@@ -75,14 +75,14 @@ class App extends XWidget<AppState> {
                 console.log("umount", data, XWidget.mounted);
                 break;
 
-                default:
-                this.actionGlobal(action, data);
+            default:
+                // this.actionGlobal(action, data);
                 break;
         }
     }
 }
 
-class App1 extends XWidget<AppState> {
+class App1 implements IXWidget<AppState> {
 
     state = {
         title: "Counter sec",
@@ -114,13 +114,11 @@ class App1 extends XWidget<AppState> {
                 break;
 
             default:
-                this.actionGlobal(action, data);
+                // this.actionGlobal(action, data);
                 break;
         }
     }
 
 }
 
-const app = new App().mount(document.getElementById("app"));
-
-(self as any).app = app;
+xwidget<AppState>(App, undefined, html => console.log(html), true);

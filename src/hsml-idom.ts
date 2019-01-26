@@ -15,7 +15,7 @@ export interface Ctx extends HsmlObj {
     onHsml(action: string, data: HsmlAttrOnData, e: Event): void;
 }
 
-class JsonmlIDomHandler implements HsmlHandler<Ctx> {
+class HsmlIDomHandler implements HsmlHandler<Ctx> {
 
     open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: Ctx): boolean {
         const props: any[] = [];
@@ -130,7 +130,7 @@ class JsonmlIDomHandler implements HsmlHandler<Ctx> {
 }
 
 function hsml2idom(hml: Hsml, ctx?: Ctx): void {
-    hsml(hml, new JsonmlIDomHandler(), ctx);
+    hsml(hml, new HsmlIDomHandler(), ctx);
 }
 
 
