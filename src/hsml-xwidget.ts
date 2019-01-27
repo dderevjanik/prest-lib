@@ -73,7 +73,7 @@ const manage: Manage = <S>(wClass: Class<Widget<S>>, state?: S): HsmlFnc | Hsmls
     };
 };
 
-function create<S>(wClass: Class<Widget<S>>): XWidget<S> {
+export function create<S>(wClass: Class<Widget<S>>): XWidget<S> {
 
     class XW extends wClass implements Ctx, Widget<S> {
 

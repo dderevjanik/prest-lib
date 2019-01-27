@@ -59,7 +59,7 @@ const manage: Manage = <S>(wClass: Class<Widget<S>>, state?: S): HsmlFnc | Hsmls
     return new wClass().view(state, actionNode, manage);
 };
 
-function create<S>(wClass: Class<Widget<S>>): XWidget<S> {
+export function create<S>(wClass: Class<Widget<S>>): XWidget<S> {
 
     class XW extends wClass implements Ctx, Widget<S> {
 
