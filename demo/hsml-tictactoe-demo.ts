@@ -1,4 +1,4 @@
-import { XWidget, Action, IXWidget, xwidget } from "../src/hsml-xwidget";
+import { XWidget, Action, Widget, xwidget } from "../src/hsml-xwidget";
 import { Hsmls, Hsml } from "../src/hsml";
 
 const NBSP = "\u00A0";
@@ -14,7 +14,7 @@ enum Actions {
     mark = "mark"
 }
 
-class TicTacToe implements IXWidget<TicTacToeState> {
+class TicTacToe implements Widget<TicTacToeState> {
 
     state = {
         board: [
@@ -50,14 +50,14 @@ class TicTacToe implements IXWidget<TicTacToeState> {
         ]
     ])
 
-    onAction = (action: string, data: any, widget: XWidget<TicTacToeState>): void => {
+    onAction = (action: string, data: any, xw: XWidget<TicTacToeState>): void => {
         console.log("action", action, data);
         switch (action) {
 
             case Actions.mark:
-                widget.state.board[data.y][data.x] = data.turn ? CROS : CIRC;
-                widget.state.turn = data.turn ? 0 : 1;
-                widget.update();
+                xw.state.board[data.y][data.x] = data.turn ? CROS : CIRC;
+                xw.state.turn = data.turn ? 0 : 1;
+                xw.update();
                 break;
 
             case "_mount":

@@ -1,4 +1,4 @@
-import { IXWidget, XWidget, Action, Manage, xwidget } from "../src/hsml-xwidget-node";
+import { Widget, XWidget, Action, Manage, xwidget } from "../src/hsml-xwidget-node";
 import { Hsmls } from "../src/hsml";
 
 interface AppState {
@@ -13,7 +13,7 @@ enum Actions {
     xXx = "xXx"
 }
 
-class App implements IXWidget<AppState> {
+class App implements Widget<AppState> {
 
     state = {
         title: "Counter",
@@ -82,7 +82,7 @@ class App implements IXWidget<AppState> {
     }
 }
 
-class App1 implements IXWidget<AppState> {
+class App1 implements Widget<AppState> {
 
     state = {
         title: "Counter sec",

@@ -3,7 +3,7 @@ import { Ctx, hsmls2html } from "./hsml-html";
 
 export type Class<T = object> = new (...args: any[]) => T;
 
-export type Manage = <S>(xwClass: Class<IXWidget<S>>, state?: S) => HsmlFnc | Hsmls;
+export type Manage = <S>(xwClass: Class<Widget<S>>, state?: S) => HsmlFnc | Hsmls;
 
 export type View<S> = (state: S, action: Action, manage: Manage) => Hsmls;
 
@@ -11,22 +11,22 @@ export type Action = (action: string, data?: any) => void;
 
 export type OnAction<S> = (action: string, data: any, xwidget: XWidget<S>) => void;
 
-export interface IXWidget<S> {
+export interface Widget<S> {
     state: S;
     view(state: S, action: Action, manage: Manage): Hsmls;
-    onAction(action: string, data: any, widget: IXWidget<S>): void;
+    onAction(action: string, data: any, widget: Widget<S>): void;
 }
 
-export function xwidget<S>(xwClass: Class<IXWidget<S>>,
+export function xwidget<S>(wClass: Class<Widget<S>>,
                            state: S,
                            onHtml: (html: string) => void,
                            pretty = false) {
-    const w = create<S>(xwClass);
+    const w = create<S>(wClass);
     state && (w.state = state);
     hsmls2html(w.render(), onHtml, true);
 }
 
-export interface XWidget<S> extends Ctx, IXWidget<S> {
+export interface XWidget<S> extends Ctx, Widget<S> {
     widgets: Widgets;
     type: string;
     id: string;
@@ -55,13 +55,13 @@ const widgets: Widgets = {
 
 let __count = 0;
 
-const manage: Manage = <S>(xwClass: Class<IXWidget<S>>, state?: S): HsmlFnc | Hsmls  => {
-    return new xwClass().view(state, actionNode, manage);
+const manage: Manage = <S>(wClass: Class<Widget<S>>, state?: S): HsmlFnc | Hsmls  => {
+    return new wClass().view(state, actionNode, manage);
 };
 
-function create<S>(xwClass: Class<IXWidget<S>>): XWidget<S> {
+function create<S>(wClass: Class<Widget<S>>): XWidget<S> {
 
-    class XW extends xwClass implements Ctx, IXWidget<S> {
+    class XW extends wClass implements Ctx, Widget<S> {
 
         readonly widgets = widgets;
 
@@ -137,7 +137,7 @@ function create<S>(xwClass: Class<IXWidget<S>>): XWidget<S> {
     }
 
     const w = new XW();
-    (w as any).type = xwClass.name;
+    (w as any).type = wClass.name;
     return w;
 
 }
