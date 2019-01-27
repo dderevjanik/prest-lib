@@ -1,4 +1,4 @@
-import { XWidget, Action, Widget, xwidget } from "../src/hsml-xwidget";
+import { XWidget, Action, Widget, xWidgetApp } from "../src/hsml-xwidget";
 import { Hsmls, Hsml } from "../src/hsml";
 
 const NBSP = "\u00A0";
@@ -73,6 +73,6 @@ class TicTacToe implements Widget<TicTacToeState> {
 }
 
 
-const app = xwidget<TicTacToeState>(TicTacToe, document.getElementById("app"));
+const app = xWidgetApp<TicTacToeState>(TicTacToe, document.getElementById("app"));
 
 (self as any).app = app;

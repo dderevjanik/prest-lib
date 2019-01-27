@@ -18,11 +18,11 @@ export interface Widget<S> {
     onAction(action: string, data: any, widget: Widget<S>): void;
 }
 
-export function xwidget<S>(wClass: Class<Widget<S>>,
-                           e: Element = document.body,
-                           onActionGlobal?: OnAction<S>): XWidget<S> {
+export function xWidgetApp<S>(wClass: Class<Widget<S>>,
+                        e: Element = document.body,
+                        onActionGlobal?: OnAction<S>): XWidget<S> {
     onActionGlobal && (widgets.onActionGlobal = onActionGlobal);
-    return create<S>(wClass).mount(e);
+    return xWidget<S>(wClass).mount(e);
 }
 
 export interface XWidget<S> extends Ctx, Widget<S> {
@@ -63,7 +63,7 @@ const manage: Manage = <S>(wClass: Class<Widget<S>>, state?: S): HsmlFnc | Hsmls
             }
             w.update();
         } else {
-            const w = create<S>(wClass);
+            const w = xWidget<S>(wClass);
             if (state !== undefined) {
                 w.state = state;
             }
@@ -73,7 +73,7 @@ const manage: Manage = <S>(wClass: Class<Widget<S>>, state?: S): HsmlFnc | Hsmls
     };
 };
 
-export function create<S>(wClass: Class<Widget<S>>): XWidget<S> {
+export function xWidget<S>(wClass: Class<Widget<S>>): XWidget<S> {
 
     class XW extends wClass implements Ctx, Widget<S> {
 

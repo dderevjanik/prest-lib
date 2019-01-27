@@ -1,4 +1,4 @@
-import { Widget, XWidget, Action, Manage, xwidget } from "../src/hsml-xwidget-node";
+import { Widget, XWidget, Action, Manage, xWidgetHtml } from "../src/hsml-xwidget-node";
 import { Hsmls } from "../src/hsml";
 
 interface AppState {
@@ -122,5 +122,5 @@ class App1 implements Widget<AppState> {
 }
 
 const out: string[] = [];
-xwidget<AppState>(App, undefined, html => out.push(html), true);
+xWidgetHtml<AppState>(App, undefined, html => out.push(html), true);
 console.log(out.join(""));

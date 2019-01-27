@@ -1,4 +1,4 @@
-import { Widget, Action, Manage, XWidget, xwidget } from "../src/hsml-xwidget";
+import { Widget, Action, Manage, XWidget, xWidgetApp } from "../src/hsml-xwidget";
 import { Hsmls } from "../src/hsml";
 
 interface AppState {
@@ -125,6 +125,6 @@ class App1 implements Widget<AppState> {
 
 }
 
-const app = xwidget<AppState>(App, document.getElementById("app"));
+const app = xWidgetApp<AppState>(App, document.getElementById("app"));
 
 (self as any).app = app;

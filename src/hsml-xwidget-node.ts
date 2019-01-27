@@ -17,11 +17,11 @@ export interface Widget<S> {
     onAction(action: string, data: any, widget: Widget<S>): void;
 }
 
-export function xwidget<S>(wClass: Class<Widget<S>>,
+export function xWidgetHtml<S>(wClass: Class<Widget<S>>,
                            state: S,
                            onHtml: (html: string) => void,
                            pretty = false) {
-    const w = create<S>(wClass);
+    const w = xWidget<S>(wClass);
     state && (w.state = state);
     hsmls2html(w.render(), onHtml, true);
 }
@@ -59,7 +59,7 @@ const manage: Manage = <S>(wClass: Class<Widget<S>>, state?: S): HsmlFnc | Hsmls
     return new wClass().view(state, actionNode, manage);
 };
 
-export function create<S>(wClass: Class<Widget<S>>): XWidget<S> {
+export function xWidget<S>(wClass: Class<Widget<S>>): XWidget<S> {
 
     class XW extends wClass implements Ctx, Widget<S> {
 
