@@ -53,8 +53,8 @@ class App implements Widget<AppState> {
     }
 
     onAction(action: string, data: any,
-             { state, update, action: actionSend, widgets }: XWidget<AppState>): void {
-        console.log("action:", action, data);
+             { state, update, action: actionLocal, actionGlobal }: XWidget<AppState>): void {
+        // console.log("action:", action, data);
         switch (action) {
 
             case Actions.title:
@@ -63,22 +63,15 @@ class App implements Widget<AppState> {
 
             case Actions.inc:
                 update({ count: state.count + data as number });
-                setTimeout(actionSend, 1e3, Actions.dec, 1); // async call
+                setTimeout(actionLocal, 1e3, Actions.dec, 1); // async call
                 break;
 
             case Actions.dec:
                 update({ count: state.count - data as number });
                 break;
 
-            case "_mount":
-                console.log("mount", data, widgets.mounted);
-                break;
-            case "_umount":
-                console.log("umount", data, widgets.mounted);
-                break;
-
             default:
-                // this.actionGlobal(action, data);
+                actionGlobal(action, data);
                 break;
         }
     }
@@ -102,29 +95,25 @@ class App1 implements Widget<AppState> {
         ];
     }
 
-    onAction(action: string, data: any, { widgets }: XWidget<AppState>): void {
-        console.log("action:", action, data);
+    onAction(action: string, data: any, { actionGlobal }: XWidget<AppState>): void {
+        // console.log("action:", action, data);
         switch (action) {
 
             case Actions.xXx:
                 console.log(Actions.xXx);
                 break;
 
-            case "_mount":
-                console.log("mount", data, widgets.mounted);
-                break;
-            case "_umount":
-                console.log("umount", data, widgets.mounted);
-                break;
-
             default:
-                // this.actionGlobal(action, data);
+                actionGlobal(action, data);
                 break;
         }
     }
 
 }
 
-const app = xWidgetApp<AppState>(App, document.getElementById("app"));
+const app = xWidgetApp<AppState>(App, document.getElementById("app"),
+    (action: string, data: any, xwidget: XWidget<any>) => {
+        console.log("action >", action, data, xwidget);
+    });
 
 (self as any).app = app;

@@ -18,9 +18,9 @@ export interface Widget<S> {
 }
 
 export function xWidgetHtml<S>(wClass: Class<Widget<S>>,
-                           state: S,
-                           onHtml: (html: string) => void,
-                           pretty = false) {
+                               state: S,
+                               onHtml: (html: string) => void,
+                               pretty = false) {
     const w = xWidget<S>(wClass);
     state && (w.state = state);
     hsmls2html(w.render(), onHtml, true);
@@ -42,13 +42,13 @@ export interface XWidget<S> extends Ctx, Widget<S> {
 }
 
 export interface Widgets {
-    mounted: { [wid: string]: XWidget<any> };
+    readonly mounted: { [wid: string]: XWidget<any> };
     onActionGlobal: OnAction<any>;
 }
 
 const widgets: Widgets = {
     mounted: {},
-    onActionGlobal: (action: string, data: any, widget: XWidget<any>) => {
+    onActionGlobal: (action: string, data: any, widget: XWidget<any>): void => {
         console.log("action:", action, data, widget);
     }
 };
@@ -139,7 +139,6 @@ export function xWidget<S>(wClass: Class<Widget<S>>): XWidget<S> {
     const w = new XW();
     (w as any).type = wClass.name;
     return w;
-
 }
 
-const actionNode: Action = (action: string, data?: any) => { };
+const actionNode: Action = (action: string, data: any) => { };

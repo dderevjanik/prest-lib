@@ -19,8 +19,8 @@ export interface Widget<S> {
 }
 
 export function xWidgetApp<S>(wClass: Class<Widget<S>>,
-                        e: Element = document.body,
-                        onActionGlobal?: OnAction<S>): XWidget<S> {
+                              e: Element = document.body,
+                              onActionGlobal?: OnAction<S>): XWidget<S> {
     onActionGlobal && (widgets.onActionGlobal = onActionGlobal);
     return xWidget<S>(wClass).mount(e);
 }
@@ -41,13 +41,13 @@ export interface XWidget<S> extends Ctx, Widget<S> {
 }
 
 export interface Widgets {
-    mounted: { [wid: string]: XWidget<any> };
+    readonly mounted: { [wid: string]: XWidget<any> };
     onActionGlobal: OnAction<any>;
 }
 
 const widgets: Widgets = {
     mounted: {},
-    onActionGlobal: (action: string, data: any, widget: XWidget<any>) => {
+    onActionGlobal: (action: string, data: any, widget: XWidget<any>): void => {
         console.log("action:", action, data, widget);
     }
 };
