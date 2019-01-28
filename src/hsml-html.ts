@@ -114,7 +114,7 @@ class HsmlHtmlHandler implements HsmlHandler<Ctx> {
             html += this._mkIndent(this._depth);
             this._depth++;
         }
-        const pairTag = (children || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
+        const pairTag = (children.length || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         html += "<" + tag + (args ? " " + args : "") + (pairTag ? ">" : "/>");
         if (this._pretty) {
             html += "\n";
@@ -138,7 +138,7 @@ class HsmlHtmlHandler implements HsmlHandler<Ctx> {
 
     close(tag: string, children: Hsmls, ctx?: Ctx): void {
         let html = "";
-        const pairTag = (children || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
+        const pairTag = (children.length || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         if (this._pretty) {
             this._depth--;
             if (pairTag) {
