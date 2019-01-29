@@ -87,7 +87,7 @@ export function xWidget<S>(wClass: Class<Widget<S>>): XWidget<S> {
         onHsml = (action: string, data: HsmlAttrOnData, e: Event): void => {
             data = (data && data.constructor === Function)
                 ? (data as HsmlAttrOnDataFnc)(e)
-                : data || e;
+                : data === undefined ? e : data;
             this.action(action, data);
         }
 
