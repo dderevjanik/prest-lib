@@ -6,11 +6,10 @@ interface AppState {
     count: number;
 }
 
-enum Actions {
+enum AppActions {
     title = "title",
     dec = "dec",
-    inc = "inc",
-    xXx = "xXx"
+    inc = "inc"
 }
 
 class App implements Widget<AppState> {
@@ -30,15 +29,15 @@ class App implements Widget<AppState> {
                         type: "text",
                         value: state.title,
                         // on: ["input", Actions.title, e => (e.target as HTMLInputElement).value]
-                        on: ["input", Actions.title]
+                        on: ["input", AppActions.title]
                     }
                 ],
             ]],
             ["p", [
                 ["em", "Count"], ": ", state.count,
                 " ",
-                ["button", { on: ["click", Actions.dec, 1] }, "-"],
-                ["button", { on: ["click", Actions.inc, 2] }, "+"]
+                ["button", { on: ["click", AppActions.dec, 1] }, "-"],
+                ["button", { on: ["click", AppActions.inc, 2] }, "+"]
             ]],
             state.title
                 ? ["div", state.title ? manage<AppState>(App1, state) : "app"]
@@ -56,25 +55,25 @@ class App implements Widget<AppState> {
              { state, update, action: actionLocal, actionGlobal }: XWidget<AppState>): void {
         // console.log("action:", action, data);
         switch (action) {
-
-            case Actions.title:
+            case AppActions.title:
                 update({ title: ((data as Event).target as HTMLInputElement).value });
                 break;
-
-            case Actions.inc:
+            case AppActions.inc:
                 update({ count: state.count + data as number });
-                setTimeout(actionLocal, 1e3, Actions.dec, 1); // async call
+                setTimeout(actionLocal, 1e3, AppActions.dec, 1); // async call
                 break;
-
-            case Actions.dec:
+            case AppActions.dec:
                 update({ count: state.count - data as number });
                 break;
-
             default:
                 actionGlobal(action, data);
                 break;
         }
     }
+}
+
+enum App1Actions {
+    xXx = "xXx"
 }
 
 class App1 implements Widget<AppState> {
@@ -90,7 +89,7 @@ class App1 implements Widget<AppState> {
             ["p", [
                 ["em", "Count"], ": ", state.count,
                 " ",
-                ["button", { on: ["click", Actions.xXx] }, Actions.xXx]
+                ["button", { on: ["click", App1Actions.xXx] }, App1Actions.xXx]
             ]]
         ];
     }
@@ -98,11 +97,9 @@ class App1 implements Widget<AppState> {
     onAction(action: string, data: any, { actionGlobal }: XWidget<AppState>): void {
         // console.log("action:", action, data);
         switch (action) {
-
-            case Actions.xXx:
-                console.log(Actions.xXx);
+            case App1Actions.xXx:
+                console.log(App1Actions.xXx);
                 break;
-
             default:
                 actionGlobal(action, data);
                 break;
@@ -114,6 +111,22 @@ class App1 implements Widget<AppState> {
 const app = xWidgetApp<AppState>(App, document.getElementById("app"),
     (action: string, data: any, xwidget: XWidget<any>) => {
         console.log("action >", action, data, xwidget);
+        switch (xwidget.type) {
+            case "App":
+                onAppAction(action, data, xwidget);
+                break;
+            default:
+                break;
+        }
     });
+
+function onAppAction(action: string, data: any, xwidget: XWidget<AppState>): void {
+    switch (action) {
+        case "xXx":
+            break;
+        default:
+            break;
+    }
+}
 
 (self as any).app = app;
