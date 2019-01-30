@@ -1,21 +1,6 @@
-import { Hsml, Hsmls, HsmlFnc, HsmlAttrOnData, HsmlAttrOnDataFnc } from "./hsml";
-import { Ctx, hsmls2html } from "./hsml-html";
-
-export type Class<T = object> = new (...args: any[]) => T;
-
-export type Manage = <S>(xwClass: Class<Widget<S>>, state?: S) => HsmlFnc | Hsmls;
-
-export type View<S> = (state: S, action: Action, manage: Manage) => Hsmls;
-
-export type Action = (action: string, data?: any) => void;
-
-export type OnAction<S> = (action: string, data: any, xwidget: XWidget<S>) => void;
-
-export interface Widget<S> {
-    state: S;
-    view(state: S, action: Action, manage: Manage): Hsmls;
-    onAction(action: string, data: any, widget: Widget<S>): void;
-}
+import { Hsml, Hsmls, HsmlFnc, HsmlAttrOnData, HsmlAttrOnDataFnc, HsmlHandlerCtx } from "./hsml";
+import { Class, Widget, Widgets, XWidget, Manage, Action } from "./hsml-xwidget";
+import { hsmls2html, hsmls2htmls } from "./hsml-html";
 
 export function xWidgetHtml<S>(wClass: Class<Widget<S>>,
                                state: S,
@@ -24,26 +9,6 @@ export function xWidgetHtml<S>(wClass: Class<Widget<S>>,
     const w = xWidget<S>(wClass);
     state && (w.state = state);
     hsmls2html(w.render(), onHtml, true);
-}
-
-export interface XWidget<S> extends Ctx, Widget<S> {
-    widgets: Widgets;
-    type: string;
-    id: string;
-    dom: Element;
-    state: S;
-    action: Action;
-    actionGlobal: Action;
-    render: () => Hsmls;
-    mount: (e: Element) => this;
-    umount: () => this;
-    update: (state?: Partial<S>) => this;
-    toHsml: () => Hsml;
-}
-
-export interface Widgets {
-    readonly mounted: { [wid: string]: XWidget<any> };
-    onActionGlobal: OnAction<any>;
 }
 
 const widgets: Widgets = {
@@ -61,7 +26,7 @@ const manage: Manage = <S>(wClass: Class<Widget<S>>, state?: S): HsmlFnc | Hsmls
 
 export function xWidget<S>(wClass: Class<Widget<S>>): XWidget<S> {
 
-    class XW extends wClass implements Ctx, Widget<S> {
+    class XW extends wClass implements HsmlHandlerCtx, Widget<S> {
 
         readonly widgets = widgets;
 
@@ -132,6 +97,10 @@ export function xWidget<S>(wClass: Class<Widget<S>>): XWidget<S> {
                     hsmls
                 ]
             );
+        }
+
+        toHtml = (pretty = false): string => {
+            return hsmls2htmls(w.render(), pretty).join("");
         }
 
     }

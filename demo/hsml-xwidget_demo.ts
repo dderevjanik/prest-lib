@@ -1,4 +1,5 @@
-import { Widget, Action, Manage, XWidget, xWidgetApp } from "../src/hsml-xwidget";
+import { Widget, Action, Manage, XWidget } from "../src/hsml-xwidget";
+import { xWidget } from "../src/hsml-xwidget-web";
 import { Hsmls } from "../src/hsml";
 
 interface AppState {
@@ -108,17 +109,18 @@ class App1 implements Widget<AppState> {
 
 }
 
-const app = xWidgetApp<AppState>(App, document.getElementById("app"),
-    (action: string, data: any, xwidget: XWidget<any>) => {
-        console.log("action >", action, data, xwidget);
-        switch (xwidget.type) {
-            case "App":
-                onAppAction(action, data, xwidget);
-                break;
-            default:
-                break;
-        }
-    });
+const app = xWidget<AppState>(App);
+
+app.widgets.onActionGlobal = (action: string, data: any, xwidget: XWidget<any>) => {
+    console.log("action >", action, data, xwidget);
+    switch (xwidget.type) {
+        case "App":
+            onAppAction(action, data, xwidget);
+            break;
+        default:
+            break;
+    }
+};
 
 function onAppAction(action: string, data: any, xwidget: XWidget<AppState>): void {
     switch (action) {
@@ -128,5 +130,7 @@ function onAppAction(action: string, data: any, xwidget: XWidget<AppState>): voi
             break;
     }
 }
+
+app.mount(document.getElementById("app"));
 
 (self as any).app = app;

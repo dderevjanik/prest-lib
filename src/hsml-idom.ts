@@ -6,18 +6,14 @@ import {
     HsmlFnc,
     HsmlObj,
     HsmlHandler,
+    HsmlHandlerCtx,
     HsmlAttrOnData
 } from "./hsml";
 import * as idom from "incremental-dom";
 
-export interface Ctx extends HsmlObj {
-    refs: { [name: string]: Element };
-    onHsml(action: string, data: HsmlAttrOnData, e: Event): void;
-}
+class HsmlIDomHandler implements HsmlHandler<HsmlHandlerCtx> {
 
-class HsmlIDomHandler implements HsmlHandler<Ctx> {
-
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: Ctx): boolean {
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -106,22 +102,22 @@ class HsmlIDomHandler implements HsmlHandler<Ctx> {
         return attrs._skip ? true : false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: Ctx): void {
+    close(tag: string, children: Hsmls, ctx?: HsmlHandlerCtx): void {
         idom.elementClose(tag);
     }
 
-    text(text: string, ctx?: Ctx): void {
+    text(text: string, ctx?: HsmlHandlerCtx): void {
         idom.text(text);
     }
 
-    fnc(fnc: HsmlFnc, ctx?: Ctx): void {
+    fnc(fnc: HsmlFnc, ctx?: HsmlHandlerCtx): void {
         const skip = fnc(idom.currentElement());
         skip && idom.skip();
     }
 
-    obj(obj: HsmlObj, ctx?: Ctx): void {
+    obj(obj: HsmlObj, ctx?: HsmlHandlerCtx): void {
         if ("toHsml" in obj) {
-            hsml(obj.toHsml(), this, obj);
+            hsml(obj.toHsml(), this, obj as HsmlHandlerCtx);
         } else {
             this.text("" + obj, ctx);
         }
@@ -129,17 +125,17 @@ class HsmlIDomHandler implements HsmlHandler<Ctx> {
 
 }
 
-function hsml2idom(hml: Hsml, ctx?: Ctx): void {
+function hsml2idom(hml: Hsml, ctx?: HsmlHandlerCtx): void {
     hsml(hml, new HsmlIDomHandler(), ctx);
 }
 
 
-function hsmls2idom(hmls: Hsmls, ctx?: Ctx): void {
+function hsmls2idom(hmls: Hsmls, ctx?: HsmlHandlerCtx): void {
     for (const hml of hmls) {
         if (hml.constructor === String) {
             idom.text(hml as string);
         } else if ("toHsml" in (hml as any)) {
-            const obj = hml as Ctx;
+            const obj = hml as HsmlHandlerCtx;
             hsml2idom(obj.toHsml(), obj);
         } else {
             hsml2idom(hml as Hsml, ctx);
@@ -148,12 +144,12 @@ function hsmls2idom(hmls: Hsmls, ctx?: Ctx): void {
 }
 
 
-export function hsml2idomPatch(node: Element, hml: Hsml, ctx?: Ctx): void {
+export function hsml2idomPatch(node: Element, hml: Hsml, ctx?: HsmlHandlerCtx): void {
     idom.patch(node,
         (data: Hsml) => hsml2idom(data, ctx), hml);
 }
 
-export function hsmls2idomPatch(node: Element, hmls: Hsmls, ctx?: Ctx): void {
+export function hsmls2idomPatch(node: Element, hmls: Hsmls, ctx?: HsmlHandlerCtx): void {
     idom.patch(node,
         (data: Hsmls) => hsmls2idom(data, ctx), hmls);
 }

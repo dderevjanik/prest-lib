@@ -1,5 +1,6 @@
-import { Widget, XWidget, Action, Manage, xWidgetHtml } from "../src/hsml-xwidget-node";
+import { Widget, XWidget, Action, Manage } from "../src/hsml-xwidget";
 import { Hsmls } from "../src/hsml";
+import { xWidget } from "../src/hsml-xwidget-node";
 
 interface AppState {
     title: string;
@@ -111,6 +112,5 @@ class App1 implements Widget<AppState> {
 
 }
 
-const out: string[] = [];
-xWidgetHtml<AppState>(App, undefined, html => out.push(html), true);
-console.log(out.join(""));
+const html = xWidget(App).toHtml(true);
+console.log(html);
