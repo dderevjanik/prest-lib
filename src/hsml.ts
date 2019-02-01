@@ -59,7 +59,12 @@ export type HsmlTag = HsmlTagAttrN | HsmlTagAttrY;
 
 export type Hsml = string | boolean | number | Date | HsmlFnc | HsmlObj | HsmlTag;
 
-export interface HsmlHandler<C> {
+export interface HsmlHandlerCtx extends HsmlObj {
+    refs: { [name: string]: Element };
+    onHsml(action: string, data: HsmlAttrOnData, e: Event): void;
+}
+
+export interface HsmlHandler<C extends HsmlHandlerCtx> {
     open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: C): boolean;
     close(tag: string, children: Hsmls, ctx?: C): void;
     text(text: string, ctx?: C): void;
@@ -67,7 +72,7 @@ export interface HsmlHandler<C> {
     obj(obj: HsmlObj, ctx?: C): void;
 }
 
-export function hsml<C = any>(hml: Hsml, handler: HsmlHandler<C>, ctx?: C): void {
+export function hsml<C extends HsmlHandlerCtx>(hml: Hsml, handler: HsmlHandler<C>, ctx?: C): void {
     // console.log("hsml", hsml);
     if (hml === undefined) {
         return;
@@ -241,7 +246,7 @@ export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
 
 // import { hsmls2htmls } from "./hsml-html";
 
-// const action: Action = (name: string, data: any, xWidget: YWidget) => {
+// const action: Action = (name: string, data: any, xWidget: XWidget) => {
 //     console.log("action:", name, data, xWidget);
 // };
 

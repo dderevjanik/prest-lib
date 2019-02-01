@@ -1,16 +1,17 @@
-import { Widget, Action, Manage, XWidget } from "../src/hsml-xwidget";
-import { xWidget } from "../src/hsml-xwidget-web";
+import { Widget, XWidget, Action, Manage } from "../src/hsml-xwidget";
 import { Hsmls } from "../src/hsml";
+import { xWidget } from "../src/hsml-xwidget-node";
 
 interface AppState {
     title: string;
     count: number;
 }
 
-enum AppActions {
+enum Actions {
     title = "title",
     dec = "dec",
-    inc = "inc"
+    inc = "inc",
+    xXx = "xXx"
 }
 
 class App implements Widget<AppState> {
@@ -30,15 +31,15 @@ class App implements Widget<AppState> {
                         type: "text",
                         value: state.title,
                         // on: ["input", Actions.title, e => (e.target as HTMLInputElement).value]
-                        on: ["input", AppActions.title]
+                        on: ["input", Actions.title]
                     }
                 ],
             ]],
             ["p", [
                 ["em", "Count"], ": ", state.count,
                 " ",
-                ["button", { on: ["click", AppActions.dec, 1] }, "-"],
-                ["button", { on: ["click", AppActions.inc, 2] }, "+"]
+                ["button", { on: ["click", Actions.dec, 1] }, "-"],
+                ["button", { on: ["click", Actions.inc, 2] }, "+"]
             ]],
             state.title
                 ? ["div", state.title ? manage<AppState>(App1, state) : "app"]
@@ -56,25 +57,25 @@ class App implements Widget<AppState> {
              { state, update, action: actionLocal, actionGlobal }: XWidget<AppState>): void {
         // console.log("action:", action, data);
         switch (action) {
-            case AppActions.title:
+
+            case Actions.title:
                 update({ title: ((data as Event).target as HTMLInputElement).value });
                 break;
-            case AppActions.inc:
+
+            case Actions.inc:
                 update({ count: state.count + data as number });
-                setTimeout(actionLocal, 1e3, AppActions.dec, 1); // async call
+                setTimeout(actionLocal, 1e3, Actions.dec, 1); // async call
                 break;
-            case AppActions.dec:
+
+            case Actions.dec:
                 update({ count: state.count - data as number });
                 break;
+
             default:
                 actionGlobal(action, data);
                 break;
         }
     }
-}
-
-enum App1Actions {
-    xXx = "xXx"
 }
 
 class App1 implements Widget<AppState> {
@@ -90,7 +91,7 @@ class App1 implements Widget<AppState> {
             ["p", [
                 ["em", "Count"], ": ", state.count,
                 " ",
-                ["button", { on: ["click", App1Actions.xXx] }, App1Actions.xXx]
+                ["button", { on: ["click", Actions.xXx] }, Actions.xXx]
             ]]
         ];
     }
@@ -98,9 +99,11 @@ class App1 implements Widget<AppState> {
     onAction(action: string, data: any, { actionGlobal }: XWidget<AppState>): void {
         // console.log("action:", action, data);
         switch (action) {
-            case App1Actions.xXx:
-                console.log(App1Actions.xXx);
+
+            case Actions.xXx:
+                console.log(Actions.xXx);
                 break;
+
             default:
                 actionGlobal(action, data);
                 break;
@@ -109,28 +112,5 @@ class App1 implements Widget<AppState> {
 
 }
 
-const app = xWidget<AppState>(App);
-
-app.widgets.onActionGlobal = (action: string, data: any, xwidget: XWidget<any>) => {
-    console.log("action >", action, data, xwidget);
-    switch (xwidget.type) {
-        case "App":
-            onAppAction(action, data, xwidget);
-            break;
-        default:
-            break;
-    }
-};
-
-function onAppAction(action: string, data: any, xwidget: XWidget<AppState>): void {
-    switch (action) {
-        case "xXx":
-            break;
-        default:
-            break;
-    }
-}
-
-app.mount(document.getElementById("app"));
-
-(self as any).app = app;
+const html = xWidget(App).toHtml(true);
+console.log(html);

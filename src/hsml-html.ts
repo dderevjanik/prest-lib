@@ -5,12 +5,11 @@ import {
     HsmlAttrs,
     HsmlFnc,
     HsmlObj,
+    HsmlHandlerCtx,
     HsmlHandler
 } from "./hsml";
 
-export interface Ctx extends HsmlObj { }
-
-class HsmlHtmlHandler implements HsmlHandler<Ctx> {
+class HsmlHtmlHandler implements HsmlHandler<HsmlHandlerCtx> {
 
     private static _pairTags = [
         "script",
@@ -33,7 +32,7 @@ class HsmlHtmlHandler implements HsmlHandler<Ctx> {
         this._indent = indent;
     }
 
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: Ctx): boolean {
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -114,7 +113,7 @@ class HsmlHtmlHandler implements HsmlHandler<Ctx> {
             html += this._mkIndent(this._depth);
             this._depth++;
         }
-        const pairTag = (children || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
+        const pairTag = (children.length || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         html += "<" + tag + (args ? " " + args : "") + (pairTag ? ">" : "/>");
         if (this._pretty) {
             html += "\n";
@@ -136,9 +135,9 @@ class HsmlHtmlHandler implements HsmlHandler<Ctx> {
         return false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: Ctx): void {
+    close(tag: string, children: Hsmls, ctx?: HsmlHandlerCtx): void {
         let html = "";
-        const pairTag = (children || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
+        const pairTag = (children.length || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         if (this._pretty) {
             this._depth--;
             if (pairTag) {
@@ -154,7 +153,7 @@ class HsmlHtmlHandler implements HsmlHandler<Ctx> {
         }
     }
 
-    text(text: string, ctx?: Ctx): void {
+    text(text: string, ctx?: HsmlHandlerCtx): void {
         let html = "";
         if (this._pretty) {
             html += this._mkIndent(this._depth);
@@ -166,12 +165,12 @@ class HsmlHtmlHandler implements HsmlHandler<Ctx> {
         this._onHtml(html);
     }
 
-    fnc(fnc: HsmlFnc, ctx?: Ctx): void {
+    fnc(fnc: HsmlFnc, ctx?: HsmlHandlerCtx): void {
     }
 
-    obj(obj: HsmlObj, ctx?: Ctx): void {
+    obj(obj: HsmlObj, ctx?: HsmlHandlerCtx): void {
         if ("toHsml" in obj) {
-            hsml(obj.toHsml(), this, obj);
+            hsml(obj.toHsml(), this, obj as HsmlHandlerCtx);
         } else {
             this.text("" + obj, ctx);
         }

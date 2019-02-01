@@ -6,21 +6,17 @@ import {
     HsmlFnc,
     HsmlObj,
     HsmlHandler,
+    HsmlHandlerCtx,
     HsmlAttrOnData
 } from "./hsml";
 
-export interface Ctx extends HsmlObj {
-    refs: { [name: string]: Element };
-    onHsml(action: string, data: HsmlAttrOnData, e: Event): void;
-}
-
-class HsmlDomHandler implements HsmlHandler<Ctx> {
+class HsmlDomHandler implements HsmlHandler<HsmlHandlerCtx> {
 
     element: HTMLElement;
 
     private _current: HTMLElement;
 
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: Ctx): boolean {
+    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
         const e = document.createElement(tag);
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -115,23 +111,23 @@ class HsmlDomHandler implements HsmlHandler<Ctx> {
         return attrs._skip ? true : false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: Ctx): void {
+    close(tag: string, children: Hsmls, ctx?: HsmlHandlerCtx): void {
         if (this._current !== this.element) {
             this._current = this._current.parentElement;
         }
     }
 
-    text(text: string, ctx?: Ctx): void {
+    text(text: string, ctx?: HsmlHandlerCtx): void {
         this._current.appendChild(document.createTextNode(text));
     }
 
-    fnc(fnc: HsmlFnc, ctx?: Ctx): void {
+    fnc(fnc: HsmlFnc, ctx?: HsmlHandlerCtx): void {
         fnc(this._current);
     }
 
-    obj(obj: HsmlObj, ctx?: Ctx): void {
+    obj(obj: HsmlObj, ctx?: HsmlHandlerCtx): void {
         if ("toHsml" in obj) {
-            hsml(obj.toHsml(), this, obj);
+            hsml(obj.toHsml(), this, obj as HsmlHandlerCtx);
         } else {
             this.text("" + obj, ctx);
         }
@@ -139,19 +135,19 @@ class HsmlDomHandler implements HsmlHandler<Ctx> {
 
 }
 
-export function hsml2dom(hml: Hsml, ctx?: Ctx): HTMLElement {
+export function hsml2dom(hml: Hsml, ctx?: HsmlHandlerCtx): HTMLElement {
     const handler = new HsmlDomHandler();
     hsml(hml, handler, ctx);
     return handler.element;
 }
 
-export function hsmls2dom(hmls: Hsmls, ctx?: Ctx): Node[] {
+export function hsmls2dom(hmls: Hsmls, ctx?: HsmlHandlerCtx): Node[] {
     const elems: Node[] = [];
     for (const hml of hmls) {
         if (hml.constructor === String) {
             elems.push(document.createTextNode(hml as string));
         } else if ("toHsml" in (hml as any)) {
-            const obj = hml as Ctx;
+            const obj = hml as HsmlHandlerCtx;
             elems.push(hsml2dom(obj.toHsml(), obj));
         } else {
             elems.push(hsml2dom(hml as Hsml, ctx));
