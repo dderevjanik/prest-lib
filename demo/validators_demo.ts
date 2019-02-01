@@ -109,10 +109,11 @@ console.log();
 
 const data = { str: "123a", num: "12,34", date: "02.01.2019 12:12" };
 
-const ov = new ObjectValidator<typeof data>()
-    .addValidator("str", sv)
-    .addValidator("num", nv)
-    .addValidator("date", dv)
+const ov = new ObjectValidator({
+        str: sv,
+        num: nv,
+        date: dv
+    })
     .validate(data);
 
 console.log(ov);

@@ -424,60 +424,82 @@ export class DateTimeValidator extends Validator<Moment, DateTimeValidatorOpts, 
 
 }
 
-export class ObjectValidator<T = any> {
+interface ValidatorOrObject {
+    [key: string]: Validator<any, any, any> | ObjectValidator<any>;
+}
 
-    readonly validators: { [key in keyof T]: Validator<any, any, any> } = {} as any;
+type DeepOV<O, T> = {
+    0: T,
+    1: O extends ObjectValidator<infer OV>
+        ? { [P in keyof OV]: DeepOV<OV[P], T> }
+        : never;
+    2: { [P in keyof O]: DeepOV<O[P], T>}
+}[O extends Validator<any, any, any>
+    ? 0
+    : O extends ObjectValidator<any>
+        ? 1
+        : O extends { [prop: string]: any }
+            ? 2
+            : 0];
 
-    readonly str: { [key in keyof T]: string };
+export class ObjectValidator<T extends ValidatorOrObject> {
+
+    readonly validators: ValidatorOrObject;
+
+    readonly str: DeepOV<T, string>;
     readonly obj: { [key in keyof T]: any };
     readonly err: { [key in keyof T]: string };
     readonly valid: boolean;
 
-    addValidator(field: keyof T, validator: Validator<any, any, any>): this {
-        this.validators[field] = validator;
+    constructor(validators: T) {
+        this.validators = validators;
+    }
+
+    validate(data: DeepOV<T, string>, defaults?: DeepOV<T, string>): this {
+        const inputData = { ...defaults, ...data };
+        const result = Object.keys(this.validators)
+            .reduce(
+                (acc, prop) => {
+                    const value = inputData[prop];
+                    const validator = this.validators[prop];
+                    const res = validator instanceof ObjectValidator
+                        ? validator.validate(value)
+                        : validator.validate(value as any);
+                    console.log("X", prop, res.err);
+                    // console.log(res);
+                    acc.str[prop] = res.str;
+                    acc.obj[prop] = res.obj;
+                    res.err && ((acc.err as any)[prop] = res.err);
+                    return acc;
+                },
+                { str: {} as any, obj: {} as any, err: {} as any, valid: false });
+
+        result.valid = !Object.keys(result.err).filter(x => !!(result.err as any)[x]).length;
+        (this.str as any) = result.str;
+        (this.obj as any) = result.obj;
+        (this.err as any) = result.err;
+        (this.valid as any) = result.valid;
         return this;
     }
 
-    validate(data: { [key in keyof T]: string },
-             defaults?: { [key in keyof T]: string }): this {
-        const d = { ...defaults as object, ...data as object };
-        const res = Object.keys(this.validators)
+    format(data: DeepOV<T, string>): this {
+        const result = Object.keys(this.validators)
             .reduce(
-                (a, k) => {
-                    const v = (d as any)[k];
-                    const r = (this.validators as any)[k].validate(v);
-                    console.log(r);
-                    (a.str as any)[k] = r.str;
-                    (a.obj as any)[k] = r.obj;
-                    r.err && ((a.err as any)[k] = r.err);
-                    return a;
+                (acc, prop) => {
+                    const value = (data as any)[prop];
+                    const validator = this.validators[prop];
+                    const res = validator.format(value);
+                    acc.str[prop] = res.str;
+                    acc.obj[prop] = value;
+                    res.err && ((acc.err as any)[prop] = res.err);
+                    return acc;
                 },
-                { str: {}, obj: {}, err: {}, valid: false });
-        res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
-        (this.str as any) = res.str;
-        (this.obj as any) = res.obj;
-        (this.err as any) = res.err;
-        (this.valid as any) = res.valid;
-        return this;
-    }
-
-    format(data: { [key in keyof T]: any }): this {
-        const res = Object.keys(this.validators)
-            .reduce(
-                (a, k) => {
-                    const v = (data as any)[k];
-                    const r = (this.validators as any)[k].format(v);
-                    (a.str as any)[k] = r.str;
-                    (a.obj as any)[k] = v;
-                    r.err && ((a.err as any)[k] = r.err);
-                    return a;
-                },
-                { str: {}, obj: {}, err: {}, valid: false });
-        res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
-        (this.str as any) = res.str;
-        (this.obj as any) = res.obj;
-        (this.err as any) = res.err;
-        (this.valid as any) = res.valid;
+                { str: {} as any, obj: {} as any, err: {} as any, valid: false });
+        result.valid = !Object.keys(result.err).filter(x => !!(result.err as any)[x]).length;
+        (this.str as any) = result.str;
+        (this.obj as any) = result.obj;
+        (this.err as any) = result.err;
+        (this.valid as any) = result.valid;
         return this;
     }
 
@@ -592,13 +614,20 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 
 // console.log();
 
-// const data = { str: "123a", num: "12,34", date: "02.01.2019 12:12" };
+// const data = { str: "123a", num: "12,34", user: { name: '1222', email: '144' } };
 
-// const ov = new ObjectValidator<typeof data>()
-//     .addValidator("str", sv)
-//     .addValidator("num", nv)
-//     .addValidator("date", dv)
+// const ov = new ObjectValidator({
+        // str: sv,
+        // num: nv,
+        // date: dv,
+//         user: new ObjectValidator({
+//             name: sv,
+//             email: sv
+//         })
+//     })
 //     .validate(data);
+// console.log(ov.valid);
+// console.log(ov.err);
 
 // console.log(ov);
 
