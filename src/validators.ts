@@ -39,11 +39,8 @@ export abstract class Validator<T, O, M> {
             return { str, obj: ots.obj, err: ots.err };
         }
         const err = this.objCheck(ots.obj);
-        if (err) {
-            (this.err as any) = err;
-            return { str, obj: ots.obj, err };
-        }
-        return { str, obj: ots.obj };
+        (this.err as any) = err;
+        return { str, obj: ots.obj, err };
     }
 
     format(obj: T, format?: string): { str?: string, err?: string } {
@@ -102,7 +99,7 @@ export class SelectValidator extends Validator<string, SelectValidatorOpts, Sele
                     : invalidOptionMsg;
             }
         }
-        return undefined;
+        return "";
     }
 
     protected objToStr(obj: string, format?: string): { str?: string, err?: string } {
@@ -190,7 +187,7 @@ export class StringValidator extends Validator<string, StringValidatorOpts, Stri
                     })
                 : notInRangeMsg;
         }
-        return undefined;
+        return "";
     }
 
     protected objToStr(obj: string, format?: string): { str?: string, err?: string } {
@@ -294,7 +291,7 @@ export class NumberValidator extends Validator<Numeral, NumberValidatorOpts, Num
                     })
                 : notInRangeMsg;
         }
-        return undefined;
+        return "";
     }
 
     protected objToStr(obj: Numeral, format?: string): { str?: string, err?: string } {
@@ -406,7 +403,7 @@ export class DateTimeValidator extends Validator<Moment, DateTimeValidatorOpts, 
                     })
                 : notInRangeMsg;
         }
-        return undefined;
+        return "";
     }
 
     protected objToStr(obj: Moment, format?: string): { str?: string, err?: string } {
@@ -465,11 +462,9 @@ export class ObjectValidator<T extends ValidatorOrObject> {
                     const res = validator instanceof ObjectValidator
                         ? validator.validate(value)
                         : validator.validate(value as any);
-                    console.log("X", prop, res.err);
-                    // console.log(res);
                     acc.str[prop] = res.str;
                     acc.obj[prop] = res.obj;
-                    res.err && ((acc.err as any)[prop] = res.err);
+                    (acc.err as any)[prop] = res.err;
                     return acc;
                 },
                 { str: {} as any, obj: {} as any, err: {} as any, valid: false });
@@ -614,7 +609,7 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 
 // console.log();
 
-// const data = { str: "123a", num: "12,34", user: { name: '1222', email: '144' } };
+// const data = { str: "111", num: "12,34", user: { name: '1222', email: '144' } };
 
 // const ov = new ObjectValidator({
         // str: sv,
