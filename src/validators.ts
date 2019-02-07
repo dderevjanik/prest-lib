@@ -421,27 +421,27 @@ export class DateTimeValidator extends Validator<Moment, DateTimeValidatorOpts, 
 
 }
 
-interface ValidatorOrObject {
-    [key: string]: Validator<any, any, any> | ObjectValidator<any>;
+interface ValidatorOrObjValidator {
+    [key: string]: Validator<any, any, any> | ObjValidator<any>;
 }
 
 type DeepOV<O, T> = {
     0: T,
-    1: O extends ObjectValidator<infer OV>
+    1: O extends ObjValidator<infer OV>
         ? { [P in keyof OV]: DeepOV<OV[P], T> }
         : never;
     2: { [P in keyof O]: DeepOV<O[P], T>}
 }[O extends Validator<any, any, any>
     ? 0
-    : O extends ObjectValidator<any>
+    : O extends ObjValidator<any>
         ? 1
         : O extends { [prop: string]: any }
             ? 2
             : 0];
 
-export class ObjectValidator<T extends ValidatorOrObject> {
+export class ObjValidator<T extends ValidatorOrObjValidator> {
 
-    readonly validators: ValidatorOrObject;
+    readonly validators: ValidatorOrObjValidator;
 
     readonly str: DeepOV<T, string>;
     readonly obj: { [key in keyof T]: any };
@@ -459,12 +459,12 @@ export class ObjectValidator<T extends ValidatorOrObject> {
                 (acc, prop) => {
                     const value = inputData[prop];
                     const validator = this.validators[prop];
-                    const res = validator instanceof ObjectValidator
+                    const res = validator instanceof ObjValidator
                         ? validator.validate(value)
                         : validator.validate(value as any);
                     acc.str[prop] = res.str;
                     acc.obj[prop] = res.obj;
-                    (acc.err as any)[prop] = res.err;
+                    acc.err[prop] = res.err;
                     return acc;
                 },
                 { str: {} as any, obj: {} as any, err: {} as any, valid: false });
@@ -486,7 +486,7 @@ export class ObjectValidator<T extends ValidatorOrObject> {
                     const res = validator.format(value);
                     acc.str[prop] = res.str;
                     acc.obj[prop] = value;
-                    res.err && ((acc.err as any)[prop] = res.err);
+                    acc.err[prop] = res.err;
                     return acc;
                 },
                 { str: {} as any, obj: {} as any, err: {} as any, valid: false });
@@ -609,13 +609,21 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 
 // console.log();
 
-// const data = { str: "111", num: "12,34", user: { name: '1222', email: '144' } };
+// const data = {
+//     str: "111",
+//     num: "12,34",
+//     date: "02.01.2019 12:12",
+//     user: {
+//         name: "1222",
+//         email: "144"
+//     }
+// };
 
-// const ov = new ObjectValidator({
-        // str: sv,
-        // num: nv,
-        // date: dv,
-//         user: new ObjectValidator({
+// const ov = new ObjValidator({
+//         str: sv,
+//         num: nv,
+//         date: dv,
+//         user: new ObjValidator({
 //             name: sv,
 //             email: sv
 //         })

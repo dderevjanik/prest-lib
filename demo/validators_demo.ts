@@ -2,7 +2,7 @@ import {
     StringValidator,
     NumberValidator,
     DateTimeValidator,
-    ObjectValidator
+    ObjValidator
 } from "../src/validators";
 import * as moment from "moment";
 
@@ -107,14 +107,28 @@ const dv = new DateTimeValidator(
 
 console.log();
 
-const data = { str: "123a", num: "12,34", date: "02.01.2019 12:12" };
+const data = {
+    str: "111",
+    num: "12,34",
+    date: "02.01.2019 12:12",
+    user: {
+        name: "1222",
+        email: "144"
+    }
+};
 
-const ov = new ObjectValidator({
+const ov = new ObjValidator({
         str: sv,
         num: nv,
-        date: dv
+        date: dv,
+        user: new ObjValidator({
+            name: sv,
+            email: sv
+        })
     })
     .validate(data);
+console.log(ov.valid);
+console.log(ov.err);
 
 console.log(ov);
 
