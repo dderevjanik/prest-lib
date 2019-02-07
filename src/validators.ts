@@ -145,7 +145,7 @@ export class StringValidator extends Validator<string, StringValidatorOpts, Stri
             }
         }
         if ("regexp" in opts) {
-            if (!str.match(opts.regexp)) {
+            if (!opts.regexp.test(str)) {
                 return {
                     err: msgs && msgs.invalid_format
                         ? tpl(msgs.invalid_format,
