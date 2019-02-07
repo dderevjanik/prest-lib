@@ -54,7 +54,7 @@
     "demo": "npm run build:watch",
     "dist": "rm -rf dist; tsc --declaration --outDir dist",
     "test": "npm run tslint; npm run test:jasmine; npm run build",
-    "test:jasmine": "ts-node node_modules/jasmine/bin/jasmine src/**/*.test.ts",
+    "test:jasmine": "ts-node node_modules/jasmine/bin/jasmine test/**/*.test.ts",
     "start": "npm run demo"
   },
   "devDependencies": {
