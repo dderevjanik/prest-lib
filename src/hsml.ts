@@ -36,7 +36,7 @@ export interface HsmlAttrs {
         | boolean
         | HsmlAttrClasses
         | HsmlAttrStyles
-        | HsmlAttrData
+        // | HsmlAttrData
         | HsmlAttrOn
         | EventListener
         | HsmlObj;
@@ -252,6 +252,26 @@ export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
 //     ["span"]
 // ]];
 // console.log(hml1);
+
+// const hml2: Hsml = ["div", [
+//     ["h2", ["title"]],
+//     ["div.w3-card-12", [
+//         ["header.w3-container w3-light-grey", [
+//             ["h3", ["Account: ", "User"]]
+//         ]],
+//         ["div.w3-container.w3-light-grey", [
+//             ["p", ["Balance: 4 DCT"]],
+//             ["br"]
+//         ]],
+//         ["h4", ["Your account spending"]],
+//         ["div#piechart"],
+//         ["h4", ["Your account balance"]],
+//         ["div#linechart"],
+//         ["button.w3-button.w3-block.w3-dark-grey", ["Refresh"]]
+//     ]],
+//     ["br"]
+// ]];
+// console.log(hml2);
 
 // TEST
 
