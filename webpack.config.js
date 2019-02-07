@@ -4,7 +4,7 @@ const { CheckerPlugin } = require("awesome-typescript-loader");
 // const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 
 const entries = {
-    ...glob.sync('./src/*.ts')
+    ...glob.sync('./src/*.(ts|!test.ts)')
         .reduce(
             (entries, entry) =>
                 Object.assign(entries,
