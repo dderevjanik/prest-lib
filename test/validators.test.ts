@@ -1,5 +1,5 @@
 import "jasmine";
-import { StringValidator } from "./validators";
+import { StringValidator } from "../src/validators";
 
 describe("Validators test", () => {
 
