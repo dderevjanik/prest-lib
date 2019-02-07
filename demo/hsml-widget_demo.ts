@@ -1,5 +1,5 @@
 import { hsmls2htmls } from "../src/hsml-html";
-import { Hsmls } from "../src/hsml";
+import { Hsmls, Hsml } from "../src/hsml";
 import { Widget } from "../src/hsml-widget";
 import { Signal } from "../src/signal";
 
@@ -161,7 +161,7 @@ class FormWidget extends Widget {
                                 type: "text", size: 10, maxlength: 10,
                                 input: this._onNameInput
                             }
-                        ]
+                        ] as Hsml
                     ]], " ",
                     ["em.error", [this._errors.name]]
                 ]],
@@ -173,7 +173,7 @@ class FormWidget extends Widget {
                                 type: "number", min: "1", max: "120",
                                 input: this._onAgeInput
                             }
-                        ]
+                        ] as Hsml
                     ]], " ",
                     ["em.error", [this._errors.age]]
                 ]],

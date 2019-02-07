@@ -36,7 +36,7 @@ export interface HsmlAttrs {
         | boolean
         | HsmlAttrClasses
         | HsmlAttrStyles
-        // | HsmlAttrData
+        | HsmlAttrData
         | HsmlAttrOn
         | EventListener
         | HsmlObj;
@@ -50,12 +50,14 @@ export interface HsmlObj {
 
 export interface Hsmls extends Array<Hsml> { }
 
-export type HsmlTagAttrN = [HsmlHead, (Hsmls | HsmlFnc
-    | HsmlObj | string | boolean | number | Date)?];
-export type HsmlTagAttrY = [HsmlHead, HsmlAttrs, (Hsmls | HsmlFnc
-    | HsmlObj | string | boolean | number | Date)?];
+export type HsmlChildren = Hsmls | HsmlFnc | HsmlObj;
+// export type HsmlChildren = Hsmls | HsmlFnc | HsmlObj | string | boolean | number | Date;
+
+export type HsmlTagAttrN = [HsmlHead, HsmlChildren?];
+export type HsmlTagAttrY = [HsmlHead, HsmlAttrs, HsmlChildren?];
 
 export type HsmlTag = HsmlTagAttrN | HsmlTagAttrY;
+// export type HsmlTag = [HsmlTagHead, (HsmlTagAttrs | HsmlTagChildren)?, HsmlTagChildren?];
 
 export type Hsml = string | boolean | number | Date | HsmlFnc | HsmlObj | HsmlTag;
 
@@ -65,8 +67,8 @@ export interface HsmlHandlerCtx extends HsmlObj {
 }
 
 export interface HsmlHandler<C extends HsmlHandlerCtx> {
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: C): boolean;
-    close(tag: string, children: Hsmls, ctx?: C): void;
+    open(tag: HsmlHead, attrs: HsmlAttrs, children: Hsmls, ctx?: C): boolean;
+    close(tag: HsmlHead, children: Hsmls, ctx?: C): void;
     text(text: string, ctx?: C): void;
     fnc(fnc: HsmlFnc, ctx?: C): void;
     obj(obj: HsmlObj, ctx?: C): void;
@@ -124,7 +126,7 @@ export function hsml<C extends HsmlHandlerCtx>(hml: Hsml, handler: HsmlHandler<C
             handler.text(ns, ctx);
             break;
         case Date:
-            const d = hml as number;
+            const d = hml as Date;
             const ds = d.toLocaleString ? d.toLocaleString() : d.toString();
             handler.text(ds, ctx);
             break;
@@ -152,12 +154,12 @@ export function hsml<C extends HsmlHandlerCtx>(hml: Hsml, handler: HsmlHandler<C
             case Function:
                 hsmlFnc = htc as HsmlFnc;
                 break;
-            case String:
-            case Boolean:
-            case Number:
-            case Date:
-                children = [htc as Hsml];
-                break;
+            // case String:
+            // case Boolean:
+            // case Number:
+            // case Date:
+            //     children = [htc as Hsml];
+            //     break;
             default: // HsmlObj
                 hsmlObj = htc as HsmlObj;
                 break;
@@ -230,24 +232,34 @@ export function join(hsmls: Hsmls, sep: string | Hsml): Hsmls {
 //         "types", " ", 1235.456, " ", new Date(), " ",
 //         ...hsmls,
 //         ["t", ["t", "a", ""]],
-//         ["t", {}, ["t", "a", ""]]
+//         ["t", {}, ["t", "a", ""]],
+//         ["t"]
 //     ]];
 
 // console.log(hsmls, hml);
 
-// const hml: Hsml = ["ppp", [
-//     ["sss", [
-//         ["aaa"]
-//     ]]
+// const hml1: Hsml = ["div", null, [
+//     ["span", null, [
+//         ["a",
+//             {
+//                 href: "https://gitlab.com/peter-rybar/diasheet",
+//                 title: "GitLab",
+//                 target: "_blank"
+//             },
+//             [["i.fa.fa-gitlab"]]
+//         ]
+//     ]],
+//     ["span"]
 // ]];
-// console.log(hml);
+// console.log(hml1);
 
 // TEST
 
 // import { hsmls2htmls } from "./hsml-html";
+// import { Action } from "./hsml-xwidget";
 
-// const action: Action = (name: string, data: any, xWidget: XWidget) => {
-//     console.log("action:", name, data, xWidget);
+// const action: Action = (name: string, data: any) => {
+//     console.log("action:", name, data);
 // };
 
 // const data = { attr: "action-data" };

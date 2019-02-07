@@ -2,6 +2,7 @@ import {
     hsml,
     Hsml,
     Hsmls,
+    HsmlHead,
     HsmlAttrs,
     HsmlFnc,
     HsmlObj,
@@ -32,7 +33,7 @@ class HsmlHtmlHandler implements HsmlHandler<HsmlHandlerCtx> {
         this._indent = indent;
     }
 
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
+    open(tag: HsmlHead, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -135,7 +136,7 @@ class HsmlHtmlHandler implements HsmlHandler<HsmlHandlerCtx> {
         return false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: HsmlHandlerCtx): void {
+    close(tag: HsmlHead, children: Hsmls, ctx?: HsmlHandlerCtx): void {
         let html = "";
         const pairTag = (children.length || HsmlHtmlHandler._pairTags.indexOf(tag) !== -1);
         if (this._pretty) {

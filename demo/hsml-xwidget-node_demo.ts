@@ -23,7 +23,7 @@ class App implements Widget<AppState> {
 
     view(state: AppState, action: Action, manage: Manage): Hsmls {
         return [
-            ["h2", state.title],
+            ["h2", [state.title]],
             ["p", [
                 "Title: ",
                 ["input",
@@ -36,13 +36,13 @@ class App implements Widget<AppState> {
                 ],
             ]],
             ["p", [
-                ["em", "Count"], ": ", state.count,
+                ["em", ["Count"]], ": ", state.count,
                 " ",
-                ["button", { on: ["click", Actions.dec, 1] }, "-"],
-                ["button", { on: ["click", Actions.inc, 2] }, "+"]
+                ["button", { on: ["click", Actions.dec, 1] }, ["-"]],
+                ["button", { on: ["click", Actions.inc, 2] }, ["+"]]
             ]],
             state.title
-                ? ["div", state.title ? manage<AppState>(App1, state) : "app"]
+                ? ["div", state.title ? manage<AppState>(App1, state) : ["app"]]
                 : ""
             // ["div",
             //     // { _widget: this.app1 }
@@ -87,11 +87,11 @@ class App1 implements Widget<AppState> {
 
     view(state: AppState, action: Action): Hsmls {
         return [
-            ["h3", state.title],
+            ["h3", [state.title]],
             ["p", [
-                ["em", "Count"], ": ", state.count,
+                ["em", ["Count"]], ": ", state.count,
                 " ",
-                ["button", { on: ["click", Actions.xXx] }, Actions.xXx]
+                ["button", { on: ["click", Actions.xXx] }, [Actions.xXx]]
             ]]
         ];
     }

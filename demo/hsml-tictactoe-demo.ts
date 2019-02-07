@@ -27,7 +27,7 @@ class TicTacToe implements Widget<TicTacToeState> {
     };
 
     view = (state: TicTacToeState, action: Action): Hsmls => ([
-        ["h1", "Tic-Tac-Toe Demo"],
+        ["h1", ["Tic-Tac-Toe Demo"]],
         ["p", [
             "Player: ", state.turn ? CROS : CIRC
         ]],

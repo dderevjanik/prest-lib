@@ -2,6 +2,7 @@ import {
     hsml,
     Hsml,
     Hsmls,
+    HsmlHead,
     HsmlAttrs,
     HsmlFnc,
     HsmlObj,
@@ -16,7 +17,7 @@ class HsmlDomHandler implements HsmlHandler<HsmlHandlerCtx> {
 
     private _current: HTMLElement;
 
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
+    open(tag: HsmlHead, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
         const e = document.createElement(tag);
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -111,7 +112,7 @@ class HsmlDomHandler implements HsmlHandler<HsmlHandlerCtx> {
         return attrs._skip ? true : false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: HsmlHandlerCtx): void {
+    close(tag: HsmlHead, children: Hsmls, ctx?: HsmlHandlerCtx): void {
         if (this._current !== this.element) {
             this._current = this._current.parentElement;
         }

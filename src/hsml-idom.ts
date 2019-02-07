@@ -2,6 +2,7 @@ import {
     hsml,
     Hsml,
     Hsmls,
+    HsmlHead,
     HsmlAttrs,
     HsmlFnc,
     HsmlObj,
@@ -13,7 +14,7 @@ import * as idom from "incremental-dom";
 
 class HsmlIDomHandler implements HsmlHandler<HsmlHandlerCtx> {
 
-    open(tag: string, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
+    open(tag: HsmlHead, attrs: HsmlAttrs, children: Hsmls, ctx?: HsmlHandlerCtx): boolean {
         const props: any[] = [];
         let id: string = attrs._id;
         let classes: string[] = attrs._classes ? attrs._classes : [];
@@ -102,7 +103,7 @@ class HsmlIDomHandler implements HsmlHandler<HsmlHandlerCtx> {
         return attrs._skip ? true : false;
     }
 
-    close(tag: string, children: Hsmls, ctx?: HsmlHandlerCtx): void {
+    close(tag: HsmlHead, children: Hsmls, ctx?: HsmlHandlerCtx): void {
         idom.elementClose(tag);
     }
 

@@ -22,7 +22,7 @@ class App extends AWidget<AppState> {
 
     view(state: AppState, action: Action): Hsmls {
         return [
-            ["h2", state.title],
+            ["h2", [state.title]],
             ["p", [
                 "Title: ",
                 ["input",
@@ -35,11 +35,11 @@ class App extends AWidget<AppState> {
                 ],
             ]],
             ["p", [
-                ["em", "Count"], ": ", state.count,
+                ["em", ["Count"]], ": ", state.count,
                 " ",
-                ["button", { on: ["click", AppActions.dec, 1] }, "-"],
-                ["button", { on: ["click", AppActions.inc, 2] }, "+"],
-                ["button", { on: ["click", AppActions.xXx] }, AppActions.xXx]
+                ["button", { on: ["click", AppActions.dec, 1] }, ["-"]],
+                ["button", { on: ["click", AppActions.inc, 2] }, ["+"]],
+                ["button", { on: ["click", AppActions.xXx] }, [AppActions.xXx]]
             ]]
         ];
     }
