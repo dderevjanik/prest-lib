@@ -421,6 +421,71 @@ export class DateTimeValidator extends Validator<Moment, DateTimeValidatorOpts, 
 
 }
 
+export class ObjectValidator<T = any> {
+
+    readonly validators: { [key in keyof T]: Validator<any, any, any> } = {} as any;
+
+    readonly str: { [key in keyof T]: string };
+    readonly obj: { [key in keyof T]: any };
+    readonly err: { [key in keyof T]: string };
+    readonly valid: boolean;
+
+    addValidator(field: keyof T, validator: Validator<any, any, any>): this {
+        this.validators[field] = validator;
+        return this;
+    }
+
+    validate(data: { [key in keyof T]: string },
+             defaults?: { [key in keyof T]: string }): this {
+        const d = { ...defaults as object, ...data as object };
+        const res = Object.keys(this.validators)
+            .reduce(
+                (a, k) => {
+                    const v = (d as any)[k];
+                    const r = (this.validators as any)[k].validate(v);
+                    console.log(r);
+                    (a.str as any)[k] = r.str;
+                    (a.obj as any)[k] = r.obj;
+                    (a.err as any)[k] = r.err;
+                    return a;
+                },
+                { str: {}, obj: {}, err: {}, valid: false });
+        res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
+        (this.str as any) = res.str;
+        (this.obj as any) = res.obj;
+        (this.err as any) = res.err;
+        (this.valid as any) = res.valid;
+        return this;
+    }
+
+    format(data: { [key in keyof T]: any }): this {
+        const res = Object.keys(this.validators)
+            .reduce(
+                (a, k) => {
+                    const v = (data as any)[k];
+                    const r = (this.validators as any)[k].format(v);
+                    (a.str as any)[k] = r.str;
+                    (a.obj as any)[k] = v;
+                    (a.err as any)[k] = r.err;
+                    return a;
+                },
+                { str: {}, obj: {}, err: {}, valid: false });
+        res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
+        (this.str as any) = res.str;
+        (this.obj as any) = res.obj;
+        (this.err as any) = res.err;
+        (this.valid as any) = res.valid;
+        return this;
+    }
+
+}
+
+function tpl(tmpl: string, data: { [k: string]: string }): string {
+    return Object.keys(data)
+        .map(k => [k, data[k]])
+        .reduce((t, d) => t.replace(new RegExp(`\\$\\{${d[0]}\\}`, "g"), d[1]), tmpl);
+}
+
 interface ValidatorOrObjValidator {
     [key: string]: Validator<any, any, any> | ObjValidator<any>;
 }
@@ -500,12 +565,6 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 
 }
 
-function tpl(tmpl: string, data: { [k: string]: string }): string {
-    return Object.keys(data)
-        .map(k => [k, data[k]])
-        .reduce((t, d) => t.replace(new RegExp(`\\$\\{${d[0]}\\}`, "g"), d[1]), tmpl);
-}
-
 // TEST
 
 // import "numeral/locales";
@@ -514,8 +573,8 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 //     {
 //         required: true,
 //         min: 3,
-//         max: 5,
-//         regexp: /[0123]+/
+//         max: 5
+//         // regexp: /^[0123]+$/
 //     },
 //     {
 //         required: "required ${min} ${max} ${regexp}",
@@ -606,6 +665,21 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
 //         console.log(f);
 //     }
 // });
+
+// console.log();
+
+// const data = { str: "123a", num: "123.45", date: "02.01.2019 12:12" };
+
+// const ov = new ObjectValidator<typeof data>()
+//     .addValidator("str", sv)
+//     .addValidator("num", nv)
+//     .addValidator("date", dv)
+//     .validate(data);
+
+// // console.log(ov);
+
+// ov.format(ov.obj);
+// console.log(ov);
 
 // console.log();
 
