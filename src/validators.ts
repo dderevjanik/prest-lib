@@ -421,40 +421,64 @@ export class DateTimeValidator extends Validator<Moment, DateTimeValidatorOpts, 
 
 }
 
+type StrDict<O, Optional extends (true | false) = false> = {
+    0: string,
+    1: string[],
+    2: Optional extends true
+        ? { [prop in keyof O]+?: StrDict<O[prop], true> }
+        : { [prop in keyof O]: StrDict<O[prop], false> }
+}[O extends string
+    ? 0
+    : O extends string[]
+        ? 1
+        : O extends { [prop: string]: any }
+            ? 2
+            : never];
+
 export class ObjectValidator<T = any> {
 
-    readonly validators: { [key in keyof T]: Validator<any, any, any> } = {} as any;
+    readonly validators: { [key in keyof T]: Validator<any, any, any> | ObjectValidator<any>} = {} as any;
 
     readonly str: { [key in keyof T]: string };
     readonly obj: { [key in keyof T]: any };
     readonly err: { [key in keyof T]: string };
     readonly valid: boolean;
 
-    addValidator(field: keyof T, validator: Validator<any, any, any>): this {
+    addValidator(field: keyof T, validator: Validator<any, any, any> | ObjectValidator<any>): this {
         this.validators[field] = validator;
         return this;
     }
 
-    validate(data: { [key in keyof T]: string },
-             defaults?: { [key in keyof T]: string }): this {
+    validate(data: StrDict<T, true>,
+             defaults?: StrDict<T>): this {
         const d = { ...defaults as object, ...data as object };
-        const res = Object.keys(this.validators)
+        (this as any).valid = true;
+        const result = Object.keys(this.validators)
             .reduce(
-                (a, k) => {
-                    const v = (d as any)[k];
-                    const r = (this.validators as any)[k].validate(v);
-                    console.log(r);
-                    (a.str as any)[k] = r.str;
-                    (a.obj as any)[k] = r.obj;
-                    (a.err as any)[k] = r.err;
-                    return a;
+                (acc, k) => {
+                    const value = (d as any)[k];
+                    const validator = (this.validators as any)[k];
+
+                    let res: any;
+                    if (validator instanceof ObjectValidator) {
+                        res = validator.validate(value, (defaults as any)[k]);
+                        !res.valid && (acc.valid = false);
+                    } else {
+                        res = validator.validate(value);
+                        res.err && (acc.valid = false);
+                    }
+
+                    (acc.str as any)[k] = res.str;
+                    (acc.obj as any)[k] = res.obj;
+                    (acc.err as any)[k] = res.err;
+                    return acc;
                 },
-                { str: {}, obj: {}, err: {}, valid: false });
-        res.valid = !Object.keys(res.err).filter(x => !!(res.err as any)[x]).length;
-        (this.str as any) = res.str;
-        (this.obj as any) = res.obj;
-        (this.err as any) = res.err;
-        (this.valid as any) = res.valid;
+                { str: {}, obj: {}, err: {}, valid: true });
+
+        (this.str as any) = result.str;
+        (this.obj as any) = result.obj;
+        (this.err as any) = result.err;
+        (this.valid as any) = result.valid;
         return this;
     }
 
@@ -689,17 +713,23 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 //     date: "02.01.2019 12:12",
 //     user: {
 //         name: "1222",
-//         email: "144"
+//         email: "144",
+//         cdsc: {
+//             x: 'dsadsa'
+//         }
 //     }
 // };
 
 // const ov = new ObjValidator({
 //         str: sv,
 //         num: nv,
-//         date: dv,
+//         date: sv,
 //         user: new ObjValidator({
 //             name: sv,
-//             email: sv
+//             email: sv,
+//             cdsc: new ObjValidator({
+//                 x: sv
+//             })
 //         })
 //     })
 //     .validate(data);
@@ -710,3 +740,42 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 
 // ov.format(ov.obj);
 // console.log(ov);
+
+// interface ReportFormData {
+//     spz: string;
+//     tachometer: string;
+//     dateCreated: string;
+//     user: {
+//         // name: string[];
+//         email: string;
+//     }
+// }
+
+// const dov = new ObjectValidator<ReportFormData>()
+//             .addValidator("spz", new StringValidator({ required: true }))
+//             .addValidator("tachometer", new NumberValidator({ required: true, min: 1 } ))
+//             .addValidator("dateCreated", new StringValidator({ required: true }))
+//             .addValidator("user", new ObjectValidator<ReportFormData["user"]>()
+//                 .addValidator("email", new StringValidator({ required: true}))
+//                 // .addValidator("name", { })
+//                 // new ArrayValidator({
+//                 //     required: true,
+//                 //     validator: new StringValidator({ required: true })
+//                 // })
+//             );
+
+// dov.validate({
+//     spz: 'dasdas',
+//     tachometer: '111222',
+//     // dateCreated: '10.02.2019',
+//     user: {
+//         // email: 'dsafasdf',
+//     }
+// }, {
+//     dateCreated: '01.03.2011',
+//     spz: '32ds9f0f',
+//     tachometer: '3213214214',
+//     user: {
+//         email: 'sadmaskdmk2@dsadsamkl.com'
+//     }
+// });
