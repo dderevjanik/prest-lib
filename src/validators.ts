@@ -707,7 +707,7 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 
 // console.log();
 
-// const data = {
+// const data1 = {
 //     str: "111",
 //     num: "12,34",
 //     date: "02.01.2019 12:12",
@@ -715,12 +715,12 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 //         name: "1222",
 //         email: "144",
 //         cdsc: {
-//             x: 'dsadsa'
+//             x: "dsadsa"
 //         }
 //     }
 // };
 
-// const ov = new ObjValidator({
+// const ov1 = new ObjValidator({
 //         str: sv,
 //         num: nv,
 //         date: sv,
@@ -732,14 +732,14 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 //             })
 //         })
 //     })
-//     .validate(data);
-// console.log(ov.valid);
-// console.log(ov.err);
+//     .validate(data1);
+// console.log(ov1.valid);
+// console.log(ov1.err);
 
-// console.log(ov);
+// console.log(ov1);
 
-// ov.format(ov.obj);
-// console.log(ov);
+// ov.format(ov1.obj);
+// console.log(ov1);
 
 // interface ReportFormData {
 //     spz: string;
@@ -748,7 +748,7 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 //     user: {
 //         // name: string[];
 //         email: string;
-//     }
+//     };
 // }
 
 // const dov = new ObjectValidator<ReportFormData>()
@@ -764,18 +764,20 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 //                 // })
 //             );
 
-// dov.validate({
-//     spz: 'dasdas',
-//     tachometer: '111222',
-//     // dateCreated: '10.02.2019',
-//     user: {
-//         // email: 'dsafasdf',
-//     }
-// }, {
-//     dateCreated: '01.03.2011',
-//     spz: '32ds9f0f',
-//     tachometer: '3213214214',
-//     user: {
-//         email: 'sadmaskdmk2@dsadsamkl.com'
-//     }
-// });
+// dov.validate(
+//     {
+//         spz: "dasdas",
+//         tachometer: "111222",
+//         // dateCreated: "10.02.2019",
+//         user: {
+//             // email: "dsafasdf",
+//         }
+//     },
+//     {
+//         dateCreated: "01.03.2011",
+//         spz: "32ds9f0f",
+//         tachometer: "3213214214",
+//         user: {
+//             email: "sadmaskdmk2@dsadsamkl.com"
+//         }
+//     });
