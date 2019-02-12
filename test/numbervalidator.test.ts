@@ -12,6 +12,7 @@ describe("NumberValidator", () => {
 
         const result = nv.validate("3");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("3");
     })
 
     it("should test required option [ERROR]", () => {
@@ -20,6 +21,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("");
         expect(result.err).toEqual("required");
+        expect(result.str).toEqual("");
     });
 
     // min
@@ -30,6 +32,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("20");
         expect(result.err).toEqual("not_in_range");
+        expect(result.str).toEqual("20");
     });
 
     it("should test min 62 with number -3 [ERROR]", () => {
@@ -38,6 +41,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("-3");
         expect(result.err).toEqual("not_in_range");
+        expect(result.str).toEqual("-3");
     });
 
     it("should test min 62 with number 61 [ERROR]", () => {
@@ -46,6 +50,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("61");
         expect(result.err).toEqual("not_in_range");
+        expect(result.str).toEqual("61");
     });
 
     it("should test min 62 with number 62", () => {
@@ -54,6 +59,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("62");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("62");
     });
 
     it("should test min 62 with number 63", () => {
@@ -62,6 +68,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("63");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("63");
     });
 
     // max
@@ -72,6 +79,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("-11");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("-11");
     });
 
     it("should test max 20 with number 19", () => {
@@ -80,6 +88,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("19");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("19");
     });
 
     it("should test max 20 with number 20", () => {
@@ -88,6 +97,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("20");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("20");
     });
 
     it("should test max 20 with number 21 [ERROR]", () => {
@@ -96,6 +106,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("21");
         expect(result.err).toEqual("not_in_range");
+        expect(result.str).toEqual("21");
     });
 
     // min && max
@@ -107,6 +118,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("-1");
         expect(result.err).toEqual("not_in_range");
+        expect(result.str).toEqual("-1");
     });
 
     it("should test range <0, 33> with number 0", () => {
@@ -116,6 +128,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("0");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("0");
     });
 
     it("should test range <0, 33> with number 1", () => {
@@ -125,6 +138,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("1");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("1");
     });
 
     it("should test range <0, 33> with number 32", () => {
@@ -134,6 +148,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("32");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("32");
     });
 
     it("should test range <0, 33> with number 33", () => {
@@ -143,6 +158,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("33");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("33");
     });
 
     it("should test range <0, 33> with number 34 [ERROR]", () => {
@@ -152,6 +168,7 @@ describe("NumberValidator", () => {
         });
         const result = nv.validate("34");
         expect(result.err).toEqual("not_in_range");
+        expect(result.str).toEqual("34");
     });
 
     // format
@@ -161,8 +178,8 @@ describe("NumberValidator", () => {
             format: "0,0.0[00]"
         });
         const result = nv.validate("1234,56");
-        expect(result.str).toEqual("1234,56");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("1234,56");
     });
 
     it("shoud use format '0,0.0[00]' for 1 234,56", () => {
@@ -170,8 +187,8 @@ describe("NumberValidator", () => {
             format: "0,0.0[00]"
         });
         const result = nv.validate("1 234,56");
-        expect(result.str).toEqual("1 234,56");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("1 234,56");
     });
 
     // it("shoud use format '0,0.0[00]' for 1 234,56y", () => {
@@ -188,8 +205,8 @@ describe("NumberValidator", () => {
             format: "0,0.0[00]"
         });
         const result = nv.validate("xy");
-        expect(result.str).toEqual("xy");
         expect(result.err).toEqual("invalid_format");
+        expect(result.str).toEqual("xy");
     });
 
     it("shoud use format '0,0.0[00]' for xy [ERROR]", () => {
@@ -197,8 +214,8 @@ describe("NumberValidator", () => {
             format: "0,0.0[00]"
         });
         const result = nv.validate("32,1");
-        expect(result.str).toEqual("32,1");
         expect(result.err).toEqual("");
+        expect(result.str).toEqual("32,1");
     });
 
 });
