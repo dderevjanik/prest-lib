@@ -7,6 +7,10 @@ const dataObject = { a: "A", b: "B" };
 
 console.log("tmplo: ${a} ${b} ${a}", "|", tmplo("tmplo: ${a} ${b} ${a}", dataObject));
 
-const template = tmpl<typeof dataObject>("tmpl : ${a} ${b} ${a}");
-console.log("tmpl : ${a} ${b} ${a}", "|", template(dataObject));
-console.log("tmpl : ", template);
+const t = tmpl<typeof dataObject>("tmpl : ${a} ${b} ${a}");
+console.log("tmpl : ${a} ${b} ${a}", "|", t(dataObject));
+console.log("tmpl : ", t);
+
+const tl = tmpl("1+2=${1 + 2} 3+x=${3 + x[1]}");
+console.log("tmpl : 1+2=${1 + 2} 3+x=${3 + x[1]}", "|", tl({ x: [2] }));
+console.log("tmpl : ", tl);
