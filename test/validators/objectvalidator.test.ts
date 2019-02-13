@@ -1,5 +1,5 @@
 import "jasmine";
-import { StringValidator, ObjectValidator, NumberValidator } from "../src/validators";
+import { StringValidator, ObjectValidator, NumberValidator } from "../../src/validators";
 
 describe("ObjectValidator", () => {
 
@@ -237,7 +237,7 @@ describe("ObjectValidator", () => {
                 refresh: string;
                 access: string;
             };
-        }
+        };
         const nv = new NumberValidator({ required: true });
         const sv = new StringValidator({ required: true });
         const ov = new ObjectValidator<UserModel>()
@@ -303,7 +303,7 @@ describe("ObjectValidator", () => {
                 refresh: string;
                 access: string;
             };
-        }
+        };
         const nv = new NumberValidator({ required: true });
         const sv = new StringValidator({ required: true });
         const ov = new ObjectValidator<UserModel>()
@@ -365,7 +365,7 @@ describe("ObjectValidator", () => {
                 refresh: string;
                 access: string;
             };
-        }
+        };
         const nv = new NumberValidator({ required: true });
         const sv = new StringValidator({ required: true });
         const ov = new ObjectValidator<UserModel>()

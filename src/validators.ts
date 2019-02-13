@@ -510,85 +510,6 @@ function tpl(tmpl: string, data: { [k: string]: string }): string {
         .reduce((t, d) => t.replace(new RegExp(`\\$\\{${d[0]}\\}`, "g"), d[1]), tmpl);
 }
 
-interface ValidatorOrObjValidator {
-    [key: string]: Validator<any, any, any> | ObjValidator<any>;
-}
-
-type DeepOV<O, T> = {
-    0: T,
-    1: O extends ObjValidator<infer OV>
-        ? { [P in keyof OV]: DeepOV<OV[P], T> }
-        : never;
-    2: { [P in keyof O]: DeepOV<O[P], T>}
-}[O extends Validator<any, any, any>
-    ? 0
-    : O extends ObjValidator<any>
-        ? 1
-        : O extends { [prop: string]: any }
-            ? 2
-            : 0];
-
-export class ObjValidator<T extends ValidatorOrObjValidator> {
-
-    readonly validators: ValidatorOrObjValidator;
-
-    readonly str: DeepOV<T, string>;
-    readonly obj: { [key in keyof T]: any };
-    readonly err: { [key in keyof T]: string };
-    readonly valid: boolean;
-
-    constructor(validators: T) {
-        this.validators = validators;
-    }
-
-    validate(data: DeepOV<T, string>, defaults?: DeepOV<T, string>): this {
-        const inputData = { ...defaults, ...data };
-        const result = Object.keys(this.validators)
-            .reduce(
-                (acc, prop) => {
-                    const value = inputData[prop];
-                    const validator = this.validators[prop];
-                    const res = validator instanceof ObjValidator
-                        ? validator.validate(value)
-                        : validator.validate(value as any);
-                    acc.str[prop] = res.str;
-                    acc.obj[prop] = res.obj;
-                    acc.err[prop] = res.err;
-                    return acc;
-                },
-                { str: {} as any, obj: {} as any, err: {} as any, valid: false });
-
-        result.valid = !Object.keys(result.err).filter(x => !!(result.err as any)[x]).length;
-        (this.str as any) = result.str;
-        (this.obj as any) = result.obj;
-        (this.err as any) = result.err;
-        (this.valid as any) = result.valid;
-        return this;
-    }
-
-    format(data: DeepOV<T, string>): this {
-        const result = Object.keys(this.validators)
-            .reduce(
-                (acc, prop) => {
-                    const value = (data as any)[prop];
-                    const validator = this.validators[prop];
-                    const res = validator.format(value);
-                    acc.str[prop] = res.str;
-                    acc.obj[prop] = value;
-                    acc.err[prop] = res.err;
-                    return acc;
-                },
-                { str: {} as any, obj: {} as any, err: {} as any, valid: false });
-        result.valid = !Object.keys(result.err).filter(x => !!(result.err as any)[x]).length;
-        (this.str as any) = result.str;
-        (this.obj as any) = result.obj;
-        (this.err as any) = result.err;
-        (this.valid as any) = result.valid;
-        return this;
-    }
-
-}
-
 // TEST
 
 // import "numeral/locales";
@@ -706,40 +627,6 @@ export class ObjValidator<T extends ValidatorOrObjValidator> {
 // console.log(ov);
 
 // console.log();
-
-// const data1 = {
-//     str: "111",
-//     num: "12,34",
-//     date: "02.01.2019 12:12",
-//     user: {
-//         name: "1222",
-//         email: "144",
-//         cdsc: {
-//             x: "dsadsa"
-//         }
-//     }
-// };
-
-// const ov1 = new ObjValidator({
-//         str: sv,
-//         num: nv,
-//         date: sv,
-//         user: new ObjValidator({
-//             name: sv,
-//             email: sv,
-//             cdsc: new ObjValidator({
-//                 x: sv
-//             })
-//         })
-//     })
-//     .validate(data1);
-// console.log(ov1.valid);
-// console.log(ov1.err);
-
-// console.log(ov1);
-
-// ov.format(ov1.obj);
-// console.log(ov1);
 
 // interface ReportFormData {
 //     spz: string;
