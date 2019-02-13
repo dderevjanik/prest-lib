@@ -9,7 +9,7 @@ export function tmplo(tmpl: string, data: { [k: string]: string }): string {
         .reduce((t, d) => t.replace(new RegExp(`\\$\\{${d[0]}\\}`, "g"), d[1]), tmpl);
 }
 
-export function tmpl<T = any>(template: string): (data: { [key in keyof T]: string }) => string {
+export function tmpl<T = any>(template: string): (data: { [key in keyof T]: any }) => string {
     const stringify = JSON.stringify;
     const re = /\$\{([\S\s]*?)\}/g;
     const strings: string[] = [];
@@ -27,6 +27,8 @@ export function tmpl<T = any>(template: string): (data: { [key in keyof T]: stri
     return fn as (data: Object) => string;
 }
 
+// TEST
+
 // const dataArray = ["A", "B"];
 // console.log("tmpla: ${0} ${1} ${0}", "|", tmpla("tmpla: ${0} ${1} ${0}", dataArray));
 
@@ -34,6 +36,10 @@ export function tmpl<T = any>(template: string): (data: { [key in keyof T]: stri
 
 // console.log("tmplo: ${a} ${b} ${a}", "|", tmplo("tmplo: ${a} ${b} ${a}", dataObject));
 
-// const template = tmpl<typeof dataObject>("tmpl : ${a} ${b} ${a}");
-// console.log("tmpl : ${a} ${b} ${a}", "|", template(dataObject));
-// console.log("tmpl : ", template);
+// const t = tmpl<typeof dataObject>("tmpl : ${a} ${b} ${a}");
+// console.log("tmpl : ${a} ${b} ${a}", "|", t(dataObject));
+// console.log("tmpl : ", t);
+
+// const tl = tmpl("1+2=${1 + 2} 3+x=${3 + x[1]}");
+// console.log("tmpl : 1+2=${1 + 2} 3+x=${3 + x[1]}", "|", tl({ x: [2] }));
+// console.log("tmpl : ", tl);

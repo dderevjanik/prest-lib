@@ -2,7 +2,7 @@ import {
     StringValidator,
     NumberValidator,
     DateTimeValidator,
-    ObjValidator
+    ObjectValidator
 } from "../src/validators";
 import * as moment from "moment";
 
@@ -12,8 +12,8 @@ const sv = new StringValidator(
     {
         required: true,
         min: 3,
-        max: 5,
-        regexp: /[0123]+/
+        max: 5
+        // regexp: /^[0123]+$/
     },
     {
         required: "required ${min} ${max} ${regexp}",
@@ -107,30 +107,58 @@ const dv = new DateTimeValidator(
 
 console.log();
 
-const data = {
-    str: "111",
-    num: "12,34",
-    date: "02.01.2019 12:12",
-    user: {
-        name: "1222",
-        email: "144"
-    }
-};
+const data = { str: "123a", num: "123.45", date: "02.01.2019 12:12" };
 
-const ov = new ObjValidator({
-        str: sv,
-        num: nv,
-        date: dv,
-        user: new ObjValidator({
-            name: sv,
-            email: sv
-        })
-    })
+const ov = new ObjectValidator<typeof data>()
+    .addValidator("str", sv)
+    .addValidator("num", nv)
+    .addValidator("date", dv)
     .validate(data);
-console.log(ov.valid);
-console.log(ov.err);
 
-console.log(ov);
+// console.log(ov);
 
 ov.format(ov.obj);
 console.log(ov);
+
+console.log();
+
+interface ReportFormData {
+    spz: string;
+    tachometer: string;
+    dateCreated: string;
+    user: {
+        // name: string[];
+        email: string;
+    };
+}
+
+const dov = new ObjectValidator<ReportFormData>()
+            .addValidator("spz", new StringValidator({ required: true }))
+            .addValidator("tachometer", new NumberValidator({ required: true, min: 1 } ))
+            .addValidator("dateCreated", new StringValidator({ required: true }))
+            .addValidator("user", new ObjectValidator<ReportFormData["user"]>()
+                .addValidator("email", new StringValidator({ required: true}))
+                // .addValidator("name", { })
+                // new ArrayValidator({
+                //     required: true,
+                //     validator: new StringValidator({ required: true })
+                // })
+            );
+
+dov.validate(
+    {
+        spz: "dasdas",
+        tachometer: "111222",
+        // dateCreated: "10.02.2019",
+        user: {
+            // email: "dsafasdf",
+        }
+    },
+    {
+        dateCreated: "01.03.2011",
+        spz: "32ds9f0f",
+        tachometer: "3213214214",
+        user: {
+            email: "sadmaskdmk2@dsadsamkl.com"
+        }
+    });

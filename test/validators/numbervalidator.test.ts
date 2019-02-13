@@ -1,5 +1,5 @@
 import "jasmine";
-import { NumberValidator } from "../src/validators";
+import { NumberValidator } from "../../src/validators";
 
 describe("NumberValidator", () => {
 
@@ -12,8 +12,7 @@ describe("NumberValidator", () => {
 
         const result = nv.validate("3");
         expect(result.err).toEqual("");
-        expect(result.str).toEqual("3");
-    })
+    });
 
     it("should test required option [ERROR]", () => {
         const nv = new NumberValidator({
