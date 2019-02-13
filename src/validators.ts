@@ -427,7 +427,7 @@ type StrDict<O, Optional extends (true | false) = false> = {
     2: Optional extends true
         ? { [prop in keyof O]+?: StrDict<O[prop], true> }
         : { [prop in keyof O]: StrDict<O[prop], false> }
-}[O extends string
+}[O extends (string | number | boolean)
     ? 0
     : O extends string[]
         ? 1
@@ -439,9 +439,9 @@ export class ObjectValidator<T = any> {
 
     readonly validators: { [key in keyof T]: Validator<any, any, any> | ObjectValidator<any>} = {} as any;
 
-    readonly str: { [key in keyof T]: string };
+    readonly str: StrDict<T>;
     readonly obj: { [key in keyof T]: any };
-    readonly err: { [key in keyof T]: string };
+    readonly err: StrDict<T>;
     readonly valid: boolean;
 
     addValidator(field: keyof T, validator: Validator<any, any, any> | ObjectValidator<any>): this {
@@ -450,7 +450,7 @@ export class ObjectValidator<T = any> {
     }
 
     validate(data: StrDict<T, true>,
-             defaults?: StrDict<T>): this {
+             defaults: StrDict<T> = {} as any): this {
         const d = { ...defaults as object, ...data as object };
         (this as any).valid = true;
         const result = Object.keys(this.validators)
@@ -461,7 +461,7 @@ export class ObjectValidator<T = any> {
 
                     let res: any;
                     if (validator instanceof ObjectValidator) {
-                        res = validator.validate(value, (defaults as any)[k]);
+                        res = validator.validate(value, (defaults as any)[k] || {});
                         !res.valid && (acc.valid = false);
                     } else {
                         res = validator.validate(value);
